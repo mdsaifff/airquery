@@ -4,6 +4,14 @@ import { useEffect, useReducer } from 'react';
 
 export const hudStore = {
   trackingFps: 0,
+  renderFps: 0,
+  /** Smoothed CPU time per render frame (ms). */
+  frameMs: 0,
+  /** Points currently shown / total. */
+  shown: 0,
+  total: 0,
+  /** Loading / error line under the stats. */
+  status: 'loading data…',
   /** Shown when the camera or tracker can't start; the app falls back to mouse mode. */
   cameraError: '',
 };

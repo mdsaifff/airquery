@@ -68,7 +68,7 @@ Current phase: **1**
     fist, open palm, victory, thumb down, and "talking with hands" (no
     gesture). Save them to `web/tests/fixtures/`.
   - Note: hotkey is Shift+R (plain R is reset view). `web/tests/synthHand.ts` makes synthetic hands so gesture tests run before real fixtures exist. Recording real fixtures pending (user).
-- [ ] **T1.4 Globe scene**
+- [x] **T1.4 Globe scene**
   - Do: `src/scene/sceneManager.ts` (renderer, camera, resize, render loop)
     and `globeScene.ts`: faint sphere + quakes as `THREE.Points` placed at
     depth (formula in ARCHITECTURE.md), size by magnitude, colour by depth.
@@ -76,6 +76,7 @@ Current phase: **1**
   - Done when: scene renders the Parquet data; one `BufferGeometry` for all
     points (no per-point objects); frame time shown in the HUD.
   - Needs you: confirm it looks right and report the frame rate.
+  - Note: verified in headless Chrome (software GL): 6,397 points render with coastlines (Natural Earth 110m, added to `make data`) and graticule. Camera controller written in full here (damping, reset, fly-to) and reused by T2.5. Real frame-rate check pending (user).
 - [ ] **T1.5 DuckDB-Wasm in a worker**
   - Do: `src/data/db.ts` loads `quakes.parquet`, exposes
     `run(sql, params) → typed arrays`; a temporary button runs a hard-coded

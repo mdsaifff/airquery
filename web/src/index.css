@@ -34,3 +34,13 @@ body,
 .warn {
   color: #fbbf24;
 }
+
+.scene {
+  position: fixed;
+  inset: 0;
+}
+
+.scene canvas {
+  display: block;
+  touch-action: none;
+}
