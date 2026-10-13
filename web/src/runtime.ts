@@ -1,57 +1,22 @@
 // Wires the imperative parts together (tracking, scene, data). React only
 // mounts the DOM elements and the HUD; it never sees per-frame data.
 import { config } from './config.ts';
-import type { Columns } from './data/arrow.ts';
-import { Db } from './data/db.ts';
-import { indexIds, maskFromResult } from './data/resultMask.ts';
+import { maskFromResult } from './data/resultMask.ts';
 import { CursorView, MODE_COLORS } from './hud/cursor.ts';
+import { Hover } from './hud/hover.ts';
 import { hudStore } from './hud/store.ts';
 import { CameraController, orbitPosition } from './interaction/cameraController.ts';
 import { HandPipeline } from './interaction/handPipeline.ts';
 import { attachMouse } from './interaction/mouseInput.ts';
-import { GlobeScene } from './scene/globeScene.ts';
-import type { Polylines } from './scene/globeScene.ts';
+import { loadGlobe } from './scene/loadGlobe.ts';
+import type { LoadedGlobe } from './scene/loadGlobe.ts';
 import { SceneManager } from './scene/sceneManager.ts';
-import { startCamera } from './tracking/camera.ts';
-import { HandTracker } from './tracking/handTracker.ts';
 import { downloadJson, LandmarkRecorder } from './tracking/recorder.ts';
-import { drawSkeleton } from './tracking/skeletonView.ts';
+import { startTracking } from './tracking/trackingLoop.ts';
 
 export interface RuntimeElements {
   sceneEl: HTMLElement;
   camCanvas: HTMLCanvasElement;
-}
-
-const BASE_QUERY = 'SELECT * FROM quakes';
-
-function stopVideo(video: HTMLVideoElement | undefined): void {
-  const stream = video?.srcObject;
-  if (stream instanceof MediaStream) stream.getTracks().forEach((t) => t.stop());
-}
-
-function range(values: Float64Array): [number, number] {
-  let lo = Infinity;
-  let hi = -Infinity;
-  for (const v of values) {
-    if (v < lo) lo = v;
-    if (v > hi) hi = v;
-  }
-  return [lo, hi];
-}
-
-async function fetchCoastlines(): Promise<Polylines | null> {
-  try {
-    const res = await fetch(new URL('data/coastlines.json', document.baseURI));
-    return ((await res.json()) as { lines: Polylines }).lines;
-  } catch {
-    return null; // the globe still works without them
-  }
-}
-
-function numbers(cols: Columns, name: string): Float64Array {
-  const col = cols.numbers.get(name);
-  if (!col) throw new Error(`missing column ${name}`);
-  return col;
 }
 
 export interface Runtime {
@@ -86,79 +51,66 @@ export function startRuntime(els: RuntimeElements): Runtime {
     },
     undo: () => {},
   });
+  const hover = new Hover(els.sceneEl, sm.renderer.domElement);
+  cleanups.push(() => hover.dispose());
 
-  let globe: GlobeScene | null = null;
+  let data: LoadedGlobe | null = null;
   sm.onFrame((now, dt) => {
-    cursor.style(hands.state.mode, hands.hold?.progress ?? 0);
-    hudStore.mode = hands.state.mode;
+    const mode = hands.state.mode;
+    cursor.style(mode, hands.hold?.progress ?? 0);
+    hudStore.mode = mode;
     const orbit = camera.update(now);
     sm.camera.position.set(...orbitPosition(orbit));
     sm.camera.lookAt(0, 0, 0);
-    globe?.update(dt, orbit.distance, sm.pixelScale);
+    sm.camera.updateMatrixWorld();
+    if (data) {
+      data.globe.update(dt, orbit.distance, sm.pixelScale);
+      const handCursor = cursor.visible ? cursor.position : null;
+      const canPick = mode === 'pointing' || mode === 'idle';
+      hover.update(sm.camera, data.globe, data.base, handCursor, canPick);
+    }
     hudStore.renderFps = sm.fps;
     hudStore.frameMs = sm.frameMs;
   });
   sm.start();
 
   // --- data ---
-  let db: Db | undefined;
-  let idIndex = new Map<string, number>();
   let mask = new Uint8Array(0);
-  void (async () => {
-    try {
-      const [opened, coastlines] = await Promise.all([Db.open(['quakes']), fetchCoastlines()]);
-      db = opened;
-      if (disposed) return void db.close();
-      const base = await db.run(BASE_QUERY);
-      const depth = numbers(base, 'depth_km');
-      const mag = numbers(base, 'magnitude');
-      globe = new GlobeScene(
-        sm.scene,
-        { lat: numbers(base, 'lat'), lon: numbers(base, 'lon'), depthKm: depth },
-        coastlines,
-      );
-      globe.setColors(depth, ...range(depth));
-      globe.setSizes(mag, ...range(mag));
-      idIndex = indexIds(base.strings.get('id') ?? []);
-      mask = new Uint8Array(globe.count);
-      hudStore.shown = hudStore.total = globe.count;
+  void loadGlobe(sm.scene)
+    .then((loaded) => {
+      if (disposed) {
+        loaded.globe.dispose();
+        return void loaded.db.close();
+      }
+      data = loaded;
+      mask = new Uint8Array(loaded.globe.count);
+      hudStore.shown = hudStore.total = loaded.globe.count;
       hudStore.status = '';
-      cleanups.push(() => globe?.dispose());
-    } catch (err) {
+      cleanups.push(() => {
+        loaded.globe.dispose();
+        void loaded.db.close();
+      });
+    })
+    .catch((err: unknown) => {
       hudStore.status = `Data failed to load: ${String(err)}`;
-    }
-  })();
-  cleanups.push(() => void db?.close());
+    });
 
   // --- hand tracking (its own loop) ---
   const recorder = new LandmarkRecorder();
-  let video: HTMLVideoElement | undefined;
-  let tracker: HandTracker | undefined;
-  void (async () => {
-    try {
-      video = await startCamera();
-      if (disposed) return stopVideo(video);
-      tracker = await HandTracker.create();
-      if (disposed) return tracker.close();
-    } catch (err) {
-      hudStore.cameraError = `Camera unavailable (${String(err)}). Mouse mode.`;
-      return;
-    }
-    const ctx = els.camCanvas.getContext('2d');
-    const cam = video;
-    tracker.start(cam, (frame) => {
-      hands.onFrame(frame, window.innerWidth, window.innerHeight);
-      const color = recorder.recording ? '#ffffff' : MODE_COLORS[hands.state.mode];
-      if (ctx) drawSkeleton(ctx, cam, frame, color);
-      hudStore.trackingFps = tracker?.fps ?? 0;
-      const fixture = recorder.push(frame, 'recording');
-      if (fixture) downloadJson(`fixture-${Date.now()}.json`, fixture);
-    });
-  })();
-  cleanups.push(() => {
-    tracker?.close();
-    stopVideo(video);
-  });
+  cleanups.push(
+    startTracking(els.camCanvas, {
+      onFrame(frame, fps) {
+        hands.onFrame(frame, window.innerWidth, window.innerHeight);
+        hudStore.trackingFps = fps;
+        const fixture = recorder.push(frame, 'recording');
+        if (fixture) downloadJson(`fixture-${Date.now()}.json`, fixture);
+      },
+      skeletonColor: () => (recorder.recording ? '#ffffff' : MODE_COLORS[hands.state.mode]),
+      onError(message) {
+        hudStore.cameraError = message;
+      },
+    }),
+  );
 
   // --- keyboard fallbacks ---
   const onKey = (e: KeyboardEvent) => {
@@ -190,7 +142,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
       cleanups.reverse().forEach((fn) => fn());
     },
     async depthFilter(km) {
-      if (!db || !globe) return;
+      if (!data) return;
+      const { globe, db, idIndex } = data;
       if (km === null) {
         globe.setVisibility(null);
         hudStore.shown = globe.count;

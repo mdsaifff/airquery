@@ -60,6 +60,8 @@ export const config = {
   pointMaxSize: 0.045,
   /** How much far-side points fade (0..1). */
   farSideDim: 0.6,
+  /** Hover picks the nearest point within this radius (px). */
+  pickRadiusPx: 14,
   /** Fade time for points entering/leaving a filter (ms). */
   filterAnimMs: 600,
 

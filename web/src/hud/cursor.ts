@@ -13,6 +13,7 @@ export const MODE_COLORS: Record<Mode, string> = {
 export class CursorView {
   readonly el: HTMLDivElement;
   private readonly ring: SVGCircleElement;
+  private readonly label: HTMLSpanElement;
   private x = 0;
   private y = 0;
 
@@ -20,10 +21,13 @@ export class CursorView {
     this.el = document.createElement('div');
     this.el.className = 'cursor';
     this.el.innerHTML =
-      '<svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="6" class="dot"/><circle cx="20" cy="20" r="16" class="ring" pathLength="1"/></svg>';
+      '<svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="6" class="dot"/><circle cx="20" cy="20" r="16" class="ring" pathLength="1"/></svg><span class="cursor-label"></span>';
     const ring = this.el.querySelector<SVGCircleElement>('.ring');
     if (!ring) throw new Error('cursor svg');
     this.ring = ring;
+    const label = this.el.querySelector<HTMLSpanElement>('.cursor-label');
+    if (!label) throw new Error('cursor label');
+    this.label = label;
     this.el.style.display = 'none';
     parent.appendChild(this.el);
   }
@@ -50,6 +54,8 @@ export class CursorView {
     this.el.style.color = MODE_COLORS[mode];
     this.ring.style.strokeDashoffset = String(1 - holdProgress);
     this.ring.style.opacity = holdProgress > 0 ? '1' : '0';
+    const text = mode === 'clutched' ? 'clutch' : mode === 'listening' ? 'listening' : '';
+    if (this.label.textContent !== text) this.label.textContent = text;
   }
 
   dispose(): void {

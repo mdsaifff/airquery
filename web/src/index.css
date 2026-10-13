@@ -98,3 +98,32 @@ body,
   transform-origin: center;
   transition: opacity 0.15s;
 }
+
+.cursor-label {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font:
+    600 11px ui-monospace,
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tooltip {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  pointer-events: none;
+  white-space: pre;
+  padding: 6px 9px;
+  font:
+    12px ui-monospace,
+    monospace;
+  background: rgb(10 16 28 / 90%);
+  border: 1px solid rgb(255 255 255 / 15%);
+  border-radius: 6px;
+}

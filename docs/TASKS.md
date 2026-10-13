@@ -123,12 +123,13 @@ changes the scene. Ask the user to record a 10-second clip for the teaser.
   - Needs you: rotate and zoom by hand; rate smoothness 1–5 and note anything
     that feels laggy or jumpy.
   - Note: controller (from T1.4) now driven by gestures via state machine -> `effects.ts`; synthetic-event tests cover drag + damping, two-hand dolly, clutch, reset, fly-to. Mouse orbit unchanged. Smoothness rating pending (user).
-- [ ] **T2.6 Cursor, picking and feedback cues**
+- [x] **T2.6 Cursor, picking and feedback cues**
   - Do: screen cursor; raycast hover on points with tooltip (place,
     magnitude, depth, date); skeleton colour by state; hold ring for reset and
     undo; clutch indicator.
   - Done when: picking works with the mouse in a test page.
   - Needs you: confirm hover and cues work by hand.
+  - Note: screen-space picking (pure, tested) instead of a raycaster; verified headless: mouse hover shows place/magnitude/depth/date. Cursor shows a clutch/listening label and the hold ring; skeleton colour follows the mode. Runtime split into loadGlobe/trackingLoop/hover modules. Hand check pending (user).
 - [ ] **T2.7 Performance pass**
   - Do: separate tracking and render loops; per-stage timings collected in a
     ring buffer; HUD shows tracking fps, render fps.
