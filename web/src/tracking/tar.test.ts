@@ -32,12 +32,13 @@ describe('makeTar', () => {
     ])); // prettier-ignore
     let listing: string;
     try {
-      listing = execFileSync('tar', ['-tf', file], { encoding: 'utf8' });
+      // relative name + cwd: GNU tar on Windows reads 'C:...' as host:path
+      listing = execFileSync('tar', ['-tf', 'frames.tar'], { cwd: dir, encoding: 'utf8' });
     } catch {
       return; // no tar binary on this machine: the layout test above still covers it
     }
     expect(listing.trim().split(/\r?\n/)).toEqual(['none/a.txt', 'rock/b.txt']);
-    execFileSync('tar', ['-xf', file, '-C', dir]);
+    execFileSync('tar', ['-xf', 'frames.tar'], { cwd: dir });
     expect(readFileSync(join(dir, 'rock', 'b.txt'), 'utf8')).toHaveLength(700);
   });
 });
