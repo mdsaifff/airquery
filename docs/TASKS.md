@@ -60,7 +60,7 @@ Current phase: **1**
   - Needs you: open the app, allow the camera, confirm the skeleton follows
     both hands and report the FPS you see.
   - Note: JS tasks-vision only has VIDEO mode (no LIVE_STREAM); runs in its own requestVideoFrameCallback loop, capped by `trackingMaxFps` (D-008). Camera check pending (user).
-- [ ] **T1.3 Landmark recorder and fixtures**
+- [x] **T1.3 Landmark recorder and fixtures**
   - Do: dev-only hotkey (`R`) records 3 s of landmark results to a JSON
     download; loader for fixtures in tests.
   - Done when: a loader test reads a sample fixture.

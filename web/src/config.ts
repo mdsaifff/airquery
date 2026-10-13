@@ -13,4 +13,6 @@ export const config = {
   /** Webcam capture size (px). */
   cameraWidth: 640,
   cameraHeight: 480,
+  /** Length of a Shift+R landmark recording (ms). */
+  recordDurationMs: 3000,
 };
