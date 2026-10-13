@@ -9,7 +9,7 @@ import type { GestureEvent } from './types.ts';
 const right = (o: SynthOptions = {}): RawHand => synthHand({ handedness: 'Left', ...o });
 const left = (o: SynthOptions = {}): RawHand => synthHand({ handedness: 'Right', cx: 0.7, ...o });
 const run = (count: number, at: (i: number) => RawHand[]) => summarize(replay(synthFrames(count, at))); // prettier-ignore
-const NO_FALSE_TRIGGERS = /^(fire|talk|pinchStart)/;
+const NO_FALSE_TRIGGERS = /^(fire|talk|pinchStart|swipe)/;
 
 describe('GestureClassifier (synthetic hands)', () => {
   it('point: cursor follows the index tip, no discrete events', () => {
@@ -111,6 +111,19 @@ describe('GestureClassifier (synthetic hands)', () => {
   it('a one-frame tracking dropout keeps the drag and push-to-talk alive', () => {
     expect(run(40, (i) => (i === 20 ? [] : [right({ pinch: 1 })]))).toEqual(['pinchStart:right']);
     expect(run(40, (i) => (i === 20 ? [] : [right({ pose: 'victory', gesture: 'Victory' })]))).toEqual(['talk:on']); // prettier-ignore
+  });
+
+  it('swipe: a fast sideways sweep of an open hand, once per cooldown', () => {
+    // raw x falls = hand moves right on screen; ~40% of the frame in 250 ms
+    expect(run(12, (i) => [right({ gesture: 'Open_Palm', cx: 0.7 - i * 0.05 })])).toEqual([
+      'swipe:right',
+    ]);
+    expect(run(12, (i) => [right({ cx: 0.3 + i * 0.05 })])).toEqual(['swipe:left']);
+  });
+
+  it('slow movement and pinch-drags are not swipes', () => {
+    expect(run(60, (i) => [right({ gesture: 'Open_Palm', cx: 0.3 + i * 0.006 })])).toEqual([]);
+    expect(run(20, (i) => [right({ pinch: 1, cx: 0.7 - i * 0.05 })]).filter((s) => s.startsWith('swipe'))).toEqual([]); // prettier-ignore
   });
 
   it('hands lost: pinch ends, then one handsLost after 500 ms', () => {

@@ -99,6 +99,11 @@
           },
           "title": "Examples",
           "type": "array"
+        },
+        "categorical": {
+          "default": false,
+          "title": "Categorical",
+          "type": "boolean"
         }
       },
       "required": [
@@ -146,7 +151,22 @@
           "type": "string"
         },
         "position": {
-          "$ref": "#/$defs/GeoPosition"
+          "discriminator": {
+            "mapping": {
+              "geo": "#/$defs/GeoPosition",
+              "xyz": "#/$defs/XyzPosition"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/GeoPosition"
+            },
+            {
+              "$ref": "#/$defs/XyzPosition"
+            }
+          ],
+          "title": "Position"
         },
         "columns": {
           "items": {
@@ -559,6 +579,36 @@
         "direction"
       ],
       "title": "Sort",
+      "type": "object"
+    },
+    "XyzPosition": {
+      "description": "Points already laid out in 3D (e.g. a UMAP of embeddings), scene units ~[-1, 1].",
+      "properties": {
+        "kind": {
+          "const": "xyz",
+          "title": "Kind",
+          "type": "string"
+        },
+        "x": {
+          "title": "X",
+          "type": "string"
+        },
+        "y": {
+          "title": "Y",
+          "type": "string"
+        },
+        "z": {
+          "title": "Z",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "x",
+        "y",
+        "z"
+      ],
+      "title": "XyzPosition",
       "type": "object"
     }
   },

@@ -22,7 +22,15 @@ interface BaselineProps {
 }
 
 export function BaselinePanel({ onApply, onUndo, onResetView }: BaselineProps) {
+  useTick(4);
   const [form, setForm] = useState<BaselineForm>(DEFAULT_FORM);
+  if (hudStore.dataset !== 'quakes') {
+    return (
+      <section className="panel baseline" aria-label="Mouse baseline filters">
+        <div className="label">mouse mode · the study filters cover the earthquake globe</div>
+      </section>
+    );
+  }
   const set = <K extends keyof BaselineForm>(key: K, value: BaselineForm[K]) => {
     const next = { ...form, [key]: value };
     setForm(next);

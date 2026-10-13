@@ -12,7 +12,7 @@ export class TooltipView {
 
   /** Show text for point `id` near (x, y); rebuilds content only when the point changes. */
   show(id: number, x: number, y: number, text: () => string): void {
-    if (id !== this.shownFor) {
+    if (id !== this.shownFor || this.el.style.display === 'none') {
       this.el.textContent = text();
       this.shownFor = id;
     }

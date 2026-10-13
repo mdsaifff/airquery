@@ -71,6 +71,7 @@
     {
       "name": "mag_type",
       "type": "text",
+      "categorical": true,
       "synonyms": [
         "magnitude type"
       ],

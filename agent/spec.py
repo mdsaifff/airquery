@@ -86,6 +86,8 @@ class Column(Contract):
     max: float | str | None = None
     synonyms: list[str] = []
     examples: list[str] = []
+    # Text with a handful of values (all listed in examples): can drive colour.
+    categorical: bool = False
 
 
 class GeoPosition(Contract):
@@ -95,12 +97,21 @@ class GeoPosition(Contract):
     depth: str | None = None
 
 
+class XyzPosition(Contract):
+    """Points already laid out in 3D (e.g. a UMAP of embeddings), scene units ~[-1, 1]."""
+
+    kind: Literal["xyz"]
+    x: str
+    y: str
+    z: str
+
+
 class DatasetSchema(Contract):
     dataset: str
     table: str
     description: str
     id: str = "id"
-    position: GeoPosition
+    position: GeoPosition | XyzPosition = Field(discriminator="kind")
     columns: list[Column]
     default_color_by: str | None = None
     default_size_by: str | None = None
@@ -108,6 +119,11 @@ class DatasetSchema(Contract):
 
     def column(self, name: str) -> Column | None:
         return next((c for c in self.columns if c.name == name), None)
+
+    def position_columns(self) -> list[str]:
+        p = self.position
+        cols = [p.lat, p.lon, p.depth] if isinstance(p, GeoPosition) else [p.x, p.y, p.z]
+        return [c for c in cols if c]
 
 
 # Models exported to TypeScript, with the JSON Schema mode each is exported in.

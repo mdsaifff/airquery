@@ -25,6 +25,7 @@ export interface Column {
   max?: number | string | null;
   synonyms?: string[];
   examples?: string[];
+  categorical?: boolean;
 }
 /**
  * POST /compile: a spec built in the UI (mouse baseline) -> validated SQL, no LLM.
@@ -78,7 +79,7 @@ export interface DatasetSchema {
   table: string;
   description: string;
   id?: string;
-  position: GeoPosition;
+  position: GeoPosition | XyzPosition;
   columns: Column[];
   default_color_by?: string | null;
   default_size_by?: string | null;
@@ -93,6 +94,18 @@ export interface GeoPosition {
   lat: string;
   lon: string;
   depth?: string | null;
+}
+/**
+ * Points already laid out in 3D (e.g. a UMAP of embeddings), scene units ~[-1, 1].
+ *
+ * This interface was referenced by `AirQueryContracts`'s JSON-Schema
+ * via the `definition` "XyzPosition".
+ */
+export interface XyzPosition {
+  kind: 'xyz';
+  x: string;
+  y: string;
+  z: string;
 }
 /**
  * This interface was referenced by `AirQueryContracts`'s JSON-Schema

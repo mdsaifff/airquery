@@ -255,6 +255,7 @@ on the deployed site. Ask the user to record the hero take.
 
 - [ ] **T5.1 Paper galaxy** — data_prep for arXiv sample (embed on CPU,
   UMAP 3D), `galaxyScene.ts`, swipe to switch scenes, new `DatasetSchema`.
+  - Note: CODE DONE, data pending (box open): `data_prep/papers.py` (arXiv API per quarter, MiniLM embeddings, UMAP 3D; tests with fake embed/reduce), DatasetSchema `xyz` position + `categorical` columns, PointCloud/globeDecor split, multi-dataset runtime (`datasets.ts`), swipe gesture + Arrow keys, categorical legend, paper tooltips, papers prompt examples. Verified headless with a temporary placeholder layout (deleted). The real `make galaxy` run was stopped by Claude Code for low system memory after 53/84 pages (cached); rerun when RAM allows (D-011).
 - [ ] **T5.2 "What's this?"** — selection summary via the agent (`explain`
   intent, aggregates computed in DuckDB, not by the LLM) + speechSynthesis.
 - [ ] **T5.3 Air lasso** — trace a loop with the index finger to select points.

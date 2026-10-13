@@ -18,7 +18,7 @@ export function GlassBox() {
       <div className="label">spec</div>
       <pre>{prettySpec(spec)}</pre>
       <div className="label">sql</div>
-      <pre className="sql">{sql ? prettySql(sql) : 'SELECT * FROM quakes'}</pre>
+      <pre className="sql">{sql ? prettySql(sql) : `SELECT * FROM ${hudStore.dataset}`}</pre>
       {params.length > 0 && <pre className="params">params {JSON.stringify(params)}</pre>}
       {t.total !== undefined && (
         <div className="timings">
@@ -46,7 +46,7 @@ export function Stats() {
           ` (median ${formatMs(metrics.voiceToRender.percentile(0.5))})`}
       </div>
       <div>
-        {hudStore.shown.toLocaleString()} / {hudStore.total.toLocaleString()} quakes ·{' '}
+        {hudStore.shown.toLocaleString()} / {hudStore.total.toLocaleString()} {hudStore.dataset} ·{' '}
         {hudStore.mode}
       </div>
       {hudStore.status && <div>{hudStore.status}</div>}
@@ -59,6 +59,21 @@ export function Legend() {
   useTick(4);
   const l = hudStore.legend;
   if (!l) return null;
+  if (l.kind === 'categories') {
+    return (
+      <div className="panel legend" aria-label={`Colour: ${l.column}`}>
+        <div className="label">colour: {l.column}</div>
+        <ul className="swatches">
+          {l.items.map((it) => (
+            <li key={it.label}>
+              <span className="swatch" style={{ background: it.color }} />
+              {it.label}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
   return (
     <div className="panel legend" aria-label={`Colour: ${l.column}`}>
       <div className="label">

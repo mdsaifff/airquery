@@ -87,3 +87,14 @@ These double as material for LinkedIn posts.
 - **Consequences:** the baseline needs the agent running (but no API key).
   Replies are sequence-numbered so the latest request wins when dropdowns
   change faster than the round trip.
+
+## D-011 Paper galaxy from the arXiv API, ML deps opt-in
+- **Context:** the PRD names the Kaggle arXiv dump, which needs a Kaggle account;
+  embeddings need torch, which is heavy for every install and CI run.
+- **Decision:** `data_prep/papers.py` pages the public arXiv API (cs.LG/CL/CV,
+  per quarter 2019-2025, 3 s between requests); `sentence-transformers` +
+  `umap-learn` live in an opt-in `galaxy` dependency group (`make galaxy`).
+  Only ids, titles, years and fields are written; abstracts stay in `raw/`.
+- **Why:** no account needed, polite to the API, normal installs stay small.
+- **Consequences:** ~17k papers rather than a random sample of the full dump
+  (each quarter returns the most recent submissions of that quarter).

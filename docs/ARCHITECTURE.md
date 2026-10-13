@@ -95,6 +95,12 @@ The agent reads schema files from `SCHEMA_DIR` (default
 ```
 
 `min`/`max` are computed by data_prep; `synonyms` and `examples` help the LLM.
+A text column with `"categorical": true` (all values listed in `examples`) can
+drive colour; the first three values get palette slots, the rest fold to grey.
+
+`position` is either `{"kind": "geo", "lat", "lon", "depth"?}` or, for data
+already laid out in 3D (the paper galaxy's UMAP), `{"kind": "xyz", "x", "y", "z"}`.
+`default_size_by` names the column sizing points when the spec sets none.
 
 ## Contract: `QuerySpec` (source of truth: `agent/spec.py`)
 
@@ -182,6 +188,7 @@ type GestureEvent =
   | { kind: 'fire'; gesture: HoldGesture }
   | { kind: 'clutch'; active: boolean }
   | { kind: 'talk'; active: boolean }
+  | { kind: 'swipe'; direction: 'left' | 'right' }               // switch scene (stretch)
   | { kind: 'handsLost' };
 type HoldGesture = 'reset' | 'undo';
 ```
@@ -204,6 +211,7 @@ States: `idle`, `pointing`, `rotating`, `zooming`, `clutched`, `listening`.
 | pointing / idle | talk active | listening | start STT |
 | listening | talk inactive | pointing | stop STT, send utterance |
 | pointing | fire reset / undo | pointing | reset view / pop history |
+| pointing / idle | swipe | (same) | switch scene (left = next) |
 | any | handsLost (> 500 ms) | idle | hide cursor, stop drag |
 
 The state machine is a pure reducer: `(state, event) => [state, effects[]]`.

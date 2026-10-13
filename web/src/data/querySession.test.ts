@@ -4,9 +4,9 @@ import * as THREE from 'three';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { DatasetSchema, QuerySpec } from '../contracts/contracts.ts';
 import { applyView } from '../scene/applyView.ts';
-import { GlobeScene } from '../scene/globeScene.ts';
+import { PointCloud } from '../scene/pointCloud.ts';
+import { positionsFor } from '../scene/positions.ts';
 import { askAgent, compileSpec } from './agentClient.ts';
-import { numbers } from './arrow.ts';
 import type { Columns } from './arrow.ts';
 import { QuerySession } from './querySession.ts';
 import { indexIds } from './resultMask.ts';
@@ -68,11 +68,7 @@ function agentReplies(...bodies: unknown[]) {
 }
 
 function rig() {
-  const globe = new GlobeScene(
-    new THREE.Scene(),
-    { lat: numbers(BASE, 'lat'), lon: numbers(BASE, 'lon'), depthKm: numbers(BASE, 'depth_km') },
-    null,
-  );
+  const globe = new PointCloud(new THREE.Scene(), positionsFor(SCHEMA, BASE, 3));
   const mask = new Uint8Array(4);
   const idIndex = indexIds(['a', 'b', 'c', 'd']);
   const notes: string[] = [];

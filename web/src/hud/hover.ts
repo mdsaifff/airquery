@@ -2,13 +2,29 @@
 import * as THREE from 'three';
 import { config } from '../config.ts';
 import type { Columns } from '../data/arrow.ts';
-import type { GlobeScene } from '../scene/globeScene.ts';
+import type { DatasetSchema } from '../contracts/contracts.ts';
+import type { PointCloud } from '../scene/pointCloud.ts';
 import { pickNearest } from '../scene/picking.ts';
 import { TooltipView } from './tooltip.ts';
 
 const viewProj = new THREE.Matrix4();
 
-export function describeQuake(base: Columns, i: number): string {
+export function describePoint(schema: DatasetSchema, base: Columns, i: number): string {
+  if (schema.dataset === 'papers') return describePaper(base, i);
+  return describeQuake(base, i);
+}
+
+function describePaper(base: Columns, i: number): string {
+  const title = base.strings.get('title')?.[i] ?? '';
+  const year = base.numbers.get('year')?.[i];
+  const field = base.strings.get('field')?.[i] ?? '';
+  const id = base.strings.get('id')?.[i] ?? '';
+  const short = title.length > 70 ? `${title.slice(0, 67)}…` : title;
+  return `${short}
+${year ?? ''} · ${field} · arxiv.org/abs/${id}`;
+}
+
+function describeQuake(base: Columns, i: number): string {
   const place = base.strings.get('place')?.[i] || 'Unknown place';
   const mag = base.numbers.get('magnitude')?.[i] ?? NaN;
   const depth = base.numbers.get('depth_km')?.[i] ?? NaN;
@@ -40,8 +56,9 @@ export class Hover {
   /** handCursor wins over the mouse when a hand is up. */
   update(
     camera: THREE.PerspectiveCamera,
-    globe: GlobeScene,
+    globe: PointCloud,
     base: Columns,
+    schema: DatasetSchema,
     handCursor: { x: number; y: number } | null,
     canPick: boolean,
   ): void {
@@ -66,7 +83,7 @@ export class Hover {
     });
     this.current = i;
     if (i < 0) this.tooltip.hide();
-    else this.tooltip.show(i, at.x, at.y, () => describeQuake(base, i));
+    else this.tooltip.show(i, at.x, at.y, () => describePoint(schema, base, i));
   }
 
   dispose(): void {

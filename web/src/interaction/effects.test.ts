@@ -30,6 +30,7 @@ function rig() {
     cursor: (v: boolean) => log.push(v ? 'cursor' : 'nocursor'),
     listening: (a: boolean) => log.push(a ? 'listen' : 'unlisten'),
     undo: () => log.push('undo'),
+    switchScene: (d: 'left' | 'right') => log.push(`scene:${d}`),
   };
   const send = (e: GestureEvent, now: number) => {
     const [next, fx] = reduce(state, e);

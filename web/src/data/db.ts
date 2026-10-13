@@ -28,20 +28,20 @@ export class Db {
     this.conn = conn;
   }
 
-  /** Loads web/public/data/<dataset>.parquet into an in-memory table per dataset. */
-  static async open(datasets: readonly string[]): Promise<Db> {
+  static async open(): Promise<Db> {
     const bundle = await duckdb.selectBundle(BUNDLES);
     if (!bundle.mainWorker) throw new Error('no DuckDB worker bundle');
     const db = new duckdb.AsyncDuckDB(new duckdb.VoidLogger(), new Worker(bundle.mainWorker));
     await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-    const conn = await db.connect();
-    for (const ds of datasets) {
-      if (!/^[a-z_][a-z0-9_]*$/.test(ds)) throw new Error(`bad dataset name: ${ds}`);
-      const url = new URL(`data/${ds}.parquet`, document.baseURI).href;
-      await db.registerFileURL(`${ds}.parquet`, url, duckdb.DuckDBDataProtocol.HTTP, false);
-      await conn.query(`CREATE TABLE ${ds} AS SELECT * FROM '${ds}.parquet'`);
-    }
-    return new Db(db, conn);
+    return new Db(db, await db.connect());
+  }
+
+  /** Loads web/public/data/<dataset>.parquet into an in-memory table named after it. */
+  async addDataset(ds: string): Promise<void> {
+    if (!/^[a-z_][a-z0-9_]*$/.test(ds)) throw new Error(`bad dataset name: ${ds}`);
+    const url = new URL(`data/${ds}.parquet`, document.baseURI).href;
+    await this.db.registerFileURL(`${ds}.parquet`, url, duckdb.DuckDBDataProtocol.HTTP, false);
+    await this.conn.query(`CREATE TABLE ${ds} AS SELECT * FROM '${ds}.parquet'`);
   }
 
   readonly run: RunQuery = async (sql, params = []) => {

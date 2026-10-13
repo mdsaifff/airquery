@@ -10,6 +10,7 @@ export interface EffectTargets {
   cursor(visible: boolean, x?: number, y?: number): void;
   listening(active: boolean): void;
   undo(): void;
+  switchScene(direction: 'left' | 'right'): void;
 }
 
 export function applyEffects(effects: readonly Effect[], t: EffectTargets, now: number): void {
@@ -57,6 +58,9 @@ export function applyEffects(effects: readonly Effect[], t: EffectTargets, now: 
         break;
       case 'stopListening':
         t.listening(false);
+        break;
+      case 'switchScene':
+        t.switchScene(e.direction);
         break;
     }
   }

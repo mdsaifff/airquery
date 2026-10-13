@@ -88,7 +88,7 @@ def validate_spec(spec: QuerySpec, schema: DatasetSchema) -> list[str]:
         errors += _check_filter(f, schema)
 
     numeric = {c.name for c in schema.columns if c.type == "number"}
-    colorable = numeric | {c.name for c in schema.columns if c.type == "timestamp"}
+    colorable = numeric | {c.name for c in schema.columns if c.type == "timestamp" or c.categorical}
     if spec.color_by is not None and spec.color_by not in colorable:
         errors.append(f"color_by must be one of {sorted(colorable)}; got {spec.color_by!r}")
     if spec.size_by is not None and spec.size_by not in numeric:

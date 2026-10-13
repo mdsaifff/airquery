@@ -1,25 +1,32 @@
 // Wires the imperative parts together (tracking, scene, data, voice, agent).
 // React only mounts the DOM elements and the HUD; it never sees per-frame data.
 import { config } from './config.ts';
+import type { QuerySpec } from './contracts/contracts.ts';
 import { askAgent, compileSpec } from './data/agentClient.ts';
-import { QuerySession } from './data/querySession.ts';
+import { Db } from './data/db.ts';
+import type { SessionDeps } from './data/querySession.ts';
+import { Datasets } from './datasets.ts';
 import { CursorView, MODE_COLORS } from './hud/cursor.ts';
 import { Hover } from './hud/hover.ts';
 import { exportMetrics, metrics } from './hud/metrics.ts';
 import { hudStore, toast } from './hud/store.ts';
 import { CameraController, orbitPosition } from './interaction/cameraController.ts';
 import { HandPipeline } from './interaction/handPipeline.ts';
-import type { StudyHost } from './interaction/study.ts';
-import type { QuerySpec } from './contracts/contracts.ts';
 import { attachMouse } from './interaction/mouseInput.ts';
+import type { StudyHost } from './interaction/study.ts';
 import { applyView } from './scene/applyView.ts';
-import { loadGlobe } from './scene/loadGlobe.ts';
-import type { LoadedGlobe } from './scene/loadGlobe.ts';
 import { SceneManager } from './scene/sceneManager.ts';
 import { downloadJson, LandmarkRecorder } from './tracking/recorder.ts';
 import { startTracking } from './tracking/trackingLoop.ts';
 import { VoiceController } from './voice/voiceController.ts';
 import { WebSpeechToText } from './voice/webSpeech.ts';
+
+/** Scenes in swipe order. */
+const DATASETS = ['quakes', 'papers'];
+const SCENE_NAMES: Record<string, string> = {
+  quakes: 'earthquake globe',
+  papers: 'ML paper galaxy',
+};
 
 export interface RuntimeElements {
   sceneEl: HTMLElement;
@@ -42,8 +49,6 @@ export interface Runtime {
 export function startRuntime(els: RuntimeElements): Runtime {
   let disposed = false;
   const cleanups: (() => void)[] = [];
-  let data: LoadedGlobe | null = null;
-  let mask = new Uint8Array(0);
   /** performance.now() when the last voice/typed request ended; cleared on the next frame. */
   let latencyFrom: number | null = null;
 
@@ -57,9 +62,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
   });
   cleanups.push(attachMouse(sm.renderer.domElement, camera));
 
-  // --- queries: agent -> DuckDB -> globe, with undo/reset history ---
-  const session = new QuerySession({
-    dataset: 'quakes',
+  // --- datasets: each has its point cloud and its own query history ---
+  const sessionDeps = (name: string): SessionDeps => ({
+    dataset: name,
     async ask(req) {
       hudStore.thinking = true;
       const t0 = performance.now();
@@ -74,25 +79,50 @@ export function startRuntime(els: RuntimeElements): Runtime {
     },
     compile: compileSpec,
     async run(sql, params) {
-      if (!data) throw new Error('data is still loading');
+      const d = datasets.get(name);
+      if (!d) throw new Error('data is still loading');
       const t0 = performance.now();
-      const result = await data.db.run(sql, params);
+      const result = await (await db).run(sql, params);
       hudStore.queryMs = performance.now() - t0;
       metrics.query.push(hudStore.queryMs);
       return result;
     },
     show(view, applied, endedAt) {
-      if (!data) return;
-      const { shown, legend } = applyView(data.globe, data.base, data.schema, data.idIndex, mask, view); // prettier-ignore
-      hudStore.shown = shown;
-      hudStore.legend = legend;
-      hudStore.glass = applied;
+      const d = datasets.get(name);
+      if (!d || datasets.active !== name) return;
+      const { shown, legend } = applyView(d.cloud, d.base, d.schema, d.idIndex, d.mask, view);
+      Object.assign(hudStore, { shown, legend, glass: applied, total: d.cloud.count });
       latencyFrom = endedAt;
     },
     flyTo: (lat, lon) => camera.flyTo(lat, lon, performance.now()),
     resetView: () => camera.reset(performance.now()),
     notify: toast,
   });
+  const db = Db.open();
+  const datasets = new Datasets(DATASETS, sm.scene, db, sessionDeps);
+  cleanups.push(() => datasets.dispose());
+
+  async function showDataset(name: string, announce: boolean): Promise<void> {
+    try {
+      const d = await datasets.show(name);
+      if (disposed) return;
+      hudStore.dataset = name;
+      if (name === 'quakes') {
+        hudStore.placeOptions = d.schema.columns.find((c) => c.name === 'place')?.examples ?? [];
+      }
+      datasets.session(name).refresh();
+      hudStore.status = '';
+      if (announce) {
+        camera.reset(performance.now());
+        toast('info', SCENE_NAMES[name] ?? name);
+      }
+    } catch (err) {
+      if (name === DATASETS[0]) hudStore.status = `Data failed to load: ${String(err)}`;
+      else toast('error', `${SCENE_NAMES[name] ?? name} is not built yet (make galaxy).`);
+    }
+  }
+  void showDataset(DATASETS[0], false);
+  const switchScene = (dir: 'left' | 'right') => void showDataset(datasets.neighbour(dir), true);
 
   // --- voice: push-to-talk -> transcript -> utterance ---
   const voice = new VoiceController(
@@ -109,7 +139,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
     },
     (utterance, endedAt, spoken) => {
       if (spoken) metrics.stt.push(performance.now() - endedAt);
-      void session.submit(utterance, endedAt);
+      void datasets.session().submit(utterance, endedAt);
     },
   );
 
@@ -121,7 +151,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
     rotateGain: config.handRotateGain,
     cursor: (visible, x, y) => cursor.set(visible, x, y),
     listening: (active) => voice.setListening(active),
-    undo: () => session.undo(),
+    undo: () => datasets.session().undo(),
+    switchScene,
   });
   const studyHost = els.study;
   hands.listeners.push((e) => studyHost.onEvent(e, performance.now()));
@@ -129,7 +160,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
   cleanups.push(() => hover.dispose());
   if (import.meta.env.DEV) {
     // Dev-only handle for headless checks and console poking.
-    Object.assign(window, { __airquery: { hud: hudStore, hands, camera, voice, session } });
+    const handle = { hud: hudStore, hands, camera, voice, datasets, switchScene };
+    Object.assign(window, { __airquery: { ...handle, get session() { return datasets.session(); } } }); // prettier-ignore
   }
 
   sm.onFrame((now, dt) => {
@@ -147,43 +179,17 @@ export function startRuntime(els: RuntimeElements): Runtime {
     sm.camera.position.set(...orbitPosition(orbit));
     sm.camera.lookAt(0, 0, 0);
     sm.camera.updateMatrixWorld();
-    if (data) {
-      data.globe.update(dt, orbit.distance, sm.pixelScale);
+    const d = datasets.current();
+    if (d) {
+      d.cloud.update(dt, orbit.distance, sm.pixelScale);
       const handCursor = cursor.visible ? cursor.position : null;
       const canPick = mode === 'pointing' || mode === 'idle';
-      hover.update(sm.camera, data.globe, data.base, handCursor, canPick);
+      hover.update(sm.camera, d.cloud, d.base, d.schema, handCursor, canPick);
     }
     hudStore.renderFps = sm.fps;
     hudStore.frameMs = sm.frameMs;
   });
   sm.start();
-
-  // --- data ---
-  void loadGlobe(sm.scene)
-    .then((loaded) => {
-      if (disposed) {
-        loaded.globe.dispose();
-        return void loaded.db.close();
-      }
-      data = loaded;
-      mask = new Uint8Array(loaded.globe.count);
-      const { legend } = applyView(loaded.globe, loaded.base, loaded.schema, loaded.idIndex, mask, {
-        result: null,
-        colorBy: null,
-        sizeBy: null,
-      });
-      hudStore.legend = legend;
-      hudStore.placeOptions = loaded.schema.columns.find((c) => c.name === 'place')?.examples ?? [];
-      hudStore.shown = hudStore.total = loaded.globe.count;
-      hudStore.status = '';
-      cleanups.push(() => {
-        loaded.globe.dispose();
-        void loaded.db.close();
-      });
-    })
-    .catch((err: unknown) => {
-      hudStore.status = `Data failed to load: ${String(err)}`;
-    });
 
   // --- hand tracking (its own loop) ---
   const recorder = new LandmarkRecorder();
@@ -202,9 +208,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
     }),
   );
 
-  // --- keyboard fallbacks: space = talk, R = reset view, Z = undo ---
+  // --- keyboard: space talk, R reset view, Z undo, arrows switch scene, M timings ---
   const onKey = (e: KeyboardEvent) => {
-    if (e.target instanceof HTMLInputElement || e.repeat) return;
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.repeat) return; // prettier-ignore
     if (e.code === 'Space') {
       e.preventDefault();
       if (hudStore.baseline) return; // no voice in the mouse baseline
@@ -214,7 +220,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
     } else if (e.code === 'KeyR') {
       camera.reset(performance.now());
     } else if (e.code === 'KeyZ') {
-      session.undo();
+      datasets.session().undo();
+    } else if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+      switchScene(e.code === 'ArrowLeft' ? 'left' : 'right');
     } else if (e.code === 'KeyM') {
       // Frontend timings for eval/latency.py.
       downloadJson(`frontend-timings-${Date.now()}.json`, exportMetrics(navigator.userAgent));
@@ -242,8 +250,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
       hudStore.baseline = on;
       if (on) hands.dispatch({ kind: 'handsLost' }); // drop any drag / cursor / listening
     },
-    applySpec: (spec) => void session.applySpec(spec),
-    undo: () => session.undo(),
+    applySpec: (spec) => void datasets.session().applySpec(spec),
+    undo: () => datasets.session().undo(),
     resetView: () => camera.reset(performance.now()),
   };
 }

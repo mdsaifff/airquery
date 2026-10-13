@@ -31,7 +31,8 @@ export type Effect =
   | { kind: 'startListening' }
   | { kind: 'stopListening' }
   | { kind: 'resetView' }
-  | { kind: 'undo' };
+  | { kind: 'undo' }
+  | { kind: 'switchScene'; direction: 'left' | 'right' };
 
 export const initialState: InteractionState = {
   mode: 'idle',
@@ -111,6 +112,10 @@ export function reduce(s: InteractionState, e: GestureEvent): Result {
 
   if (e.kind === 'twoHandZoom') {
     return s.mode === 'zooming' ? [s, [{ kind: 'dolly', scale: e.scaleDelta }]] : [s, []];
+  }
+
+  if (e.kind === 'swipe' && (s.mode === 'pointing' || s.mode === 'idle')) {
+    return [s, [{ kind: 'switchScene', direction: e.direction }]];
   }
 
   if (e.kind === 'fire' && s.mode === 'pointing') {

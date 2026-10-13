@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <entry>
+    <id>http://arxiv.org/abs/2312.11138v1</id>
+    <title>Rapid Open-World Adaptation by
+      Adaptation Principles Learning</title>
+    <summary>Novelty adaptation is the ability of an agent to adjust.</summary>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-12-18T12:30:30Z</published>
+    <arxiv:primary_category term="cs.AI"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2312.10185v2</id>
+    <title>Student as an Inherent Denoiser of Noisy Teacher</title>
+    <summary>Knowledge distillation with noisy teachers.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-12-15T20:21:45Z</published>
+    <arxiv:primary_category term="cs.CL"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1905.00001v1</id>
+    <title>Diffusion Models for Images</title>
+    <summary>We denoise images.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2019-05-01T00:00:00Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2312.10185v2</id>
+    <title>Student as an Inherent Denoiser of Noisy Teacher</title>
+    <summary>Duplicate cross-listing.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-12-15T20:21:45Z</published>
+    <arxiv:primary_category term="cs.CL"/>
+  </entry>
+</feed>

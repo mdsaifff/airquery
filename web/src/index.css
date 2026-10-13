@@ -454,3 +454,22 @@ body,
 .tasks li.active {
   color: var(--accent);
 }
+
+.legend .swatches {
+  margin: 6px 0 2px;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.legend .swatches li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend .swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}

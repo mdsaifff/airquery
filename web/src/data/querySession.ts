@@ -115,6 +115,11 @@ export class QuerySession {
     }
   }
 
+  /** Re-push what is on screen (e.g. after switching back to this dataset). */
+  refresh(): void {
+    this.show(this.top, performance.now());
+  }
+
   /** Pop the last query (Thumb_Down, Z, or "undo"). */
   undo(endedAt = performance.now()): void {
     this.seq++; // cancels any reply still in flight

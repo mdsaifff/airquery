@@ -38,7 +38,7 @@ COLUMNS: list[dict[str, object]] = [
         "unit": "magnitude",
         "synonyms": ["mag", "strength", "strong", "big", "size"],
     },
-    {"name": "mag_type", "type": "text", "synonyms": ["magnitude type"]},
+    {"name": "mag_type", "type": "text", "categorical": True, "synonyms": ["magnitude type"]},
     {"name": "place", "type": "text", "synonyms": ["region", "location", "near", "country"]},
 ]
 

@@ -48,6 +48,11 @@ export const config = {
     undoHoldMs: 400,
     /** No hands for this long emits handsLost (ms). */
     handsLostMs: 500,
+    /** Swipe: wrist travels this far sideways (hand-scale units)... */
+    swipeMinHandScales: 3.5,
+    /** ...within this window (ms), then no new swipe for the cooldown (ms). */
+    swipeWindowMs: 350,
+    swipeCooldownMs: 900,
   },
 
   // --- scene ---

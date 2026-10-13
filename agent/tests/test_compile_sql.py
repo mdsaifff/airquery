@@ -112,3 +112,22 @@ def test_limit_is_bounded_by_the_model() -> None:
         spec(limit=10_000)
     with pytest.raises(ValueError):
         spec(limit="10; DROP TABLE quakes")
+
+
+def test_xyz_datasets_select_their_position_columns() -> None:
+    schema = DatasetSchema.model_validate(
+        {
+            "dataset": "papers",
+            "table": "papers",
+            "description": "t",
+            "position": {"kind": "xyz", "x": "x", "y": "y", "z": "z"},
+            "columns": [{"name": "year", "type": "number", "min": 2019, "max": 2025}],
+        }
+    )
+    q = compile_spec(
+        QuerySpec.model_validate(
+            {"dataset": "papers", "filters": [{"field": "year", "op": ">=", "value": 2023}]}
+        ),
+        schema,
+    )
+    assert q.sql == 'SELECT "id", "x", "y", "z" FROM "papers" WHERE "year" >= ?'

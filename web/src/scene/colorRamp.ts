@@ -13,3 +13,11 @@ export function rampColor(t: number, out: Float32Array | number[], offset = 0): 
 
 /** CSS gradient matching the ramp, for legends. */
 export const RAMP_CSS = `linear-gradient(to right, ${RAMP_STOPS.join(', ')})`;
+
+// Categorical: reference data-viz palette slots 1-3, dark-surface steps (validated
+// all-pairs for scatter-like marks). Past three categories, the rest fold to grey.
+export const CATEGORY_HEX = ['#3987e5', '#d95926', '#199e70'];
+export const OTHER_HEX = '#6b7280';
+const hexRgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+export const CATEGORY_COLORS = CATEGORY_HEX.map(hexRgb);
+export const OTHER_COLOR = hexRgb(OTHER_HEX);

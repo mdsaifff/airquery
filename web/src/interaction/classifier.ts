@@ -37,6 +37,8 @@ class Debounced {
 interface HandState {
   label: Debounced;
   points: Vec2[];
+  /** Recent wrist positions for swipe detection. */
+  trail: { t: number; x: number; y: number }[];
   pinching: boolean;
   pinchFrames: number;
   missing: number;
@@ -63,6 +65,7 @@ export class GestureClassifier {
   private hold: Hold | null = null;
   private zoomDist: number | null = null;
   private lastHandsAt = -Infinity;
+  private lastSwipeAt = -Infinity;
   private lostEmitted = true;
 
   /** params is read every frame, so debug-panel edits apply live. */
@@ -86,7 +89,7 @@ export class GestureClassifier {
     for (const h of frame.hands) {
       let s = this.hands.get(h.hand);
       if (!s) {
-        s = { label: new Debounced(), points: h.points, pinching: false, pinchFrames: 0, missing: 0, lastSeen: t }; // prettier-ignore
+        s = { label: new Debounced(), points: h.points, trail: [], pinching: false, pinchFrames: 0, missing: 0, lastSeen: t }; // prettier-ignore
         this.hands.set(h.hand, s);
       }
       s.points = h.points;
@@ -112,6 +115,7 @@ export class GestureClassifier {
       } else {
         ev.push({ kind: 'pinchMove', hand: h.hand, x: at.x, y: at.y });
       }
+      this.detectSwipe(s, raw, t, ev);
     }
 
     // Hands missing from this frame decay through the same debounce, so a
@@ -149,6 +153,26 @@ export class GestureClassifier {
       ev.push({ kind: 'handsLost' });
     }
     return ev;
+  }
+
+  /** A fast sideways sweep of an open (not pinching, not fist) hand. */
+  private detectSwipe(s: HandState, raw: string, t: number, ev: GestureEvent[]): void {
+    const { p } = this;
+    const wrist = s.points[WRIST];
+    s.trail.push({ t, x: wrist.x, y: wrist.y });
+    while (s.trail.length && t - s.trail[0].t > p.swipeWindowMs) s.trail.shift();
+    if (s.pinching || raw === 'Closed_Fist' || t - this.lastSwipeAt < p.swipeCooldownMs) return;
+    const first = s.trail[0];
+    const dx = wrist.x - first.x;
+    const dy = wrist.y - first.y;
+    if (
+      Math.abs(dx) > p.swipeMinHandScales * handScale(s.points) &&
+      Math.abs(dx) > 2 * Math.abs(dy)
+    ) {
+      ev.push({ kind: 'swipe', direction: dx > 0 ? 'right' : 'left' });
+      this.lastSwipeAt = t;
+      s.trail.length = 0;
+    }
   }
 
   private endPinch(hand: Hand, s: HandState, ev: GestureEvent[]): void {

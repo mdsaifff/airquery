@@ -8,6 +8,8 @@ import type { Legend } from '../scene/applyView.ts';
 
 export const hudStore = {
   mode: 'idle' as Mode,
+  /** Which scene is on screen (dataset name). */
+  dataset: 'quakes',
   /** Push-to-talk is held (hand Victory or spacebar). */
   listening: false,
   trackingFps: 0,

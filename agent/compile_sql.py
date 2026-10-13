@@ -24,10 +24,8 @@ class CompiledQuery:
 
 
 def _ident(name: str, schema: DatasetSchema) -> str:
-    pos = schema.position
-    allowed = {c.name for c in schema.columns} | {schema.id, schema.table, pos.lat, pos.lon}
-    if pos.depth:
-        allowed.add(pos.depth)
+    allowed = {c.name for c in schema.columns} | {schema.id, schema.table}
+    allowed |= set(schema.position_columns())
     if name not in allowed:
         raise InvalidSpecError([f"identifier {name!r} is not in the schema"])
     return '"' + name.replace('"', '""') + '"'
@@ -69,8 +67,7 @@ def compile_spec(spec: QuerySpec, schema: DatasetSchema) -> CompiledQuery:
     if errors:
         raise InvalidSpecError(errors)
 
-    pos = schema.position
-    select = [schema.id, pos.lat, pos.lon, pos.depth, spec.color_by, spec.size_by]
+    select = [schema.id, *schema.position_columns(), spec.color_by, spec.size_by]
     cols = list(dict.fromkeys(name for name in select if name))  # dedupe, keep order
     sql = f"SELECT {', '.join(_ident(n, schema) for n in cols)} FROM {_ident(schema.table, schema)}"
 

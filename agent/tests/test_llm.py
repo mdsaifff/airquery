@@ -74,3 +74,34 @@ def test_mock_llm_replays_scripted_replies() -> None:
 def test_unconfigured_provider_fails_clearly() -> None:
     with pytest.raises(LLMNotConfiguredError, match="LLM_PROVIDER"):
         make_llm("", "", "")
+
+
+PAPERS = DatasetSchema.model_validate(
+    {
+        "dataset": "papers",
+        "table": "papers",
+        "description": "stand-in for papers.schema.json",
+        "position": {"kind": "xyz", "x": "x", "y": "y", "z": "z"},
+        "columns": [
+            {"name": "title", "type": "text"},
+            {"name": "year", "type": "number", "min": 2019, "max": 2025},
+            {
+                "name": "field",
+                "type": "text",
+                "categorical": True,
+                "examples": ["machine learning", "language", "vision"],
+            },
+        ],
+    }
+)
+
+
+def test_papers_examples_are_valid() -> None:
+    examples = load_examples("papers")
+    assert 8 <= len(examples) <= 12
+    for ex in examples:
+        out = LLMOutput.model_validate(ex["output"])
+        assert (out.spec is None) != (out.clarify is None), ex["utterance"]
+        if out.spec:
+            assert validate_spec(out.spec, PAPERS) == [], ex["utterance"]
+    assert "papers about diffusion models" in build_prompt(PAPERS, "x", None).system

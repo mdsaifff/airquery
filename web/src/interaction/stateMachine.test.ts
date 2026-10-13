@@ -44,6 +44,8 @@ const TABLE: Row[] = [
   { row: 'listening + talk inactive', from: st('listening', { resume: 'pointing' }), event: { kind: 'talk', active: false }, to: 'pointing', effects: ['stopListening'] },
   { row: 'pointing + fire reset', from: st('pointing'), event: { kind: 'fire', gesture: 'reset' }, to: 'pointing', effects: ['resetView'] },
   { row: 'pointing + fire undo', from: st('pointing'), event: { kind: 'fire', gesture: 'undo' }, to: 'pointing', effects: ['undo'] },
+  { row: 'pointing + swipe', from: st('pointing'), event: { kind: 'swipe', direction: 'left' }, to: 'pointing', effects: ['switchScene'] },
+  { row: 'idle + swipe', from: st('idle'), event: { kind: 'swipe', direction: 'right' }, to: 'idle', effects: ['switchScene'] },
   ...(['idle', 'pointing', 'rotating', 'zooming'] as const).map((m): Row => ({
     row: `${m} + handsLost`, from: m === 'rotating' ? rotating : st(m), event: { kind: 'handsLost' }, to: 'idle', effects: ['hideCursor', 'stopDrag'],
   })),

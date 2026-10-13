@@ -11,4 +11,5 @@ export type GestureEvent =
   | { kind: 'fire'; gesture: HoldGesture }
   | { kind: 'clutch'; active: boolean }
   | { kind: 'talk'; active: boolean }
+  | { kind: 'swipe'; direction: 'left' | 'right' } // switch scene
   | { kind: 'handsLost' };

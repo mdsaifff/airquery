@@ -102,3 +102,13 @@ def test_registry_loads_the_real_schema_files() -> None:
     assert magnitude is not None and isinstance(magnitude.min, float)  # computed by data_prep
     with pytest.raises(UnknownDatasetError):
         reg.get("nope")
+
+
+def test_categorical_text_columns_can_drive_colour(quakes_schema: DatasetSchema) -> None:
+    assert validate_spec(spec(color_by="mag_type"), quakes_schema)  # not marked categorical
+    cols = [
+        c.model_copy(update={"categorical": c.name == "mag_type"}) for c in quakes_schema.columns
+    ]
+    schema = quakes_schema.model_copy(update={"columns": cols})
+    assert validate_spec(spec(color_by="mag_type"), schema) == []
+    assert validate_spec(spec(size_by="mag_type"), schema)  # size stays numeric-only
