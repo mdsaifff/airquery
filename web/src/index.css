@@ -3,7 +3,34 @@ body,
 #root {
   margin: 0;
   height: 100%;
+  overflow: hidden;
   background: #05070d;
   color: #e6edf7;
   font-family: system-ui, sans-serif;
+}
+
+/* Webcam + skeleton, mirrored so it reads like a mirror. */
+.cam {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  transform: scaleX(-1);
+  border-radius: 8px;
+  border: 1px solid rgb(255 255 255 / 15%);
+  background: #000;
+}
+
+.stats {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  font:
+    12px ui-monospace,
+    monospace;
+  text-align: right;
+  opacity: 0.85;
+}
+
+.warn {
+  color: #fbbf24;
 }

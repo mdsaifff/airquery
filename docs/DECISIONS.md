@@ -54,3 +54,15 @@ These double as material for LinkedIn posts.
 - **Why:** a fresh clone runs without network; 6k points keep 60 fps easy.
 - **Consequences:** relative time ("last 30 days") is measured from the
   latest event in the data, not from today (see `compile_sql.py`).
+
+## D-008 MediaPipe VIDEO mode in its own frame-callback loop
+- **Context:** T1.2 asks for `LIVE_STREAM`, but the JS tasks-vision API only
+  has `IMAGE` and `VIDEO` (synchronous `recognizeForVideo`).
+- **Decision:** `VIDEO` mode called from a `requestVideoFrameCallback` loop,
+  separate from the render `requestAnimationFrame` loop, capped at
+  `config.trackingMaxFps`. Results are pushed to consumers by callback.
+- **Why:** keeps the render loop free of tracking awaits with no worker
+  plumbing; a worker (ImageBitmap transfer) is the upgrade if inference time
+  starts costing render frames.
+- **Consequences:** inference still shares the main thread; watch
+  `inferenceMs` in the HUD.

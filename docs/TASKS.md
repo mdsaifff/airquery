@@ -51,7 +51,7 @@ Current phase: **1**
     running `make data` produces both files; row count and min/max printed.
   - Needs you: run `make data` once with network access.
   - Note: ran it here (2024, M4.5+: 6,397 rows, 265 KB). The small Parquet is committed so a fresh clone works. Schema adds `id` and `row_count` keys.
-- [ ] **T1.2 Hand tracking on screen**
+- [x] **T1.2 Hand tracking on screen**
   - Do: `src/tracking/handTracker.ts` wraps MediaPipe Gesture Recognizer
     (`LIVE_STREAM`, `numHands: 2`); webcam in a small corner canvas,
     mirrored, with the 21-point skeleton drawn; tracking FPS shown.
@@ -59,6 +59,7 @@ Current phase: **1**
     counter wired.
   - Needs you: open the app, allow the camera, confirm the skeleton follows
     both hands and report the FPS you see.
+  - Note: JS tasks-vision only has VIDEO mode (no LIVE_STREAM); runs in its own requestVideoFrameCallback loop, capped by `trackingMaxFps` (D-008). Camera check pending (user).
 - [ ] **T1.3 Landmark recorder and fixtures**
   - Do: dev-only hotkey (`R`) records 3 s of landmark results to a JSON
     download; loader for fixtures in tests.
