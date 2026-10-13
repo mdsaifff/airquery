@@ -1,6 +1,7 @@
 // Raw tracking frames -> screen space -> smoothing -> gestures -> state machine
 // -> effects. Keyboard fallbacks dispatch into the same state machine.
 import { config } from '../config.ts';
+import { metrics } from '../hud/metrics.ts';
 import { toScreen } from '../tracking/geometry.ts';
 import { HandSmoother } from '../tracking/handSmoother.ts';
 import type { RawFrame } from '../tracking/rawFrame.ts';
@@ -24,8 +25,10 @@ export class HandPipeline {
   }
 
   onFrame(frame: RawFrame, width: number, height: number): void {
+    const t0 = performance.now();
     const hands = this.smoother.smooth(toScreen(frame, width, height));
     for (const e of this.classifier.step(hands)) this.dispatch(e);
+    metrics.gestures.push(performance.now() - t0);
   }
 
   dispatch(e: GestureEvent): void {

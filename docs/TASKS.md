@@ -130,10 +130,11 @@ changes the scene. Ask the user to record a 10-second clip for the teaser.
   - Done when: picking works with the mouse in a test page.
   - Needs you: confirm hover and cues work by hand.
   - Note: screen-space picking (pure, tested) instead of a raycaster; verified headless: mouse hover shows place/magnitude/depth/date. Cursor shows a clutch/listening label and the hold ring; skeleton colour follows the mode. Runtime split into loadGlobe/trackingLoop/hover modules. Hand check pending (user).
-- [ ] **T2.7 Performance pass**
+- [x] **T2.7 Performance pass**
   - Do: separate tracking and render loops; per-stage timings collected in a
     ring buffer; HUD shows tracking fps, render fps.
   - Done when: render loop never awaits tracking or DuckDB.
+  - Note: ring buffers per stage (frame, inference, gestures, query, voiceToRender) in `hud/metrics.ts`; HUD shows render/tracking fps + inference/gesture medians. A test guards that the render loop has no async code. Headless software-GL inference is ~180 ms; real-laptop numbers pending (user).
 
 **Gate 2:** run the gesture self-test from `docs/EVAL.md` (20 tries per
 gesture). All gestures ≥ 90%, no false trigger in 2 minutes of talking.

@@ -1,5 +1,6 @@
 // Starts the webcam + hand tracker and draws the corner skeleton view.
 // Runs in its own frame-callback loop; never touches the render loop.
+import { metrics } from '../hud/metrics.ts';
 import { startCamera } from './camera.ts';
 import { HandTracker } from './handTracker.ts';
 import type { RawFrame } from './rawFrame.ts';
@@ -35,6 +36,7 @@ export function startTracking(canvas: HTMLCanvasElement, hooks: TrackingHooks): 
     const cam = video;
     const t = tracker;
     t.start(cam, (frame) => {
+      metrics.inference.push(t.inferenceMs);
       hooks.onFrame(frame, t.fps);
       if (ctx) drawSkeleton(ctx, cam, frame, hooks.skeletonColor());
     });

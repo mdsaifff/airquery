@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { config } from './config.ts';
 import { DebugPanel } from './hud/DebugPanel.tsx';
+import { metrics } from './hud/metrics.ts';
 import { hudStore, useTick } from './hud/store.ts';
 import { startRuntime } from './runtime.ts';
 import type { Runtime } from './runtime.ts';
@@ -13,7 +14,9 @@ function Stats() {
         render {hudStore.renderFps.toFixed(0)} fps · {hudStore.frameMs.toFixed(1)} ms
       </div>
       <div>
-        tracking {hudStore.trackingFps.toFixed(0)} fps · {hudStore.mode}
+        tracking {hudStore.trackingFps.toFixed(0)} fps · infer{' '}
+        {metrics.inference.percentile(0.5).toFixed(1)} ms · gestures{' '}
+        {metrics.gestures.percentile(0.5).toFixed(2)} ms · {hudStore.mode}
         {hudStore.listening && ' · listening'}
       </div>
       <div>

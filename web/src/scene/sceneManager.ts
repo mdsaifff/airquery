@@ -2,6 +2,7 @@
 // other loops (tracking, DuckDB) have already written; it never awaits them.
 import * as THREE from 'three';
 import { config } from '../config.ts';
+import { metrics } from '../hud/metrics.ts';
 
 export type FrameCallback = (now: number, dt: number) => void;
 
@@ -43,7 +44,9 @@ export class SceneManager {
       this.last = now;
       for (const cb of this.callbacks) cb(now, dt);
       this.renderer.render(this.scene, this.camera);
-      this.frameMs = 0.9 * this.frameMs + 0.1 * (performance.now() - t0);
+      const ms = performance.now() - t0;
+      metrics.frame.push(ms);
+      this.frameMs = 0.9 * this.frameMs + 0.1 * ms;
       this.frames++;
       if (now - this.fpsWindowStart >= 1000) {
         this.fps = (this.frames * 1000) / (now - this.fpsWindowStart);

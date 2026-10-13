@@ -4,6 +4,7 @@ import { config } from './config.ts';
 import { maskFromResult } from './data/resultMask.ts';
 import { CursorView, MODE_COLORS } from './hud/cursor.ts';
 import { Hover } from './hud/hover.ts';
+import { metrics } from './hud/metrics.ts';
 import { hudStore } from './hud/store.ts';
 import { CameraController, orbitPosition } from './interaction/cameraController.ts';
 import { HandPipeline } from './interaction/handPipeline.ts';
@@ -152,6 +153,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       const t0 = performance.now();
       const result = await db.run('SELECT id FROM quakes WHERE depth_km > ?', [km]);
       hudStore.queryMs = performance.now() - t0;
+      metrics.query.push(hudStore.queryMs);
       hudStore.shown = maskFromResult(result, 'id', idIndex, mask);
       globe.setVisibility(mask);
     },
