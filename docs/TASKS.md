@@ -180,11 +180,12 @@ Tune `config.ts` and repeat until met.
   - Done when: tests with `MockLLM` cover success, one repair, exhausted
     retries, and clarify paths.
   - Note: exhausted retries -> `rejected` (listing filterable fields) when errors say the dataset can't do it, else `clarify`. Invalid client `current_spec` is rejected before any LLM call. Provider exceptions -> `rejected`. Token usage tracked for the cost ablation.
-- [ ] **T3.6 `/query` endpoint**
+- [x] **T3.6 `/query` endpoint**
   - Do: FastAPI route per the API contract; CORS for the web origin; simple
     per-IP rate limit; in-memory cache keyed by (utterance, current_spec);
     JSONL logging.
   - Done when: endpoint tests with `MockLLM`; log line matches the schema.
+  - Note: `create_app()` factory for DI; LRU cache (256) keyed by dataset + normalized utterance + current_spec, rejections not cached; sliding-window per-IP limit (429 with a QueryResponse body); one JSONL line per call incl. 422/429, plus model + token usage.
 - [ ] **T3.7 Speech to text and push-to-talk**
   - Do: `SpeechToText` interface; Web Speech implementation with interim
     results; typed-input box fallback; push-to-talk via `talk` events and
