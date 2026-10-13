@@ -111,9 +111,10 @@ changes the scene. Ask the user to record a 10-second clip for the teaser.
     sequence; the "talking with hands" fixture produces no `fire`, `talk` or
     `pinchStart` events.
   - Note: verified on synthetic replays (point, pinch, drag, two-hand zoom, fist, palm, thumb down, victory, dropouts, talking). Extra guards: pinch needs index reach (fist looks like a pinch), holds restart if the palm drifts. Real fixtures get checked against `tests/fixtures/expected.json` once recorded.
-- [ ] **T2.4 Interaction state machine**
+- [x] **T2.4 Interaction state machine**
   - Do: pure reducer implementing the transition table in ARCHITECTURE.md.
   - Done when: a table-driven test covers every row of the table.
+  - Note: every table row (with the 'any' and 'pointing / rotating' rows expanded) is a test case. Small additions: clutched->pointing emits `unfreeze`; listening returns to idle if push-to-talk began without hands.
 - [ ] **T2.5 Camera controller**
   - Do: rotate from pinch-drag deltas, dolly from `twoHandZoom`, damping on
     release, animated reset, fly-to for `camera_target`. Mouse orbit stays as

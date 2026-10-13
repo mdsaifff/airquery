@@ -1,11 +1,13 @@
 .PHONY: dev dev-web dev-agent test lint data eval
 
 # Fresh clone: install web deps on first use. uv syncs Python deps by itself.
-web/node_modules: web/package-lock.json
+# npm rewrites node_modules/.package-lock.json on every install, so this only
+# reruns when package-lock.json changed since the last install.
+WEB_DEPS := web/node_modules/.package-lock.json
+$(WEB_DEPS): web/package-lock.json
 	cd web && npm ci
-	touch web/node_modules
 
-dev: web/node_modules
+dev: $(WEB_DEPS)
 	$(MAKE) -j2 dev-web dev-agent
 
 dev-web:
@@ -14,12 +16,12 @@ dev-web:
 dev-agent:
 	cd agent && uv run uvicorn main:app --reload --port 8000
 
-test: web/node_modules
+test: $(WEB_DEPS)
 	cd web && npm test
 	cd agent && uv run pytest -q
 	cd data_prep && uv run pytest -q
 
-lint: web/node_modules
+lint: $(WEB_DEPS)
 	cd web && npm run lint
 	cd agent && uv run ruff check . && uv run ruff format --check .
 	cd data_prep && uv run ruff check . && uv run ruff format --check .
