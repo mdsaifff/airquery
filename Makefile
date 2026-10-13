@@ -21,17 +21,20 @@ test: $(WEB_DEPS)
 	cd web && npm test
 	cd agent && uv run pytest -q
 	cd data_prep && uv run pytest -q
+	cd agent && uv run --with duckdb pytest -q -p no:cacheprovider ../eval
 
 lint: $(WEB_DEPS)
 	cd web && npm run lint
 	cd agent && uv run ruff check . && uv run ruff format --check .
 	cd data_prep && uv run ruff check . && uv run ruff format --check .
+	cd eval && uv run --project ../agent ruff check . && uv run --project ../agent ruff format --check .
 
 data:
 	cd data_prep && uv run python quakes.py && uv run python coastlines.py
 
+# Query accuracy against the configured LLM (see eval/score.py --help for ablations).
 eval:
-	@echo "eval: not set up yet (T4.1)"
+	cd agent && uv run --with duckdb python ../eval/score.py $(ARGS)
 
 # After changing agent/spec.py: JSON Schema first, then the TS types.
 contracts: $(WEB_DEPS)

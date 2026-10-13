@@ -59,7 +59,7 @@ def filterable(schema: DatasetSchema) -> str:
     return ", ".join(c.name for c in schema.columns)
 
 
-def build_graph(llm: LLMAdapter):
+def build_graph(llm: LLMAdapter, max_retries: int = MAX_RETRIES):
     async def parse(state: AgentState) -> AgentState:
         schema = state["schema"]
         repairing = bool(state.get("errors"))
@@ -145,7 +145,7 @@ def build_graph(llm: LLMAdapter):
     def after_validate(state: AgentState) -> str:
         if not state.get("errors"):
             return "merge"
-        return "repair" if state.get("retries", 0) < MAX_RETRIES else "give_up"
+        return "repair" if state.get("retries", 0) < max_retries else "give_up"
 
     g = StateGraph(AgentState)
     g.add_node("parse", parse)

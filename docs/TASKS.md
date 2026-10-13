@@ -224,6 +224,7 @@ on the deployed site. Ask the user to record the hero take.
     (filters, encodings, ranks, time, refine chains, typos, ambiguous ones);
     `eval/score.py` reports spec exact-match and result-set match.
   - Needs you: review and correct the gold specs; add 20 phrased your own way.
+  - Note: DRAFTED (box open until reviewed): `eval/utterances.jsonl` (100 items, EVAL.md mix; gold = merged spec or `gold_clarify`), `eval/score.py` (in-process pipeline; spec exact-match, result-set match in DuckDB, clarify P/R, invalid SQL, latency, tokens/cost; `--no-repair`, `--model`, `--llm gold|fake`), tests incl. a gold-oracle run that must score 100%. `make eval` + eval tests in `make test`. Needs: user review of gold specs + 20 own phrasings; real run needs the LLM provider.
 - [ ] **T4.2 Ablation**
   - Do: run the eval with and without repair, and across 2–3 model tiers;
     save a table + chart of accuracy vs. cost vs. latency to `eval/reports/`.
