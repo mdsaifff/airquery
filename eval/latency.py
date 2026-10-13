@@ -10,13 +10,16 @@ Writes eval/reports/<date>_latency.md (never overwrites).
 
 import argparse
 import json
+import sys
 from datetime import date
 from pathlib import Path
 from typing import Any
 
-from scoring import percentile
-
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "agent"))
+
+from scoring import percentile  # noqa: E402
+
 LOG = ROOT / "agent" / "logs" / "queries.jsonl"
 REPORTS = Path(__file__).resolve().parent / "reports"
 
