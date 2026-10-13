@@ -44,3 +44,11 @@ body,
   display: block;
   touch-action: none;
 }
+
+.temp-controls {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  display: flex;
+  gap: 8px;
+}

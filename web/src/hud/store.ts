@@ -7,6 +7,8 @@ export const hudStore = {
   renderFps: 0,
   /** Smoothed CPU time per render frame (ms). */
   frameMs: 0,
+  /** Last DuckDB query time (ms). */
+  queryMs: 0,
   /** Points currently shown / total. */
   shown: 0,
   total: 0,

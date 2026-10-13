@@ -77,12 +77,13 @@ Current phase: **1**
     points (no per-point objects); frame time shown in the HUD.
   - Needs you: confirm it looks right and report the frame rate.
   - Note: verified in headless Chrome (software GL): 6,397 points render with coastlines (Natural Earth 110m, added to `make data`) and graticule. Camera controller written in full here (damping, reset, fly-to) and reused by T2.5. Real frame-rate check pending (user).
-- [ ] **T1.5 DuckDB-Wasm in a worker**
+- [x] **T1.5 DuckDB-Wasm in a worker**
   - Do: `src/data/db.ts` loads `quakes.parquet`, exposes
     `run(sql, params) → typed arrays`; a temporary button runs a hard-coded
     `depth_km > ?` filter and the scene updates.
   - Done when: query runs in the worker (UI stays responsive); converting
     results allocates typed arrays once per query.
+  - Note: verified headless: the temp button runs `depth_km > ?` (300) via a prepared statement in the DuckDB worker: 314/6,397 shown, ~30 ms. Results become a visibility mask through an id->index map built once.
 
 **Gate 1:** hands on screen, quakes on the globe, one parameterized query
 changes the scene. Ask the user to record a 10-second clip for the teaser.

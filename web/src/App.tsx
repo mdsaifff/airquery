@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { config } from './config.ts';
 import { hudStore, useTick } from './hud/store.ts';
 import { startRuntime } from './runtime.ts';
+import type { Runtime } from './runtime.ts';
 
 function Stats() {
   useTick();
@@ -13,6 +14,7 @@ function Stats() {
       <div>tracking {hudStore.trackingFps.toFixed(0)} fps</div>
       <div>
         {hudStore.shown.toLocaleString()} / {hudStore.total.toLocaleString()} quakes
+        {hudStore.queryMs > 0 && ` · query ${hudStore.queryMs.toFixed(0)} ms`}
       </div>
       {hudStore.status && <div>{hudStore.status}</div>}
       {hudStore.cameraError && <div className="warn">{hudStore.cameraError}</div>}
@@ -23,10 +25,13 @@ function Stats() {
 export function App() {
   const sceneRef = useRef<HTMLDivElement>(null);
   const camRef = useRef<HTMLCanvasElement>(null);
+  const runtime = useRef<Runtime | null>(null);
 
   useEffect(() => {
     if (!sceneRef.current || !camRef.current) return;
-    return startRuntime({ sceneEl: sceneRef.current, camCanvas: camRef.current });
+    const rt = startRuntime({ sceneEl: sceneRef.current, camCanvas: camRef.current });
+    runtime.current = rt;
+    return () => rt.dispose();
   }, []);
 
   return (
@@ -39,6 +44,11 @@ export function App() {
         height={config.cameraHeight / 2}
       />
       <Stats />
+      {/* Temporary (T1.5): proves a parameterized query changes the scene. */}
+      <div className="temp-controls">
+        <button onClick={() => void runtime.current?.depthFilter(300)}>deeper than 300 km</button>
+        <button onClick={() => void runtime.current?.depthFilter(null)}>show all</button>
+      </div>
     </>
   );
 }

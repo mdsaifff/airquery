@@ -3,6 +3,7 @@
 import { config } from './config.ts';
 import type { Columns } from './data/arrow.ts';
 import { Db } from './data/db.ts';
+import { indexIds, maskFromResult } from './data/resultMask.ts';
 import { hudStore } from './hud/store.ts';
 import { CameraController, orbitPosition } from './interaction/cameraController.ts';
 import { attachMouse } from './interaction/mouseInput.ts';
@@ -51,7 +52,13 @@ function numbers(cols: Columns, name: string): Float64Array {
   return col;
 }
 
-export function startRuntime(els: RuntimeElements): () => void {
+export interface Runtime {
+  dispose(): void;
+  /** Temporary (T1.5): show only quakes deeper than km, via a DuckDB prepared statement. */
+  depthFilter(km: number | null): Promise<void>;
+}
+
+export function startRuntime(els: RuntimeElements): Runtime {
   let disposed = false;
   const cleanups: (() => void)[] = [];
 
@@ -77,6 +84,8 @@ export function startRuntime(els: RuntimeElements): () => void {
 
   // --- data ---
   let db: Db | undefined;
+  let idIndex = new Map<string, number>();
+  let mask = new Uint8Array(0);
   void (async () => {
     try {
       const [opened, coastlines] = await Promise.all([Db.open(['quakes']), fetchCoastlines()]);
@@ -92,6 +101,8 @@ export function startRuntime(els: RuntimeElements): () => void {
       );
       globe.setColors(depth, ...range(depth));
       globe.setSizes(mag, ...range(mag));
+      idIndex = indexIds(base.strings.get('id') ?? []);
+      mask = new Uint8Array(globe.count);
       hudStore.shown = hudStore.total = globe.count;
       hudStore.status = '';
       cleanups.push(() => globe?.dispose());
@@ -141,8 +152,23 @@ export function startRuntime(els: RuntimeElements): () => void {
   window.addEventListener('keydown', onKey);
   cleanups.push(() => window.removeEventListener('keydown', onKey));
 
-  return () => {
-    disposed = true;
-    cleanups.reverse().forEach((fn) => fn());
+  return {
+    dispose() {
+      disposed = true;
+      cleanups.reverse().forEach((fn) => fn());
+    },
+    async depthFilter(km) {
+      if (!db || !globe) return;
+      if (km === null) {
+        globe.setVisibility(null);
+        hudStore.shown = globe.count;
+        return;
+      }
+      const t0 = performance.now();
+      const result = await db.run('SELECT id FROM quakes WHERE depth_km > ?', [km]);
+      hudStore.queryMs = performance.now() - t0;
+      hudStore.shown = maskFromResult(result, 'id', idIndex, mask);
+      globe.setVisibility(mask);
+    },
   };
 }
