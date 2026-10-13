@@ -5,6 +5,7 @@ description = "AirQuery query service: utterance -> validated QuerySpec -> SQL"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi>=0.143.0",
+    "langgraph>=1.2.15",
     "pydantic>=2.14.1",
     "pydantic-settings>=2.15.0",
     "uvicorn>=0.54.0",

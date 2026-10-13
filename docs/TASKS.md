@@ -173,12 +173,13 @@ Tune `config.ts` and repeat until met.
     provider with 5 utterances and prints specs.
   - Needs you: put the API key in `agent/.env`.
   - Note: PARTIAL (box left open): `LLMAdapter` protocol, `MockLLM`, prompt builder (`prompt_builder.py`), `prompts/system.md` + 12 worked examples (validated against the real schema in tests), `scripts/try_llm.py`. Waiting on the user's provider/model choice; then add one adapter in `llm.make_llm` using that provider's official SDK.
-- [ ] **T3.5 LangGraph agent**
+- [x] **T3.5 LangGraph agent**
   - Do: `graph.py`: parse → validate → (repair, max 2 retries | clarify) →
     merge → compile. Clarify when the LLM signals ambiguity or repairs run out
     on an ambiguous field.
   - Done when: tests with `MockLLM` cover success, one repair, exhausted
     retries, and clarify paths.
+  - Note: exhausted retries -> `rejected` (listing filterable fields) when errors say the dataset can't do it, else `clarify`. Invalid client `current_spec` is rejected before any LLM call. Provider exceptions -> `rejected`. Token usage tracked for the cost ablation.
 - [ ] **T3.6 `/query` endpoint**
   - Do: FastAPI route per the API contract; CORS for the web origin; simple
     per-IP rate limit; in-memory cache keyed by (utterance, current_spec);
