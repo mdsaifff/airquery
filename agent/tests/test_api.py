@@ -116,9 +116,9 @@ def test_cors_allows_the_web_origin(quakes_schema, log_path) -> None:
     c, _ = client(quakes_schema, log_path)
     r = c.options(
         "/query",
-        headers={"Origin": settings.web_origin, "Access-Control-Request-Method": "POST"},
+        headers={"Origin": settings.web_origins[0], "Access-Control-Request-Method": "POST"},
     )
-    assert r.headers["access-control-allow-origin"] == settings.web_origin
+    assert r.headers["access-control-allow-origin"] == settings.web_origins[0]
     r = c.options(
         "/query",
         headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "POST"},

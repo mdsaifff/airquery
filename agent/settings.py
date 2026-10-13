@@ -14,8 +14,13 @@ class Settings(BaseSettings):
     llm_model: str = ""
     llm_api_key: str = ""
     schema_dir: Path = AGENT_DIR / "../web/public/data"
-    web_origin: str = "http://localhost:5173"
+    # Comma-separated list of allowed browser origins (CORS).
+    web_origin: str = "http://localhost:5173,http://localhost:4173"
     rate_limit_per_min: int = 30
+
+    @property
+    def web_origins(self) -> list[str]:
+        return [o.strip() for o in self.web_origin.split(",") if o.strip()]
 
 
 settings = Settings()

@@ -66,3 +66,13 @@ These double as material for LinkedIn posts.
   starts costing render frames.
 - **Consequences:** inference still shares the main thread; watch
   `inferenceMs` in the HUD.
+
+## D-009 Keyword "fake agent" for UI work without an API key
+- **Context:** the LLM provider is still undecided (T3.4), but the UI, CORS,
+  zod validation, DuckDB and the scene all need an end-to-end check.
+- **Decision:** `agent/scripts/fake_agent.py` runs the real FastAPI app and
+  LangGraph pipeline with a regex `MockLLM`. Dev-only; never deployed.
+- **Why:** everything except the model is exercised for real, so wiring bugs
+  show up before any tokens are spent.
+- **Consequences:** it understands a handful of phrasings; accuracy numbers must
+  come from `make eval` against a real provider.

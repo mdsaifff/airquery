@@ -1,4 +1,4 @@
-.PHONY: dev dev-web dev-agent test lint data eval contracts
+.PHONY: dev dev-web dev-agent test lint data eval contracts build preview docker-agent
 
 # Fresh clone: install web deps on first use. uv syncs Python deps by itself.
 # npm rewrites node_modules/.package-lock.json on every install, so this only
@@ -37,3 +37,13 @@ eval:
 contracts: $(WEB_DEPS)
 	cd agent && uv run python scripts/export_schema.py
 	cd web && node scripts/gen-contracts.ts
+
+# Production: static web build (set VITE_AGENT_URL to the deployed agent) and agent image.
+build: $(WEB_DEPS)
+	cd web && npm run build
+
+preview: build
+	cd web && npx vite preview --port 4173 --strictPort
+
+docker-agent:
+	docker build -f agent/Dockerfile -t airquery-agent .

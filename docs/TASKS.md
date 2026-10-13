@@ -205,11 +205,12 @@ Tune `config.ts` and repeat until met.
     counter (voice-to-render), mic indicator, toasts. Clean layout for video.
   - Needs you: check readability at 1080p screen recording.
   - Note: 1080p layout checked in a headless 1920x1080 screenshot: glass box (spec with filters as expressions, SQL, params, per-stage timings) top-left, stats with voice->render latency (last + median) top-right, legend + transcript bottom-left clear of the webcam, toasts top-centre. Readability check of a real recording pending (user).
-- [ ] **T3.10 Deploy**
+- [x] **T3.10 Deploy**
   - Do: Dockerfile for the agent; static build for web; env-based agent URL;
     deployment notes in README. Suggest hosts; the user picks.
   - Done when: production build works locally against a local agent.
   - Needs you: create accounts, set secrets, deploy, share the URLs.
+  - Note: agent Dockerfile (uv image, schema files baked in, `$PORT`), `.dockerignore` keeps `.env` out (checked in the image). `WEB_ORIGIN` takes a comma-separated list. Verified: production web build on vite preview (:4173) against the container (CORS + zod + rejection toast with no LLM configured) and against the fake agent (314 rows, glass box, latency). Hosts listed in README; accounts/secrets/deploy pending (user).
 
 **Gate 3:** the MVP hero scene (beats 1–4 of `docs/PRD.md`) works end to end
 on the deployed site. Ask the user to record the hero take.

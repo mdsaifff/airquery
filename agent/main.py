@@ -79,7 +79,7 @@ def create_app(
     app = FastAPI(title="AirQuery agent")
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[settings.web_origin],
+        allow_origins=settings.web_origins,
         allow_methods=["GET", "POST"],
         allow_headers=["Content-Type"],
     )
