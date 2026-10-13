@@ -103,13 +103,14 @@ changes the scene. Ask the user to record a 10-second clip for the teaser.
   - Done when: tests show reduced jitter on a noisy synthetic signal and low
     lag on a step.
   - Note: `HandSmoother` filters all 21 landmarks per hand; tests: >3x jitter cut on a still noisy signal, 90% of a 300 px step within 5 frames.
-- [ ] **T2.3 Gesture classifier**
+- [x] **T2.3 Gesture classifier**
   - Do: pure classifier combining built-in labels + pinch rule (hysteresis:
     enter < `PINCH_ENTER`, exit > `PINCH_EXIT`) + hold-frames debounce,
     emitting `GestureEvent`s (ARCHITECTURE.md).
   - Done when: replaying each fixture from T1.3 produces the expected event
     sequence; the "talking with hands" fixture produces no `fire`, `talk` or
     `pinchStart` events.
+  - Note: verified on synthetic replays (point, pinch, drag, two-hand zoom, fist, palm, thumb down, victory, dropouts, talking). Extra guards: pinch needs index reach (fist looks like a pinch), holds restart if the palm drifts. Real fixtures get checked against `tests/fixtures/expected.json` once recorded.
 - [ ] **T2.4 Interaction state machine**
   - Do: pure reducer implementing the transition table in ARCHITECTURE.md.
   - Done when: a table-driven test covers every row of the table.

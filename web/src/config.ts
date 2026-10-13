@@ -34,6 +34,10 @@ export const config = {
     pinchExit: 0.5,
     /** Consecutive frames a pinch must hold before pinchStart (frames). */
     pinchStableFrames: 2,
+    /** Min wrist→index-tip distance for a pinch; a fist is shorter (hand-scale units). */
+    pinchMinIndexReach: 1.15,
+    /** A hold restarts if the palm drifts further than this (hand-scale units). */
+    holdMaxDrift: 0.4,
     /** Consecutive frames a built-in label must hold to count (frames). */
     labelStableFrames: 3,
     /** Min built-in gesture score to accept a label (0..1). */
