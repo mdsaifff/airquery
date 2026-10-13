@@ -19,8 +19,10 @@ test: web/node_modules
 	cd agent && uv run pytest -q
 	cd data_prep && uv run pytest -q
 
-lint:
-	@echo "lint: not set up yet (T0.2)"
+lint: web/node_modules
+	cd web && npm run lint
+	cd agent && uv run ruff check . && uv run ruff format --check .
+	cd data_prep && uv run ruff check . && uv run ruff format --check .
 
 data:
 	@echo "data: not set up yet (T1.1)"

@@ -22,7 +22,7 @@ Current phase: **0**
   - Done when: `make dev` serves the Vite page and `/health` returns
     `{"ok": true}`; `make test` runs one passing test in each Python package
     and one in `web/`.
-- [ ] **T0.2 Lint and format tooling**
+- [x] **T0.2 Lint and format tooling**
   - Do: ESLint + Prettier + `tsc --noEmit` for web; ruff for Python;
     wire into `make lint`.
   - Done when: `make lint` passes on a clean tree and fails on a planted error.
