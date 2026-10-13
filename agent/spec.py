@@ -6,10 +6,11 @@ generated from these (see scripts/export_schema.py); a test fails if they drift.
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
 
 Op = Literal["=", "!=", ">", ">=", "<", "<=", "between", "in", "contains", "last_days"]
-Scalar = float | int | str
+# Strict: no silent bool->int or number->str coercion of filter values.
+Scalar = StrictInt | StrictFloat | StrictStr
 
 
 class Contract(BaseModel):

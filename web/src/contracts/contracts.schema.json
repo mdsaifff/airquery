@@ -197,10 +197,10 @@
         "value": {
           "anyOf": [
             {
-              "type": "number"
+              "type": "integer"
             },
             {
-              "type": "integer"
+              "type": "number"
             },
             {
               "type": "string"
@@ -209,10 +209,10 @@
               "items": {
                 "anyOf": [
                   {
-                    "type": "number"
+                    "type": "integer"
                   },
                   {
-                    "type": "integer"
+                    "type": "number"
                   },
                   {
                     "type": "string"
@@ -340,10 +340,10 @@
           "items": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "integer"
               },
               {
-                "type": "integer"
+                "type": "number"
               },
               {
                 "type": "string"

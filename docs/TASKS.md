@@ -150,11 +150,12 @@ Tune `config.ts` and repeat until met.
     contract test fails if generated types are stale.
   - Done when: `make test` includes the drift check.
   - Note: one schema file `web/src/contracts/contracts.schema.json` holds QuerySpec, QueryRequest/Response and DatasetSchema; `make contracts` regenerates. Drift checked on both sides (pytest: spec.py vs JSON; vitest: JSON vs TS).
-- [ ] **T3.2 Schema registry, validator and merge**
+- [x] **T3.2 Schema registry, validator and merge**
   - Do: `schema_registry.py` loads `*.schema.json`; validator enforces the
     rules in ARCHITECTURE.md; `merge.py` implements refine rules.
   - Done when: tests cover unknown fields, wrong operator for type,
     out-of-range values, and each merge rule.
+  - Note: validator lives in `agent/validate.py` and returns repair-friendly messages. Filter values are strict (no bool->number coercion). Extra rules: color_by must be numeric/timestamp, size_by numeric, navigate needs camera_target. Merge never carries camera_target over.
 - [ ] **T3.3 SQL compiler**
   - Do: `compile_sql.py` turns a validated spec into DuckDB SQL with `?`
     params; identifiers only from the schema whitelist.

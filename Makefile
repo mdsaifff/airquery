@@ -5,7 +5,8 @@
 # reruns when package-lock.json changed since the last install.
 WEB_DEPS := web/node_modules/.package-lock.json
 $(WEB_DEPS): web/package-lock.json
-	cd web && npm ci
+	cd web && if [ -d node_modules ]; then npm install --no-audit --no-fund; else npm ci; fi
+	touch $(WEB_DEPS)
 
 dev: $(WEB_DEPS)
 	$(MAKE) -j2 dev-web dev-agent
