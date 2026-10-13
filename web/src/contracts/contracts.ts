@@ -108,6 +108,20 @@ export interface XyzPosition {
   z: string;
 }
 /**
+ * POST /explain: ids of the selected points -> aggregate SQL (computed in DuckDB).
+ *
+ * This interface was referenced by `AirQueryContracts`'s JSON-Schema
+ * via the `definition` "ExplainRequest".
+ */
+export interface ExplainRequest {
+  dataset: string;
+  /**
+   * @minItems 1
+   * @maxItems 5000
+   */
+  ids: [string, ...string[]];
+}
+/**
  * This interface was referenced by `AirQueryContracts`'s JSON-Schema
  * via the `definition` "QueryRequest".
  */

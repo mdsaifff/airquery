@@ -6,6 +6,7 @@ import { askAgent, compileSpec } from './data/agentClient.ts';
 import { Db } from './data/db.ts';
 import type { SessionDeps } from './data/querySession.ts';
 import { Datasets } from './datasets.ts';
+import { explainHere } from './explainHere.ts';
 import { CursorView, MODE_COLORS } from './hud/cursor.ts';
 import { Hover } from './hud/hover.ts';
 import { exportMetrics, metrics } from './hud/metrics.ts';
@@ -97,7 +98,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
     flyTo: (lat, lon) => camera.flyTo(lat, lon, performance.now()),
     resetView: () => camera.reset(performance.now()),
     notify: toast,
+    explain: () => void explainHere({ datasets, hover, camera: sm.camera, db }, name),
   });
+
   const db = Db.open();
   const datasets = new Datasets(DATASETS, sm.scene, db, sessionDeps);
   cleanups.push(() => datasets.dispose());

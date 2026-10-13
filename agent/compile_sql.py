@@ -85,3 +85,31 @@ def compile_spec(spec: QuerySpec, schema: DatasetSchema) -> CompiledQuery:
     if spec.limit is not None:
         sql += f" LIMIT {int(spec.limit)}"
     return CompiledQuery(sql, params)
+
+
+def compile_explain(schema: DatasetSchema, ids: list[str]) -> CompiledQuery:
+    """Aggregates over a selection, for "what's this?" (the LLM never sees the numbers).
+
+    Per column: numbers -> avg/min/max; categorical text -> most common value;
+    text with examples (e.g. place) -> most common part after the last comma.
+    Free text without examples (e.g. titles) is skipped.
+    """
+    if not ids:
+        raise InvalidSpecError(["explain needs at least one selected point"])
+    parts = ['count(*) AS "n"']
+    for c in schema.columns:
+        col = _ident(c.name, schema)
+        if c.type in ("number", "timestamp"):
+            for agg in ("avg", "min", "max"):
+                if c.type == "timestamp" and agg == "avg":
+                    continue
+                parts.append(f'{agg}({col}) AS "{agg}_{c.name}"')
+        elif c.categorical:
+            parts.append(f'mode({col}) AS "mode_{c.name}"')
+        elif c.examples:
+            parts.append(f"mode(trim(regexp_extract({col}, '[^,]+$'))) AS \"mode_{c.name}\"")
+    table = _ident(schema.table, schema)
+    id_col = _ident(schema.id, schema)
+    placeholders = ", ".join("?" * len(ids))
+    sql = f"SELECT {', '.join(parts)} FROM {table} WHERE {id_col} IN ({placeholders})"
+    return CompiledQuery(sql, list(ids))

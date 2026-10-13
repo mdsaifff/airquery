@@ -1,6 +1,6 @@
 import pytest
 
-from compile_sql import InvalidSpecError, compile_spec
+from compile_sql import InvalidSpecError, compile_explain, compile_spec
 from spec import DatasetSchema, QuerySpec
 
 SELECT = 'SELECT "id", "lat", "lon", "depth_km" FROM "quakes"'
@@ -131,3 +131,14 @@ def test_xyz_datasets_select_their_position_columns() -> None:
         schema,
     )
     assert q.sql == 'SELECT "id", "x", "y", "z" FROM "papers" WHERE "year" >= ?'
+
+
+def test_explain_aggregates_a_selection(quakes_schema: DatasetSchema) -> None:
+    q = compile_explain(quakes_schema, ["a", "b'); DROP TABLE quakes; --"])
+    assert q.sql.startswith('SELECT count(*) AS "n", min("time") AS "min_time"')
+    assert 'avg("depth_km") AS "avg_depth_km"' in q.sql
+    assert 'mode(trim(regexp_extract("place", \'[^,]+$\'))) AS "mode_place"' in q.sql
+    assert q.sql.endswith('FROM "quakes" WHERE "id" IN (?, ?)')
+    assert q.params == ["a", "b'); DROP TABLE quakes; --"]  # ids are parameters
+    with pytest.raises(InvalidSpecError):
+        compile_explain(quakes_schema, [])

@@ -12,12 +12,12 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from compile_sql import InvalidSpecError, compile_spec
+from compile_sql import InvalidSpecError, compile_explain, compile_spec
 from graph import AgentState, build_graph, run_agent
 from llm import LLMAdapter, LLMNotConfiguredError, make_llm
 from schema_registry import SchemaRegistry, UnknownDatasetError
 from settings import AGENT_DIR, settings
-from spec import CompileRequest, QueryRequest, QueryResponse
+from spec import CompileRequest, ExplainRequest, QueryRequest, QueryResponse
 
 CACHE_SIZE = 256
 DEFAULT_LOG = AGENT_DIR / "logs" / "queries.jsonl"
@@ -169,6 +169,17 @@ def create_app(
             resp = QueryResponse(status="rejected", message="; ".join(err.errors))
         else:
             resp = QueryResponse(status="ok", spec=req.spec, sql=query.sql, params=query.params)
+        return JSONResponse(resp.model_dump(mode="json"))
+
+    @app.post("/explain")
+    def explain_endpoint(req: ExplainRequest) -> JSONResponse:
+        """What's this?: aggregate SQL over the selected ids; DuckDB computes the numbers."""
+        try:
+            query = compile_explain(registry.get(req.dataset), req.ids)
+        except UnknownDatasetError:
+            resp = QueryResponse(status="rejected", message=f"Unknown dataset {req.dataset!r}.")
+        else:
+            resp = QueryResponse(status="ok", sql=query.sql, params=query.params)
         return JSONResponse(resp.model_dump(mode="json"))
 
     return app

@@ -222,6 +222,30 @@
       "title": "DatasetSchema",
       "type": "object"
     },
+    "ExplainRequest": {
+      "description": "POST /explain: ids of the selected points -> aggregate SQL (computed in DuckDB).",
+      "properties": {
+        "dataset": {
+          "title": "Dataset",
+          "type": "string"
+        },
+        "ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5000,
+          "minItems": 1,
+          "title": "Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "dataset",
+        "ids"
+      ],
+      "title": "ExplainRequest",
+      "type": "object"
+    },
     "Filter": {
       "properties": {
         "field": {

@@ -65,6 +65,13 @@ class CompileRequest(Contract):
     spec: QuerySpec
 
 
+class ExplainRequest(Contract):
+    """POST /explain: ids of the selected points -> aggregate SQL (computed in DuckDB)."""
+
+    dataset: str
+    ids: list[str] = Field(min_length=1, max_length=5000)
+
+
 class QueryResponse(Contract):
     status: Literal["ok", "clarify", "rejected"]
     spec: QuerySpec | None = None
@@ -133,6 +140,7 @@ EXPORTED = {
     QuerySpec: "serialization",
     QueryRequest: "serialization",
     CompileRequest: "serialization",
+    ExplainRequest: "serialization",
     QueryResponse: "serialization",
     DatasetSchema: "validation",
 }

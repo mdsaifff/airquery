@@ -49,6 +49,8 @@ def understand(prompt: Prompt) -> LLMReply:
     if "fly to chile" in text:
         target = {"lat": -33.4, "lon": -70.6, "label": "Chile"}
         return LLMReply(spec={**ds, "intent": "navigate", "camera_target": target})
+    if "what" in text and ("this" in text or "that" in text):
+        return LLMReply(spec={**ds, "intent": "explain"})
     for intent in ("undo", "reset"):
         if intent in text:
             return LLMReply(spec={**ds, "intent": intent})

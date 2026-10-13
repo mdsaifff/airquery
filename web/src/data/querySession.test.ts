@@ -87,6 +87,7 @@ function rig() {
     },
     show: (view) => legends.push(applyView(globe, BASE, SCHEMA, idIndex, mask, view).legend?.column ?? null), // prettier-ignore
     flyTo: (lat, lon) => flights.push([lat, lon]),
+    explain: () => notes.push('explain'),
     resetView: () => notes.push('resetView'),
     notify: (kind, text) => notes.push(`${kind}:${text}`),
   });
@@ -221,5 +222,13 @@ describe('voice to scene (mocked agent)', () => {
     await first;
     expect(r.session.current).toEqual(deeper);
     expect(r.runs).toHaveLength(1);
+  });
+
+  it('explain asks the scene for a summary instead of re-querying', async () => {
+    agentReplies(okResponse(spec({ intent: 'explain' }), 'SELECT 1', []));
+    const r = rig();
+    await r.session.submit("what's this?", 0);
+    expect(r.notes).toEqual(['explain']);
+    expect(r.runs).toEqual([]);
   });
 });

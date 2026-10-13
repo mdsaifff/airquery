@@ -31,6 +31,8 @@ export interface SessionDeps {
   /** Push a view to the scene; endedAt starts the voice-to-render clock. */
   show(view: SceneView, applied: Applied, endedAt: number): void;
   flyTo(lat: number, lon: number): void;
+  /** "What's this?": summarize what is under the pointer (or the lasso selection). */
+  explain(): void;
   resetView(): void;
   notify(kind: 'info' | 'clarify' | 'error', text: string): void;
 }
@@ -96,6 +98,7 @@ export class QuerySession {
 
     if (spec.intent === 'undo') return this.undo(endedAt);
     if (spec.intent === 'reset') return this.reset(endedAt);
+    if (spec.intent === 'explain') return deps.explain();
     if (spec.intent === 'navigate') {
       if (spec.camera_target) {
         deps.flyTo(spec.camera_target.lat, spec.camera_target.lon);

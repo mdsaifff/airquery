@@ -137,3 +137,12 @@ def test_compile_validates_and_compiles_ui_specs(quakes_schema, log_path) -> Non
     assert r.json()["status"] == "rejected" and "unknown field" in r.json()["message"]
     assert mock is not None and mock.calls == []  # no LLM involved
     assert not log_path.exists()  # only voice queries are logged
+
+
+def test_explain_compiles_aggregates_over_ids(quakes_schema, log_path) -> None:
+    c, _ = client(quakes_schema, log_path)
+    body = c.post("/explain", json={"dataset": "quakes", "ids": ["a", "b"]}).json()
+    assert body["status"] == "ok"
+    assert body["sql"].startswith('SELECT count(*) AS "n"')
+    assert body["params"] == ["a", "b"]
+    assert c.post("/explain", json={"dataset": "quakes", "ids": []}).status_code == 422

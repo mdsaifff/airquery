@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import type {
   CompileRequest,
+  ExplainRequest,
   QueryRequest,
   QueryResponse,
   QuerySpec,
@@ -68,6 +69,11 @@ async function post(path: string, req: unknown, baseUrl: string): Promise<QueryR
 /** POST /query. Throws on network errors or a response that fails validation. */
 export function askAgent(req: QueryRequest, baseUrl = AGENT_URL): Promise<QueryResponse> {
   return post('/query', req, baseUrl);
+}
+
+/** POST /explain: aggregate SQL over the selected ids (run in DuckDB, not by the LLM). */
+export function explainIds(req: ExplainRequest, baseUrl = AGENT_URL): Promise<QueryResponse> {
+  return post('/explain', req, baseUrl);
 }
 
 /** POST /compile (mouse baseline): a UI-built spec -> validated SQL, no LLM. */

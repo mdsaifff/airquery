@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
-import { pickNearest } from './picking.ts';
+import { pickNearest, pointsWithin } from './picking.ts';
 import type { PickInput } from './picking.ts';
 
 const W = 800;
@@ -54,5 +54,17 @@ describe('pickNearest', () => {
 
   it('ignores points behind the camera', () => {
     expect(pickNearest({ ...setup([[0, 0, 5]]), x: W / 2, y: H / 2 })).toBe(-1);
+  });
+
+  it('pointsWithin gathers every visible point in the radius, optionally front side only', () => {
+    const s = setup([
+      [0, 0, 1],
+      [0.01, 0, 1],
+      [0, 0, -1], // behind
+      [0.9, 0, 0.4], // far off on screen
+    ]);
+    s.radiusPx = 30;
+    expect(pointsWithin({ ...s, x: W / 2, y: H / 2 }, true)).toEqual([0, 1]);
+    expect(pointsWithin({ ...s, x: W / 2, y: H / 2 }, false)).toEqual([0, 1, 2]);
   });
 });

@@ -4,10 +4,32 @@ import { config } from '../config.ts';
 import type { Columns } from '../data/arrow.ts';
 import type { DatasetSchema } from '../contracts/contracts.ts';
 import type { PointCloud } from '../scene/pointCloud.ts';
-import { pickNearest } from '../scene/picking.ts';
+import { pickNearest, pointsWithin } from '../scene/picking.ts';
+import type { PickInput } from '../scene/picking.ts';
 import { TooltipView } from './tooltip.ts';
 
 const viewProj = new THREE.Matrix4();
+
+function pickInput(
+  camera: THREE.PerspectiveCamera,
+  cloud: PointCloud,
+  at: { x: number; y: number },
+  radiusPx: number,
+): PickInput {
+  viewProj.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+  return {
+    positions: cloud.positions,
+    visible: cloud.visible,
+    viewProj: viewProj.elements,
+    camDist: camera.position.length(),
+    camPos: [camera.position.x, camera.position.y, camera.position.z],
+    width: window.innerWidth,
+    height: window.innerHeight,
+    x: at.x,
+    y: at.y,
+    radiusPx,
+  };
+}
 
 export function describePoint(schema: DatasetSchema, base: Columns, i: number): string {
   if (schema.dataset === 'papers') return describePaper(base, i);
@@ -36,6 +58,8 @@ function describeQuake(base: Columns, i: number): string {
 export class Hover {
   /** Index of the point under the pointer, or -1. */
   current = -1;
+  /** Where the hand cursor or mouse last was (px), for "what's this?". */
+  pointer: { x: number; y: number } | null = null;
   private readonly tooltip: TooltipView;
   private mouse: { x: number; y: number } | null = null;
   private readonly el: HTMLElement;
@@ -63,27 +87,28 @@ export class Hover {
     canPick: boolean,
   ): void {
     const at = handCursor ?? this.mouse;
+    if (at) this.pointer = at;
     if (!at || !canPick) {
       this.current = -1;
       this.tooltip.hide();
       return;
     }
-    viewProj.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
-    const i = pickNearest({
-      positions: globe.positions,
-      visible: globe.visible,
-      viewProj: viewProj.elements,
-      camDist: camera.position.length(),
-      camPos: [camera.position.x, camera.position.y, camera.position.z],
-      width: window.innerWidth,
-      height: window.innerHeight,
-      x: at.x,
-      y: at.y,
-      radiusPx: config.pickRadiusPx,
-    });
+    const i = pickNearest(pickInput(camera, globe, at, config.pickRadiusPx));
     this.current = i;
     if (i < 0) this.tooltip.hide();
     else this.tooltip.show(i, at.x, at.y, () => describePoint(schema, base, i));
+  }
+
+  /** Visible points within radiusPx of the last pointer position (front side only for globes). */
+  nearby(
+    camera: THREE.PerspectiveCamera,
+    cloud: PointCloud,
+    radiusPx: number,
+    skipBehind: boolean,
+  ): number[] {
+    // prettier-ignore
+    if (!this.pointer) return [];
+    return pointsWithin(pickInput(camera, cloud, this.pointer, radiusPx), skipBehind);
   }
 
   dispose(): void {
