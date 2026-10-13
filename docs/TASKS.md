@@ -26,12 +26,13 @@ Current phase: **0**
   - Do: ESLint + Prettier + `tsc --noEmit` for web; ruff for Python;
     wire into `make lint`.
   - Done when: `make lint` passes on a clean tree and fails on a planted error.
-- [ ] **T0.3 CI**
+- [x] **T0.3 CI**
   - Do: GitHub Actions workflow running `make lint` and `make test` on
     push and pull requests (Node LTS, Python 3.12, uv).
   - Done when: workflow file exists and runs locally with `act` or is
     verified green after the user pushes.
   - Needs you: create the GitHub repo and push.
+  - Note: workflow written; not yet run (pending push by the user).
 
 **Gate 0:** `make dev`, `make lint`, `make test` all work from a fresh clone.
 
