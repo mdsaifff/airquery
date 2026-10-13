@@ -1,4 +1,4 @@
-.PHONY: dev dev-web dev-agent test lint data eval contracts build preview docker-agent
+.PHONY: dev dev-web dev-agent test lint data eval ablation contracts build preview docker-agent
 
 # Fresh clone: install web deps on first use. uv syncs Python deps by itself.
 # npm rewrites node_modules/.package-lock.json on every install, so this only
@@ -35,6 +35,10 @@ data:
 # Query accuracy against the configured LLM (see eval/score.py --help for ablations).
 eval:
 	cd agent && uv run --with duckdb python ../eval/score.py $(ARGS)
+
+# Table + chart from the eval reports (run make eval per configuration first).
+ablation:
+	cd agent && uv run python ../eval/ablation.py $(ARGS)
 
 # After changing agent/spec.py: JSON Schema first, then the TS types.
 contracts: $(WEB_DEPS)
