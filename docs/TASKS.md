@@ -7,7 +7,7 @@ Format: each task has **Do** (what to build), **Done when** (acceptance
 criteria Claude can check), and sometimes **Needs you** (checks only the
 human can do: camera, microphone, feel, API keys, recording).
 
-Current phase: **0**
+Current phase: **1**
 
 ---
 
