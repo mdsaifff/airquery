@@ -96,12 +96,13 @@ changes the scene. Ask the user to record a 10-second clip for the teaser.
   - Do: pure functions in `src/tracking/geometry.ts`: mirror conversion,
     hand scale, normalized fingertip distances, pinch point.
   - Done when: unit tests cover mirroring and scale invariance.
-- [ ] **T2.2 One Euro filter + debug panel**
+- [x] **T2.2 One Euro filter + debug panel**
   - Do: pure `OneEuroFilter` class; dev-only debug panel with sliders for
     `minCutoff`, `beta`, pinch thresholds, hold frames (values from
     `config.ts`).
   - Done when: tests show reduced jitter on a noisy synthetic signal and low
     lag on a step.
+  - Note: `HandSmoother` filters all 21 landmarks per hand; tests: >3x jitter cut on a still noisy signal, 90% of a 300 px step within 5 frames.
 - [ ] **T2.3 Gesture classifier**
   - Do: pure classifier combining built-in labels + pinch rule (hysteresis:
     enter < `PINCH_ENTER`, exit > `PINCH_EXIT`) + hold-frames debounce,

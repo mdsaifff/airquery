@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { config } from './config.ts';
+import { DebugPanel } from './hud/DebugPanel.tsx';
 import { hudStore, useTick } from './hud/store.ts';
 import { startRuntime } from './runtime.ts';
 import type { Runtime } from './runtime.ts';
@@ -26,6 +27,16 @@ export function App() {
   const sceneRef = useRef<HTMLDivElement>(null);
   const camRef = useRef<HTMLCanvasElement>(null);
   const runtime = useRef<Runtime | null>(null);
+  const [debug, setDebug] = useState(false);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code === 'KeyD' && !(e.target instanceof HTMLInputElement)) setDebug((d) => !d);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   useEffect(() => {
     if (!sceneRef.current || !camRef.current) return;
@@ -44,6 +55,7 @@ export function App() {
         height={config.cameraHeight / 2}
       />
       <Stats />
+      {debug && <DebugPanel />}
       {/* Temporary (T1.5): proves a parameterized query changes the scene. */}
       <div className="temp-controls">
         <button onClick={() => void runtime.current?.depthFilter(300)}>deeper than 300 km</button>

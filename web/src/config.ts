@@ -16,6 +16,36 @@ export const config = {
   /** Length of a Shift+R landmark recording (ms). */
   recordDurationMs: 3000,
 
+  /** One Euro filter on every landmark (screen px). */
+  filter: {
+    /** Cutoff at rest (Hz). Lower = steadier, laggier. */
+    minCutoff: 1.0,
+    /** Cutoff gain with speed (Hz per px/s). Higher = less lag on fast moves. */
+    beta: 0.01,
+    /** Cutoff of the speed estimate (Hz). */
+    dCutoff: 1.0,
+  },
+
+  // --- gestures ---
+  gesture: {
+    /** Pinch starts below this thumb-index distance (hand-scale units)... */
+    pinchEnter: 0.35,
+    /** ...and ends above this one (hysteresis; hand-scale units). */
+    pinchExit: 0.5,
+    /** Consecutive frames a pinch must hold before pinchStart (frames). */
+    pinchStableFrames: 2,
+    /** Consecutive frames a built-in label must hold to count (frames). */
+    labelStableFrames: 3,
+    /** Min built-in gesture score to accept a label (0..1). */
+    minGestureScore: 0.6,
+    /** Open palm hold for reset (ms). */
+    resetHoldMs: 500,
+    /** Thumb down hold for undo (ms). */
+    undoHoldMs: 400,
+    /** No hands for this long emits handsLost (ms). */
+    handsLostMs: 500,
+  },
+
   // --- scene ---
   /** Vertical field of view (degrees). */
   cameraFovDeg: 45,
