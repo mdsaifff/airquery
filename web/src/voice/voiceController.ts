@@ -8,8 +8,8 @@ export interface VoiceView {
   error(message: string): void;
 }
 
-/** Called with the utterance and when it was finished (ms, performance.now()). */
-export type Submit = (utterance: string, endedAt: number) => void;
+/** Called with the utterance, when it was finished (ms, performance.now()) and whether it was spoken. */
+export type Submit = (utterance: string, endedAt: number, spoken: boolean) => void;
 
 export class VoiceController {
   private readonly stt: SpeechToText;
@@ -38,7 +38,7 @@ export class VoiceController {
       interim: (text) => this.view.transcript(text, false),
       final: (text, releasedAt) => {
         this.view.transcript(text, true);
-        if (text.trim()) this.submit(text.trim(), releasedAt);
+        if (text.trim()) this.submit(text.trim(), releasedAt, true);
       },
       error: (message) => this.view.error(message),
     });
@@ -49,6 +49,6 @@ export class VoiceController {
     const t = text.trim();
     if (!t) return;
     this.view.transcript(t, true);
-    this.submit(t, performance.now());
+    this.submit(t, performance.now(), false);
   }
 }

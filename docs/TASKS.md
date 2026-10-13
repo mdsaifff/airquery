@@ -229,9 +229,10 @@ on the deployed site. Ask the user to record the hero take.
   - Do: run the eval with and without repair, and across 2–3 model tiers;
     save a table + chart of accuracy vs. cost vs. latency to `eval/reports/`.
   - Note: PARTIAL (box open): `eval/ablation.py` + `make ablation` turn the per-config reports into a table and an accuracy-vs-cost SVG (latency in tooltips/table), tested on fixture reports. Running the configs (`make eval ARGS="--model X --price-in .. --price-out .."`, with and without `--no-repair`, 2-3 tiers) needs the LLM provider.
-- [ ] **T4.3 Latency report**
+- [x] **T4.3 Latency report**
   - Do: script summarizing `queries.jsonl` and frontend timings: median and
     p90 per stage.
+  - Note: `eval/latency.py` (+ `make latency`): agent log (cache misses only) + frontend timings exported with M (new stages: stt, agent round trip) -> median/p90 per stage vs the ARCHITECTURE budget. Real numbers pending a measured session on the demo laptop (user).
 - [ ] **T4.4 Gesture study harness**
   - Do: guided on-screen trial mode (prompts a gesture, records outcome),
     exports a confusion matrix CSV.

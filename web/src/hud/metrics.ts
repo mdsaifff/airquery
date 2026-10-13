@@ -41,6 +41,8 @@ export type Stage =
   | 'frame' // render loop CPU per frame (ms)
   | 'inference' // MediaPipe per tracking frame (ms)
   | 'gestures' // smoothing + classifier + state machine per tracking frame (ms)
+  | 'stt' // push-to-talk released -> final transcript (ms)
+  | 'agent' // browser-side /query round trip incl. network (ms)
   | 'query' // DuckDB per query (ms)
   | 'voiceToRender'; // end of speech -> first changed frame (ms)
 
@@ -50,9 +52,18 @@ export const metrics: Record<Stage, RingBuffer> = {
   frame: new RingBuffer(CAPACITY),
   inference: new RingBuffer(CAPACITY),
   gestures: new RingBuffer(CAPACITY),
+  stt: new RingBuffer(CAPACITY),
+  agent: new RingBuffer(CAPACITY),
   query: new RingBuffer(CAPACITY),
   voiceToRender: new RingBuffer(CAPACITY),
 };
+
+/** Everything the latency report needs, as a JSON-able object. */
+export function exportMetrics(userAgent: string): Record<string, unknown> {
+  const stages: Record<string, number[]> = {};
+  for (const [stage, buf] of Object.entries(metrics)) stages[stage] = buf.values();
+  return { exportedAt: new Date().toISOString(), userAgent, stages };
+}
 
 /** Median and p90 per stage, rounded to 0.1 ms (for the HUD and exports). */
 export function summarizeMetrics(): Record<Stage, { n: number; p50: number; p90: number }> {

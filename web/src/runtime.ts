@@ -5,7 +5,7 @@ import { askAgent } from './data/agentClient.ts';
 import { QuerySession } from './data/querySession.ts';
 import { CursorView, MODE_COLORS } from './hud/cursor.ts';
 import { Hover } from './hud/hover.ts';
-import { metrics } from './hud/metrics.ts';
+import { exportMetrics, metrics } from './hud/metrics.ts';
 import { hudStore, toast } from './hud/store.ts';
 import { CameraController, orbitPosition } from './interaction/cameraController.ts';
 import { HandPipeline } from './interaction/handPipeline.ts';
@@ -53,8 +53,10 @@ export function startRuntime(els: RuntimeElements): Runtime {
     dataset: 'quakes',
     async ask(req) {
       hudStore.thinking = true;
+      const t0 = performance.now();
       try {
         const resp = await askAgent(req);
+        metrics.agent.push(performance.now() - t0);
         hudStore.timings = resp.timings_ms;
         return resp;
       } finally {
@@ -95,7 +97,10 @@ export function startRuntime(els: RuntimeElements): Runtime {
       },
       error: (message) => toast('error', message),
     },
-    (utterance, endedAt) => void session.submit(utterance, endedAt),
+    (utterance, endedAt, spoken) => {
+      if (spoken) metrics.stt.push(performance.now() - endedAt);
+      void session.submit(utterance, endedAt);
+    },
   );
 
   // --- gestures -> state machine -> camera / cursor / voice ---
@@ -195,6 +200,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
       camera.reset(performance.now());
     } else if (e.code === 'KeyZ') {
       session.undo();
+    } else if (e.code === 'KeyM') {
+      // Frontend timings for eval/latency.py.
+      downloadJson(`frontend-timings-${Date.now()}.json`, exportMetrics(navigator.userAgent));
     }
   };
   const onKeyUp = (e: KeyboardEvent) => {
