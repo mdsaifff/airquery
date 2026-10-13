@@ -25,7 +25,7 @@ lint: web/node_modules
 	cd data_prep && uv run ruff check . && uv run ruff format --check .
 
 data:
-	@echo "data: not set up yet (T1.1)"
+	cd data_prep && uv run python quakes.py
 
 eval:
 	@echo "eval: not set up yet (T4.1)"

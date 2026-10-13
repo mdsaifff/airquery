@@ -45,3 +45,12 @@ These double as material for LinkedIn posts.
   outside React.
 - **Why:** keeps the 60 fps loop free of React re-renders; HUD stays easy to
   build.
+
+## D-007 One fixed year (2024), processed Parquet committed
+- **Context:** the demo and the study tasks mention "2024 only"; the agent and
+  the static site both need the data.
+- **Decision:** `make data` defaults to 2024, M4.5+ (~6.4k events). The
+  ~0.3 MB Parquet + schema are committed; raw CSVs stay gitignored.
+- **Why:** a fresh clone runs without network; 6k points keep 60 fps easy.
+- **Consequences:** relative time ("last 30 days") is measured from the
+  latest event in the data, not from today (see `compile_sql.py`).

@@ -1,0 +1,8 @@
+time,latitude,longitude,depth,mag,magType,nst,gap,dmin,rms,net,id,updated,place,type,horizontalError,depthError,magError,magNst,status,locationSource,magSource
+2024-01-01T00:37:09.096Z,17.6625,145.4596,384.941,4.7,mb,198,36,2.429,0.5,us,us6000m0w6,2024-03-09T21:38:09.040Z,"272 km N of Saipan, Northern Mariana Islands",earthquake,10.13,5.448,0.042,168,reviewed,us,us
+2024-01-01T01:43:14.869Z,-24.412,179.8704,513.317,4.6,mb,89,31,5.199,0.71,us,us6000m0wc,2024-03-09T21:38:11.040Z,"south of the Fiji Islands",earthquake,10.66,0.841,0.044,154,reviewed,us,us
+2024-01-01T03:04:00.096Z,76.065,17.4987,10,4.5,mb,69,63,2.14,0.67,us,us6000m0wm,2024-03-09T21:38:12.040Z,"245 km S of Longyearbyen, Svalbard and Jan Mayen",earthquake,4.23,1.765,0.084,42,reviewed,us,us
+2024-01-01T07:10:09.476Z,37.4874,137.2710,10,7.5,mww,,26,1.234,0.82,us,us6000m0xl,2024-06-01T00:00:00.000Z,"2024 Noto Peninsula, Japan Earthquake",earthquake,6.3,1.8,0.03,108,reviewed,us,us
+2024-01-01T07:10:09.476Z,37.4874,137.2710,10,7.5,mww,,26,1.234,0.82,us,us6000m0xl,2024-06-01T00:00:00.000Z,"2024 Noto Peninsula, Japan Earthquake",earthquake,6.3,1.8,0.03,108,reviewed,us,us
+2024-01-02T10:00:00.000Z,-33.1,-71.9,-1.5,,mb,,,,,us,us_nomag,2024-01-03T00:00:00.000Z,"10 km W of Valparaiso, Chile",earthquake,,,,,reviewed,us,us
+2024-01-03T12:30:00.000Z,-33.1,-71.9,30.2,5.1,,,,,,us,us_noplace,2024-01-03T00:00:00.000Z,,earthquake,,,,,reviewed,us,us

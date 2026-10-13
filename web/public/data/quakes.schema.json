@@ -1,0 +1,110 @@
+{
+  "dataset": "quakes",
+  "table": "quakes",
+  "description": "Earthquakes worldwide, M4.5+, 2024, from the USGS catalog",
+  "id": "id",
+  "position": {
+    "kind": "geo",
+    "lat": "lat",
+    "lon": "lon",
+    "depth": "depth_km"
+  },
+  "columns": [
+    {
+      "name": "time",
+      "type": "timestamp",
+      "unit": "UTC",
+      "synonyms": [
+        "date",
+        "when",
+        "year"
+      ],
+      "min": "2024-01-01T00:37:09.096000",
+      "max": "2024-12-31T23:13:20.048000"
+    },
+    {
+      "name": "lat",
+      "type": "number",
+      "unit": "degrees",
+      "synonyms": [
+        "latitude"
+      ],
+      "min": -65.3009,
+      "max": 86.5295
+    },
+    {
+      "name": "lon",
+      "type": "number",
+      "unit": "degrees",
+      "synonyms": [
+        "longitude"
+      ],
+      "min": -179.9398,
+      "max": 179.9984
+    },
+    {
+      "name": "depth_km",
+      "type": "number",
+      "unit": "km",
+      "synonyms": [
+        "depth",
+        "deep",
+        "shallow"
+      ],
+      "min": 1.358,
+      "max": 653.779
+    },
+    {
+      "name": "magnitude",
+      "type": "number",
+      "unit": "magnitude",
+      "synonyms": [
+        "mag",
+        "strength",
+        "strong",
+        "big",
+        "size"
+      ],
+      "min": 4.5,
+      "max": 7.5
+    },
+    {
+      "name": "mag_type",
+      "type": "text",
+      "synonyms": [
+        "magnitude type"
+      ],
+      "examples": [
+        "mb",
+        "mww",
+        "mwr",
+        "ml",
+        "mw",
+        "mwb",
+        "md"
+      ]
+    },
+    {
+      "name": "place",
+      "type": "text",
+      "synonyms": [
+        "region",
+        "location",
+        "near",
+        "country"
+      ],
+      "examples": [
+        "Indonesia",
+        "Philippines",
+        "Japan",
+        "Tonga",
+        "Papua New Guinea",
+        "Vanuatu",
+        "Taiwan",
+        "South Sandwich Islands region"
+      ]
+    }
+  ],
+  "default_color_by": "depth_km",
+  "row_count": 6397
+}

@@ -40,7 +40,7 @@ Current phase: **1**
 
 ## Phase 1 — Foundations (prove the three risky pieces separately)
 
-- [ ] **T1.1 Earthquake data pipeline**
+- [x] **T1.1 Earthquake data pipeline**
   - Do: `data_prep/quakes.py` downloads one year from the USGS FDSN API as
     CSV, month by month (20,000-event cap per query), into
     `data_prep/raw/` (gitignored); cleans to the `quakes` columns in
@@ -50,6 +50,7 @@ Current phase: **1**
   - Done when: tests pass on a small saved CSV fixture (no network);
     running `make data` produces both files; row count and min/max printed.
   - Needs you: run `make data` once with network access.
+  - Note: ran it here (2024, M4.5+: 6,397 rows, 265 KB). The small Parquet is committed so a fresh clone works. Schema adds `id` and `row_count` keys.
 - [ ] **T1.2 Hand tracking on screen**
   - Do: `src/tracking/handTracker.ts` wraps MediaPipe Gesture Recognizer
     (`LIVE_STREAM`, `numHands: 2`); webcam in a small corner canvas,
