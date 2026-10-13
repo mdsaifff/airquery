@@ -5,7 +5,7 @@ import { maskFromResult } from './data/resultMask.ts';
 import { CursorView, MODE_COLORS } from './hud/cursor.ts';
 import { Hover } from './hud/hover.ts';
 import { metrics } from './hud/metrics.ts';
-import { hudStore } from './hud/store.ts';
+import { hudStore, toast } from './hud/store.ts';
 import { CameraController, orbitPosition } from './interaction/cameraController.ts';
 import { HandPipeline } from './interaction/handPipeline.ts';
 import { attachMouse } from './interaction/mouseInput.ts';
@@ -14,6 +14,8 @@ import type { LoadedGlobe } from './scene/loadGlobe.ts';
 import { SceneManager } from './scene/sceneManager.ts';
 import { downloadJson, LandmarkRecorder } from './tracking/recorder.ts';
 import { startTracking } from './tracking/trackingLoop.ts';
+import { VoiceController } from './voice/voiceController.ts';
+import { WebSpeechToText } from './voice/webSpeech.ts';
 
 export interface RuntimeElements {
   sceneEl: HTMLElement;
@@ -24,6 +26,8 @@ export interface Runtime {
   dispose(): void;
   /** Temporary (T1.5): show only quakes deeper than km, via a DuckDB prepared statement. */
   depthFilter(km: number | null): Promise<void>;
+  /** Typed-input fallback for every voice feature. */
+  typed(text: string): void;
 }
 
 export function startRuntime(els: RuntimeElements): Runtime {
@@ -40,6 +44,22 @@ export function startRuntime(els: RuntimeElements): Runtime {
   });
   cleanups.push(attachMouse(sm.renderer.domElement, camera));
 
+  // --- voice: push-to-talk -> transcript -> utterance ---
+  const voice = new VoiceController(
+    new WebSpeechToText(),
+    {
+      transcript(text, final) {
+        hudStore.transcript = text;
+        hudStore.transcriptFinal = final;
+      },
+      listening(active) {
+        hudStore.listening = active;
+      },
+      error: (message) => toast('error', message),
+    },
+    (utterance) => toast('info', `heard: ${utterance}`), // T3.8 sends this to the agent
+  );
+
   // --- gestures -> state machine -> camera / cursor / voice ---
   const cursor = new CursorView(els.sceneEl);
   cleanups.push(() => cursor.dispose());
@@ -47,12 +67,14 @@ export function startRuntime(els: RuntimeElements): Runtime {
     camera,
     rotateGain: config.handRotateGain,
     cursor: (visible, x, y) => cursor.set(visible, x, y),
-    listening: (active) => {
-      hudStore.listening = active;
-    },
+    listening: (active) => voice.setListening(active),
     undo: () => {},
   });
   const hover = new Hover(els.sceneEl, sm.renderer.domElement);
+  if (import.meta.env.DEV) {
+    // Dev-only handle for headless checks and console poking.
+    Object.assign(window, { __airquery: { hud: hudStore, hands, camera, voice } });
+  }
   cleanups.push(() => hover.dispose());
 
   let data: LoadedGlobe | null = null;
@@ -142,6 +164,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       disposed = true;
       cleanups.reverse().forEach((fn) => fn());
     },
+    typed: (text) => voice.typed(text),
     async depthFilter(km) {
       if (!data) return;
       const { globe, db, idIndex } = data;

@@ -186,12 +186,13 @@ Tune `config.ts` and repeat until met.
     JSONL logging.
   - Done when: endpoint tests with `MockLLM`; log line matches the schema.
   - Note: `create_app()` factory for DI; LRU cache (256) keyed by dataset + normalized utterance + current_spec, rejections not cached; sliding-window per-IP limit (429 with a QueryResponse body); one JSONL line per call incl. 422/429, plus model + token usage.
-- [ ] **T3.7 Speech to text and push-to-talk**
+- [x] **T3.7 Speech to text and push-to-talk**
   - Do: `SpeechToText` interface; Web Speech implementation with interim
     results; typed-input box fallback; push-to-talk via `talk` events and
     spacebar.
   - Done when: interface has a fake implementation used in tests.
   - Needs you: test in Chrome; say 5 commands and note any mis-transcriptions.
+  - Note: verified headless: typed input submits; spacebar drives idle->listening->idle through the state machine. `FakeSpeechToText` drives the `VoiceController` tests. Dev-only `window.__airquery` handle for headless checks. Chrome mic test pending (user).
 - [ ] **T3.8 Wire voice to scene**
   - Do: send utterance + current spec, validate response with zod, run SQL in
     DuckDB, animate points out/in, update legend; history stack for undo and

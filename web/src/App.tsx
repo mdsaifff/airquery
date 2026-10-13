@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { config } from './config.ts';
 import { DebugPanel } from './hud/DebugPanel.tsx';
+import { Toasts, TranscriptBar } from './hud/TranscriptBar.tsx';
 import { metrics } from './hud/metrics.ts';
 import { hudStore, useTick } from './hud/store.ts';
 import { startRuntime } from './runtime.ts';
@@ -62,6 +63,8 @@ export function App() {
       />
       <Stats />
       {debug && <DebugPanel />}
+      <TranscriptBar onSubmit={(text) => runtime.current?.typed(text)} />
+      <Toasts />
       {/* Temporary (T1.5): proves a parameterized query changes the scene. */}
       <div className="temp-controls">
         <button onClick={() => void runtime.current?.depthFilter(300)}>deeper than 300 km</button>
