@@ -1,38 +1,27 @@
+:root {
+  --bg: #05070d;
+  --fg: #e6edf7;
+  --muted: #94a3b8;
+  --panel: rgb(10 16 28 / 82%);
+  --line: rgb(255 255 255 / 12%);
+  --accent: #7dd3fc;
+  --warn: #fbbf24;
+  --bad: #f87171;
+  --good: #4ade80;
+  --gutter: 16px;
+  --cam-w: 320px;
+  --mono: ui-monospace, 'Cascadia Mono', 'SF Mono', monospace;
+}
+
 html,
 body,
 #root {
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background: #05070d;
-  color: #e6edf7;
+  background: var(--bg);
+  color: var(--fg);
   font-family: system-ui, sans-serif;
-}
-
-/* Webcam + skeleton, mirrored so it reads like a mirror. */
-.cam {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  transform: scaleX(-1);
-  border-radius: 8px;
-  border: 1px solid rgb(255 255 255 / 15%);
-  background: #000;
-}
-
-.stats {
-  position: fixed;
-  top: 12px;
-  right: 16px;
-  font:
-    12px ui-monospace,
-    monospace;
-  text-align: right;
-  opacity: 0.85;
-}
-
-.warn {
-  color: #fbbf24;
 }
 
 .scene {
@@ -45,33 +34,227 @@ body,
   touch-action: none;
 }
 
-.debug-panel {
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+}
+
+.label {
+  font: 600 10px var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.warn {
+  color: var(--warn);
+}
+
+/* --- top-left: glass box --- */
+.glass {
   position: fixed;
-  top: 12px;
-  left: 16px;
+  top: var(--gutter);
+  left: var(--gutter);
+  width: min(380px, calc(100vw - 2 * var(--gutter)));
+  padding: 12px 14px;
+  z-index: 3;
+}
+
+.glass h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.glass .sub {
+  margin-left: 6px;
+  font: 500 11px var(--mono);
+  color: var(--muted);
+}
+
+.glass .thinking {
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.glass pre {
+  margin: 4px 0 10px;
+  font: 12.5px/1.45 var(--mono);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.glass .sql {
+  color: #c4b5fd;
+}
+
+.glass .params {
+  margin-top: -6px;
+  color: var(--warn);
+}
+
+.timings {
+  font: 11px var(--mono);
+  color: var(--muted);
+}
+
+/* --- top-right: stats --- */
+.stats {
+  position: fixed;
+  top: var(--gutter);
+  right: var(--gutter);
+  font: 12px/1.6 var(--mono);
+  text-align: right;
+  color: var(--muted);
+  z-index: 3;
+}
+
+.stats b {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+/* --- bottom-right: webcam + skeleton, mirrored --- */
+.cam {
+  position: fixed;
+  right: var(--gutter);
+  bottom: var(--gutter);
+  width: var(--cam-w);
+  transform: scaleX(-1);
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #000;
+  z-index: 3;
+}
+
+/* --- bottom-left: legend + transcript, clear of the webcam --- */
+.bottom-left {
+  position: fixed;
+  left: var(--gutter);
+  right: calc(var(--cam-w) + 2 * var(--gutter));
+  bottom: var(--gutter);
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 10px 12px;
-  font:
-    12px ui-monospace,
-    monospace;
-  background: rgb(10 16 28 / 85%);
-  border: 1px solid rgb(255 255 255 / 12%);
+  align-items: flex-start;
+  gap: 10px;
+  z-index: 4;
+}
+
+.legend {
+  width: 240px;
+  padding: 8px 12px 6px;
+}
+
+.legend .ramp {
+  height: 10px;
+  margin: 6px 0 4px;
+  border-radius: 3px;
+}
+
+.legend .ends {
+  display: flex;
+  justify-content: space-between;
+  font: 11px var(--mono);
+}
+
+.transcript {
+  box-sizing: border-box;
+  width: min(760px, 100%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-size: 17px;
+}
+
+.transcript .said {
+  flex: 1;
+  min-width: 0;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.transcript .said.final {
+  color: var(--fg);
+}
+
+.transcript form {
+  flex: none;
+}
+
+.transcript input {
+  width: 210px;
+  padding: 6px 10px;
+  color: inherit;
+  background: rgb(255 255 255 / 6%);
+  border: 1px solid var(--line);
   border-radius: 8px;
+  font: inherit;
+  font-size: 14px;
 }
 
-.debug-panel label {
+.mic {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #475569;
+  flex: none;
+}
+
+.is-listening .mic {
+  background: var(--good);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    transform: scale(1.35);
+  }
+}
+
+/* --- top-centre: toasts --- */
+.toasts {
+  position: fixed;
+  top: var(--gutter);
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  z-index: 7;
 }
 
+.toast {
+  max-width: min(520px, calc(100vw - 2 * var(--gutter)));
+  padding: 9px 14px;
+  border-radius: 10px;
+  background: rgb(10 16 28 / 94%);
+  border: 1px solid var(--line);
+  font-size: 15px;
+}
+
+.toast-clarify {
+  border-color: var(--warn);
+}
+
+.toast-error {
+  border-color: var(--bad);
+}
+
+/* --- cursor, tooltip --- */
 .cursor {
   position: fixed;
   left: 0;
   top: 0;
   pointer-events: none;
-  color: #7dd3fc;
+  color: var(--accent);
   z-index: 5;
 }
 
@@ -96,9 +279,7 @@ body,
   top: 40px;
   left: 50%;
   transform: translateX(-50%);
-  font:
-    600 11px ui-monospace,
-    monospace;
+  font: 600 11px var(--mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -112,98 +293,45 @@ body,
   pointer-events: none;
   white-space: pre;
   padding: 6px 9px;
-  font:
-    12px ui-monospace,
-    monospace;
-  background: rgb(10 16 28 / 90%);
-  border: 1px solid rgb(255 255 255 / 15%);
+  font: 12px/1.45 var(--mono);
+  background: rgb(10 16 28 / 92%);
+  border: 1px solid var(--line);
   border-radius: 6px;
 }
 
-.transcript {
+/* --- dev debug panel (D) --- */
+.debug-panel {
   position: fixed;
-  left: 50%;
-  bottom: 20px;
-  transform: translateX(-50%);
-  width: min(720px, calc(100vw - 32px));
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: rgb(10 16 28 / 80%);
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-radius: 12px;
-  font-size: 15px;
-  z-index: 4;
-}
-
-.transcript .said {
-  flex: 1;
-  opacity: 0.6;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.transcript .said.final {
-  opacity: 1;
-}
-
-.transcript input {
-  width: 220px;
-  padding: 6px 10px;
-  color: inherit;
-  background: rgb(255 255 255 / 6%);
-  border: 1px solid rgb(255 255 255 / 15%);
-  border-radius: 8px;
-  font: inherit;
-  font-size: 14px;
-}
-
-.mic {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #475569;
-  flex: none;
-}
-
-.is-listening .mic {
-  background: #4ade80;
-  animation: pulse 1s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  50% {
-    box-shadow: 0 0 0 8px rgb(74 222 128 / 0%);
-    transform: scale(1.25);
-  }
-}
-
-.toasts {
-  position: fixed;
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 120px;
+  right: var(--gutter);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  z-index: 7;
+  gap: 6px;
+  padding: 10px 12px;
+  font: 12px var(--mono);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  z-index: 8;
 }
 
-.toast {
-  max-width: min(560px, calc(100vw - 32px));
-  padding: 9px 14px;
-  border-radius: 10px;
-  background: rgb(10 16 28 / 92%);
-  border: 1px solid rgb(255 255 255 / 15%);
-  font-size: 14px;
+.debug-panel label {
+  display: flex;
+  flex-direction: column;
 }
 
-.toast-clarify {
-  border-color: #facc15;
-}
+/* Narrow screens: stack the bottom row above the webcam. */
+@media (max-width: 760px) {
+  :root {
+    --cam-w: 160px;
+  }
 
-.toast-error {
-  border-color: #f87171;
+  .bottom-left {
+    right: var(--gutter);
+    bottom: calc(var(--gutter) + 130px);
+  }
+
+  .glass {
+    display: none;
+  }
 }

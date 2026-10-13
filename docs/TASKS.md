@@ -200,10 +200,11 @@ Tune `config.ts` and repeat until met.
   - Done when: an end-to-end test with a mocked agent response updates the
     point buffer.
   - Note: `QuerySession` (history stack) + `applyView`; zod schemas carry compile-time equality checks against the generated types. E2E test drives mocked agent JSON through zod, session, fake DuckDB and a real GlobeScene buffer. Also verified in headless Chrome against `agent/scripts/fake_agent.py` (keyword MockLLM, dev only): filter -> refine colour -> Z undo -> clarify toast. Added `default_size_by` to DatasetSchema. Open palm/R reset the camera; spoken 'reset' clears queries too.
-- [ ] **T3.9 HUD**
+- [x] **T3.9 HUD**
   - Do: glass box (spec as compact JSON + SQL), transcript strip, latency
     counter (voice-to-render), mic indicator, toasts. Clean layout for video.
   - Needs you: check readability at 1080p screen recording.
+  - Note: 1080p layout checked in a headless 1920x1080 screenshot: glass box (spec with filters as expressions, SQL, params, per-stage timings) top-left, stats with voice->render latency (last + median) top-right, legend + transcript bottom-left clear of the webcam, toasts top-centre. Readability check of a real recording pending (user).
 - [ ] **T3.10 Deploy**
   - Do: Dockerfile for the agent; static build for web; env-based agent URL;
     deployment notes in README. Suggest hosts; the user picks.
