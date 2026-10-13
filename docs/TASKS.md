@@ -92,7 +92,7 @@ changes the scene. Ask the user to record a 10-second clip for the teaser.
 
 ## Phase 2 — Hands
 
-- [ ] **T2.1 Hand geometry**
+- [x] **T2.1 Hand geometry**
   - Do: pure functions in `src/tracking/geometry.ts`: mirror conversion,
     hand scale, normalized fingertip distances, pinch point.
   - Done when: unit tests cover mirroring and scale invariance.

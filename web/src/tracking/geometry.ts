@@ -44,3 +44,42 @@ export function toScreen(frame: RawFrame, width: number, height: number): HandsF
     })),
   };
 }
+
+// Landmark indices (MediaPipe hand model).
+export const WRIST = 0;
+export const THUMB_TIP = 4;
+export const INDEX_TIP = 8;
+export const MIDDLE_MCP = 9;
+export const FINGERTIPS = [4, 8, 12, 16, 20] as const;
+
+export function dist(a: Vec2, b: Vec2): number {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+/** Hand scale: wrist to middle-finger MCP (px). Everything else is divided by it. */
+export function handScale(points: readonly Vec2[]): number {
+  return dist(points[WRIST], points[MIDDLE_MCP]);
+}
+
+/** Distance between two landmarks in hand-scale units (camera-distance invariant). */
+export function normalizedDistance(points: readonly Vec2[], a: number, b: number): number {
+  const s = handScale(points);
+  return s > 0 ? dist(points[a], points[b]) / s : Infinity;
+}
+
+/** Thumb tip to index tip, in hand-scale units. Small = pinching. */
+export function pinchDistance(points: readonly Vec2[]): number {
+  return normalizedDistance(points, THUMB_TIP, INDEX_TIP);
+}
+
+/** Midpoint of thumb tip and index tip (px): where a pinch "grabs". */
+export function pinchPoint(points: readonly Vec2[]): Vec2 {
+  const a = points[THUMB_TIP];
+  const b = points[INDEX_TIP];
+  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+}
+
+/** Each fingertip's distance from the wrist, in hand-scale units (thumb..pinky). */
+export function fingertipSpread(points: readonly Vec2[]): number[] {
+  return FINGERTIPS.map((tip) => normalizedDistance(points, WRIST, tip));
+}
