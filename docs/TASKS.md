@@ -172,6 +172,7 @@ Tune `config.ts` and repeat until met.
   - Done when: unit tests pass with `MockLLM`; a manual script hits the real
     provider with 5 utterances and prints specs.
   - Needs you: put the API key in `agent/.env`.
+  - Note: PARTIAL (box left open): `LLMAdapter` protocol, `MockLLM`, prompt builder (`prompt_builder.py`), `prompts/system.md` + 12 worked examples (validated against the real schema in tests), `scripts/try_llm.py`. Waiting on the user's provider/model choice; then add one adapter in `llm.make_llm` using that provider's official SDK.
 - [ ] **T3.5 LangGraph agent**
   - Do: `graph.py`: parse → validate → (repair, max 2 retries | clarify) →
     merge → compile. Clarify when the LLM signals ambiguity or repairs run out
