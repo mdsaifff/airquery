@@ -1,4 +1,4 @@
-.PHONY: dev dev-web dev-agent test lint data eval
+.PHONY: dev dev-web dev-agent test lint data eval contracts
 
 # Fresh clone: install web deps on first use. uv syncs Python deps by itself.
 # npm rewrites node_modules/.package-lock.json on every install, so this only
@@ -31,3 +31,8 @@ data:
 
 eval:
 	@echo "eval: not set up yet (T4.1)"
+
+# After changing agent/spec.py: JSON Schema first, then the TS types.
+contracts: $(WEB_DEPS)
+	cd agent && uv run python scripts/export_schema.py
+	cd web && node scripts/gen-contracts.ts

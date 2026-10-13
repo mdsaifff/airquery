@@ -144,11 +144,12 @@ Tune `config.ts` and repeat until met.
 
 ## Phase 3 — Voice and agent
 
-- [ ] **T3.1 QuerySpec contract**
+- [x] **T3.1 QuerySpec contract**
   - Do: `agent/spec.py` exactly as in ARCHITECTURE.md; script exports JSON
     Schema; `json-schema-to-typescript` generates `web/src/contracts/`;
     contract test fails if generated types are stale.
   - Done when: `make test` includes the drift check.
+  - Note: one schema file `web/src/contracts/contracts.schema.json` holds QuerySpec, QueryRequest/Response and DatasetSchema; `make contracts` regenerates. Drift checked on both sides (pytest: spec.py vs JSON; vitest: JSON vs TS).
 - [ ] **T3.2 Schema registry, validator and merge**
   - Do: `schema_registry.py` loads `*.schema.json`; validator enforces the
     rules in ARCHITECTURE.md; `merge.py` implements refine rules.

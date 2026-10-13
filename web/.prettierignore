@@ -3,3 +3,4 @@ public/data
 src/contracts/*.ts
 package-lock.json
 tests/fixtures
+src/contracts/*.json
