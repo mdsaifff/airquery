@@ -3,3 +3,4 @@ extend = "../agent/pyproject.toml"
 [lint.per-file-ignores]
 # SVG markup reads better on one line.
 "ablation.py" = ["E501"]
+"gesture_report.py" = ["E501"]

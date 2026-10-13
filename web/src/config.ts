@@ -86,6 +86,8 @@ export const config = {
   flyToDistance: 2.2,
   /** Extra gain on hand pinch-drag rotation vs. mouse drag (×). */
   handRotateGain: 1.0,
+  /** Gesture study (G): trial timeout, cursor-only time that counts as "point", rest between trials (ms). */
+  study: { timeoutMs: 5000, pointHoldMs: 1000, restMs: 1200 },
   /** Wheel zoom: scale = exp(-deltaY * this) (1/px). */
   wheelZoomPerPx: 0.0015,
 };

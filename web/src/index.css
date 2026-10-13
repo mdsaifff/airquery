@@ -335,3 +335,52 @@ body,
     display: none;
   }
 }
+
+/* --- gesture study (G) --- */
+.study {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(520px, calc(100vw - 2 * var(--gutter)));
+  padding: 16px 18px;
+  z-index: 9;
+}
+
+.study h2 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.study .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.study input {
+  width: 90px;
+  padding: 5px 8px;
+  color: inherit;
+  background: rgb(255 255 255 / 6%);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.study .prompt {
+  margin: 8px 0;
+  font-size: 28px;
+  font-weight: 650;
+  text-align: center;
+}
+
+.study table {
+  margin-bottom: 10px;
+  font: 13px var(--mono);
+}
+
+.study td {
+  padding: 1px 12px 1px 0;
+}

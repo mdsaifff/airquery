@@ -233,10 +233,11 @@ on the deployed site. Ask the user to record the hero take.
   - Do: script summarizing `queries.jsonl` and frontend timings: median and
     p90 per stage.
   - Note: `eval/latency.py` (+ `make latency`): agent log (cache misses only) + frontend timings exported with M (new stages: stt, agent round trip) -> median/p90 per stage vs the ARCHITECTURE budget. Real numbers pending a measured session on the demo laptop (user).
-- [ ] **T4.4 Gesture study harness**
+- [x] **T4.4 Gesture study harness**
   - Do: guided on-screen trial mode (prompts a gesture, records outcome),
     exports a confusion matrix CSV.
   - Needs you: run it with yourself and 4 other people.
+  - Note: G opens the study panel: seeded shuffled trials (N per gesture), first discrete event wins, cursor-only = point, timeout = none; exports confusion + raw trial CSVs; includes the talking false-trigger counter (per 5 min). `make gestures ARGS="confusion-*.csv"` merges participants into CSV + SVG heatmap. Verified headless (prompt shown, timeout recorded). Sessions with 5 people pending (user).
 - [ ] **T4.5 Mouse baseline mode**
   - Do: a toggle that swaps gestures/voice for mouse orbit + dropdown filters;
     task timer for the 5 study tasks in `docs/EVAL.md`.

@@ -16,6 +16,8 @@ export class HandPipeline {
   state: InteractionState = initialState;
   /** Latest hold timer, for the HUD ring (null when no hold is timing). */
   hold: { gesture: HoldGesture; progress: number } | null = null;
+  /** Taps on every gesture event (gesture study, false-trigger counter). */
+  readonly listeners: ((e: GestureEvent) => void)[] = [];
   private readonly smoother = new HandSmoother(config.filter);
   private readonly classifier = new GestureClassifier(config.gesture);
   private readonly targets: EffectTargets;
@@ -32,6 +34,7 @@ export class HandPipeline {
   }
 
   dispatch(e: GestureEvent): void {
+    for (const listen of this.listeners) listen(e);
     if (e.kind === 'holdProgress') {
       this.hold = e.progress > 0 && e.progress < 1 ? { gesture: e.gesture, progress: e.progress } : null; // prettier-ignore
     }

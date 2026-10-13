@@ -9,6 +9,7 @@ import { exportMetrics, metrics } from './hud/metrics.ts';
 import { hudStore, toast } from './hud/store.ts';
 import { CameraController, orbitPosition } from './interaction/cameraController.ts';
 import { HandPipeline } from './interaction/handPipeline.ts';
+import type { StudyHost } from './interaction/study.ts';
 import { attachMouse } from './interaction/mouseInput.ts';
 import { applyView } from './scene/applyView.ts';
 import { loadGlobe } from './scene/loadGlobe.ts';
@@ -22,6 +23,8 @@ import { WebSpeechToText } from './voice/webSpeech.ts';
 export interface RuntimeElements {
   sceneEl: HTMLElement;
   camCanvas: HTMLCanvasElement;
+  /** Owned by the HUD's study panel; the runtime feeds it events and time. */
+  study: StudyHost;
 }
 
 export interface Runtime {
@@ -113,6 +116,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
     listening: (active) => voice.setListening(active),
     undo: () => session.undo(),
   });
+  const studyHost = els.study;
+  hands.listeners.push((e) => studyHost.onEvent(e, performance.now()));
   const hover = new Hover(els.sceneEl, sm.renderer.domElement);
   cleanups.push(() => hover.dispose());
   if (import.meta.env.DEV) {
@@ -127,6 +132,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       metrics.voiceToRender.push(hudStore.latencyMs);
       latencyFrom = null;
     }
+    studyHost.tick(now);
     const mode = hands.state.mode;
     cursor.style(mode, hands.hold?.progress ?? 0);
     hudStore.mode = mode;

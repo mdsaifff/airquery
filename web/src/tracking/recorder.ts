@@ -35,7 +35,12 @@ export class LandmarkRecorder {
 
 /** Browser-only: save JSON as a file download. */
 export function downloadJson(filename: string, data: unknown): void {
-  const url = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }));
+  downloadText(filename, JSON.stringify(data), 'application/json');
+}
+
+/** Browser-only: save text (CSV, JSON...) as a file download. */
+export function downloadText(filename: string, text: string, type = 'text/csv'): void {
+  const url = URL.createObjectURL(new Blob([text], { type }));
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
