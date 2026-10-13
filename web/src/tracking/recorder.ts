@@ -40,7 +40,12 @@ export function downloadJson(filename: string, data: unknown): void {
 
 /** Browser-only: save text (CSV, JSON...) as a file download. */
 export function downloadText(filename: string, text: string, type = 'text/csv'): void {
-  const url = URL.createObjectURL(new Blob([text], { type }));
+  downloadBlob(filename, new Blob([text], { type }));
+}
+
+/** Browser-only: save any blob as a file download. */
+export function downloadBlob(filename: string, blob: Blob): void {
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;

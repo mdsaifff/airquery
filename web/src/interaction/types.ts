@@ -1,7 +1,8 @@
 // Gesture event contract (docs/ARCHITECTURE.md).
 
 export type Hand = 'left' | 'right';
-export type HoldGesture = 'reset' | 'undo';
+/** explain: the custom gesture trained with MediaPipe Model Maker (stretch, T5.5). */
+export type HoldGesture = 'reset' | 'undo' | 'explain';
 
 export type GestureEvent =
   | { kind: 'cursor'; x: number; y: number } // screen px

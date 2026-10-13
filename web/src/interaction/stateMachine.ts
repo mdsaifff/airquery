@@ -34,6 +34,7 @@ export type Effect =
   | { kind: 'resetView' }
   | { kind: 'undo' }
   | { kind: 'switchScene'; direction: 'left' | 'right' }
+  | { kind: 'explain' }
   | { kind: 'lassoStart' }
   | { kind: 'lassoPoint'; x: number; y: number }
   | { kind: 'lassoEnd' }
@@ -132,7 +133,8 @@ export function reduce(s: InteractionState, e: GestureEvent): Result {
   }
 
   if (e.kind === 'fire' && s.mode === 'pointing') {
-    return [s, [{ kind: e.gesture === 'reset' ? 'resetView' : 'undo' }]];
+    const kind = e.gesture === 'reset' ? 'resetView' : e.gesture === 'undo' ? 'undo' : 'explain';
+    return [s, [{ kind }]];
   }
 
   return [s, []]; // holdProgress and anything not in the table

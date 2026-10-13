@@ -30,7 +30,7 @@ export function outcomeOf(e: GestureEvent): Outcome | null {
     case 'clutch':
       return e.active ? 'clutch' : null;
     case 'fire':
-      return e.gesture;
+      return e.gesture === 'explain' ? null : e.gesture;
     default:
       return null;
   }

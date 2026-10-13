@@ -86,9 +86,15 @@ by magnitude", "the ten strongest", "near Japan", "undo", ...).
 | Undo | hold thumb down 👎 | **Z** |
 | Reset view | hold open palm ✋ (0.5 s) | **R** |
 | Freeze the scene while repositioning | closed fist ✊ | – |
+| Switch scene (globe ↔ paper galaxy ↔ your CSV) | swipe an open hand sideways | **←** / **→** |
+| Lasso-select points | hold 🤟 and trace a loop | **Shift**+drag, **Esc** clears |
+| What's this? (spoken summary) | say it, or hold the custom gesture | type it |
 
 Study tools: **G** gesture study + false-trigger counter, **B** mouse baseline
-(dropdown filters), **T** task timer, **M** download frontend timings.
+(dropdown filters), **T** task timer, **M** download frontend timings,
+**C** record frames for a custom gesture (`notebooks/custom_gesture.ipynb`).
+Drop any CSV with latitude/longitude columns onto the page to explore it.
+`make galaxy` builds the arXiv paper galaxy (needs a few GB of RAM).
 Dev only: **D** tuning panel, **Shift+R** record a landmark fixture.
 
 ## Deploy

@@ -37,12 +37,20 @@ export class HandTracker {
     this.recognizer = recognizer;
   }
 
+  /** Which model is loaded: the custom Model Maker one (T5.5) or the stock CDN one. */
+  static model = 'stock';
+
   static async create(): Promise<HandTracker> {
     const fileset = await FilesetResolver.forVisionTasks(
       `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${config.mediapipeVersion}/wasm`,
     );
+    const custom = new URL(config.customModelPath, document.baseURI).href;
+    const head = await fetch(custom, { method: 'HEAD' }).catch(() => null);
+    const isCustom = !!head?.ok && !(head.headers.get('content-type') ?? '').includes('html');
+    const modelAssetPath = isCustom ? custom : MODEL_URL;
+    HandTracker.model = isCustom ? 'custom' : 'stock';
     const options = (delegate: 'GPU' | 'CPU') => ({
-      baseOptions: { modelAssetPath: MODEL_URL, delegate },
+      baseOptions: { modelAssetPath, delegate },
       runningMode: 'VIDEO' as const,
       numHands: config.numHands,
       minHandDetectionConfidence: config.minHandConfidence,

@@ -8,6 +8,8 @@ import { drawSkeleton } from './skeletonView.ts';
 
 export interface TrackingHooks {
   onFrame(frame: RawFrame, fps: number): void;
+  /** The live (unmirrored) webcam video, e.g. for capturing training frames. */
+  onVideo?(video: HTMLVideoElement): void;
   skeletonColor(): string;
   onError(message: string): void;
 }
@@ -34,6 +36,7 @@ export function startTracking(canvas: HTMLCanvasElement, hooks: TrackingHooks): 
     }
     const ctx = canvas.getContext('2d');
     const cam = video;
+    hooks.onVideo?.(cam);
     const t = tracker;
     t.start(cam, (frame) => {
       metrics.inference.push(t.inferenceMs);

@@ -22,6 +22,7 @@ import type { CsvImport } from './scene/loadCsv.ts';
 import type { CsvMapping } from './data/csvSchema.ts';
 import { SceneManager } from './scene/sceneManager.ts';
 import { downloadJson, LandmarkRecorder } from './tracking/recorder.ts';
+import { captureFrames } from './tracking/captureFrames.ts';
 import { startTracking } from './tracking/trackingLoop.ts';
 import { VoiceController } from './voice/voiceController.ts';
 import { WebSpeechToText } from './voice/webSpeech.ts';
@@ -52,6 +53,8 @@ export interface Runtime {
   /** Bring your own CSV: load and guess the mapping, then build it once confirmed. */
   importCsv(file: File): Promise<CsvImport>;
   finishCsv(imp: CsvImport, mapping: CsvMapping): Promise<void>;
+  /** Custom gesture training data: capture labelled webcam frames to <label>.tar. */
+  captureGesture(label: string, onProgress: (done: number) => void): Promise<void>;
 }
 
 export function startRuntime(els: RuntimeElements): Runtime {
@@ -171,6 +174,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
     undo: () => datasets.session().undo(),
     switchScene,
     lasso: (step, x, y) => lasso.step(step, x, y),
+    explain: () => datasets.session().explainNow(),
   });
   const studyHost = els.study;
   hands.listeners.push((e) => studyHost.onEvent(e, performance.now()));
@@ -180,7 +184,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
   cleanups.push(lasso.attachMouse(sm.renderer.domElement), () => lasso.dispose());
   if (import.meta.env.DEV) {
     // Dev-only handle for headless checks and console poking.
-    const handle = { hud: hudStore, hands, camera, voice, datasets, switchScene };
+    const handle = { hud: hudStore, hands, camera, voice, datasets, switchScene, config };
     Object.assign(window, { __airquery: { ...handle, get session() { return datasets.session(); } } }); // prettier-ignore
   }
 
@@ -213,8 +217,12 @@ export function startRuntime(els: RuntimeElements): Runtime {
 
   // --- hand tracking (its own loop) ---
   const recorder = new LandmarkRecorder();
+  let video: HTMLVideoElement | null = null;
   cleanups.push(
     startTracking(els.camCanvas, {
+      onVideo(v) {
+        video = v;
+      },
       onFrame(frame, fps) {
         if (!hudStore.baseline) hands.onFrame(frame, window.innerWidth, window.innerHeight);
         hudStore.trackingFps = fps;
@@ -274,6 +282,10 @@ export function startRuntime(els: RuntimeElements): Runtime {
     },
     applySpec: (spec) => void datasets.session().applySpec(spec),
     importCsv: async (file) => importCsv(await db, file),
+    async captureGesture(label, onProgress) {
+      if (!video) throw new Error('camera is not running');
+      await captureFrames(video, label, config.captureFrames, config.captureIntervalMs, onProgress);
+    },
     async finishCsv(imp, mapping) {
       datasets.addCustom(imp.name, buildCsvDataset(sm.scene, imp, mapping));
       await showDataset(imp.name, false);

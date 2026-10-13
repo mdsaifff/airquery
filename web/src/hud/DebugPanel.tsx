@@ -4,7 +4,7 @@ import { config } from '../config.ts';
 
 interface Slider {
   label: string;
-  obj: Record<string, number>;
+  obj: Record<string, unknown>;
   key: string;
   min: number;
   max: number;
@@ -30,14 +30,14 @@ export function DebugPanel() {
       {SLIDERS.map((s) => (
         <label key={s.label}>
           <span>
-            {s.label}: {s.obj[s.key]}
+            {s.label}: {String(s.obj[s.key])}
           </span>
           <input
             type="range"
             min={s.min}
             max={s.max}
             step={s.step}
-            value={s.obj[s.key]}
+            value={Number(s.obj[s.key])}
             onChange={(e) => {
               s.obj[s.key] = Number(e.target.value);
               setVersion((v) => v + 1);

@@ -32,6 +32,7 @@ function rig() {
     undo: () => log.push('undo'),
     switchScene: (d: 'left' | 'right') => log.push(`scene:${d}`),
     lasso: (step: string) => log.push(`lasso:${step}`),
+    explain: () => log.push('explain'),
   };
   const send = (e: GestureEvent, now: number) => {
     const [next, fx] = reduce(state, e);

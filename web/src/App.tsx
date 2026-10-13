@@ -3,6 +3,7 @@ import type { CsvMapping } from './data/csvSchema.ts';
 import type { CsvImport } from './scene/loadCsv.ts';
 import { config } from './config.ts';
 import { BaselinePanel, TaskPanel } from './hud/BaselinePanels.tsx';
+import { CapturePanel } from './hud/CapturePanel.tsx';
 import { CsvDrop } from './hud/CsvPanel.tsx';
 import { DebugPanel } from './hud/DebugPanel.tsx';
 import { GlassBox, Legend, Stats } from './hud/Hud.tsx';
@@ -19,12 +20,18 @@ export function App() {
   const [debug, setDebug] = useState(false);
   const [studyOpen, setStudyOpen] = useState(false);
   const [tasksOpen, setTasksOpen] = useState(false);
+  const [captureOpen, setCaptureOpen] = useState(false);
   const [baseline, setBaseline] = useState(false);
   const [study] = useState(() => new StudyHost());
   const importCsv = useCallback((file: File) => {
     if (!runtime.current) return Promise.reject(new Error('still starting'));
     return runtime.current.importCsv(file);
   }, []);
+  const capture = useCallback(
+    (label: string, onProgress: (n: number) => void) =>
+      runtime.current?.captureGesture(label, onProgress) ?? Promise.reject(new Error('still starting')), // prettier-ignore
+    [],
+  );
   const finishCsv = useCallback(
     (imp: CsvImport, mapping: CsvMapping) => runtime.current?.finishCsv(imp, mapping) ?? Promise.resolve(), // prettier-ignore
     [],
@@ -47,6 +54,7 @@ export function App() {
       if (e.code === 'KeyD' && import.meta.env.DEV) setDebug((d) => !d);
       if (e.code === 'KeyG') setStudyOpen((s) => !s); // gesture study
       if (e.code === 'KeyT') setTasksOpen((s) => !s); // study task timer
+      if (e.code === 'KeyC') setCaptureOpen((s) => !s); // custom gesture data
       if (e.code === 'KeyB') {
         // mouse baseline: hands + voice off, dropdowns on
         setBaseline((b) => !b);
@@ -83,6 +91,7 @@ export function App() {
       )}
       {tasksOpen && <TaskPanel mode={baseline ? 'mouse' : 'hands'} />}
       <CsvDrop importCsv={importCsv} finishCsv={finishCsv} />
+      {captureOpen && <CapturePanel capture={capture} />}
     </>
   );
 }

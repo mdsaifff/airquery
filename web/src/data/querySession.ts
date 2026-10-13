@@ -126,6 +126,11 @@ export class QuerySession {
     }
   }
 
+  /** Custom gesture: same as saying "what's this?", without the agent round trip. */
+  explainNow(): void {
+    this.deps.explain();
+  }
+
   /** Re-push what is on screen (e.g. after switching back to this dataset). */
   refresh(): void {
     this.show(this.top, performance.now());

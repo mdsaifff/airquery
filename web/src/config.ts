@@ -10,6 +10,11 @@ export const config = {
   numHands: 2,
   /** MediaPipe detection / presence / tracking confidence (0..1). */
   minHandConfidence: 0.5,
+  /** A custom Model Maker gesture model, used instead of the CDN model when present (path). */
+  customModelPath: 'models/gesture_recognizer.task',
+  /** Frames per custom-gesture capture (count) and the gap between them (ms). */
+  captureFrames: 60,
+  captureIntervalMs: 120,
   /** Webcam capture size (px). */
   cameraWidth: 640,
   cameraHeight: 480,
@@ -53,6 +58,10 @@ export const config = {
     /** ...within this window (ms), then no new swipe for the cooldown (ms). */
     swipeWindowMs: 350,
     swipeCooldownMs: 900,
+    /** Label of the custom Model Maker gesture that asks "what's this?" (needs the custom model). */
+    customExplainLabel: 'Rock',
+    /** Hold time for the custom explain gesture (ms). */
+    explainHoldMs: 400,
   },
 
   // --- scene ---

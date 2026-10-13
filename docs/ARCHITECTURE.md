@@ -191,7 +191,7 @@ type GestureEvent =
   | { kind: 'swipe'; direction: 'left' | 'right' }               // switch scene (stretch)
   | { kind: 'lasso'; active: boolean }                           // 🤟 held: air lasso (stretch)
   | { kind: 'handsLost' };
-type HoldGesture = 'reset' | 'undo';
+type HoldGesture = 'reset' | 'undo' | 'explain'; // explain: custom Model Maker gesture (stretch)
 ```
 
 ## Interaction state machine
@@ -213,6 +213,7 @@ States: `idle`, `pointing`, `rotating`, `zooming`, `clutched`, `listening`,
 | pointing / idle | talk active | listening | start STT |
 | listening | talk inactive | pointing | stop STT, send utterance |
 | pointing | fire reset / undo | pointing | reset view / pop history |
+| pointing | fire explain | pointing | "what's this?" (custom gesture, stretch) |
 | pointing / idle | swipe | (same) | switch scene (left = next) |
 | pointing | lasso active | lassoing | start loop |
 | lassoing | cursor | lassoing | add loop point |

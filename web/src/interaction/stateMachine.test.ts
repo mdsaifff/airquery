@@ -44,6 +44,7 @@ const TABLE: Row[] = [
   { row: 'listening + talk inactive', from: st('listening', { resume: 'pointing' }), event: { kind: 'talk', active: false }, to: 'pointing', effects: ['stopListening'] },
   { row: 'pointing + fire reset', from: st('pointing'), event: { kind: 'fire', gesture: 'reset' }, to: 'pointing', effects: ['resetView'] },
   { row: 'pointing + fire undo', from: st('pointing'), event: { kind: 'fire', gesture: 'undo' }, to: 'pointing', effects: ['undo'] },
+  { row: 'pointing + fire explain (custom gesture)', from: st('pointing'), event: { kind: 'fire', gesture: 'explain' }, to: 'pointing', effects: ['explain'] },
   { row: 'pointing + swipe', from: st('pointing'), event: { kind: 'swipe', direction: 'left' }, to: 'pointing', effects: ['switchScene'] },
   { row: 'idle + swipe', from: st('idle'), event: { kind: 'swipe', direction: 'right' }, to: 'idle', effects: ['switchScene'] },
   { row: 'pointing + lasso active', from: st('pointing'), event: { kind: 'lasso', active: true }, to: 'lassoing', effects: ['lassoStart'] },

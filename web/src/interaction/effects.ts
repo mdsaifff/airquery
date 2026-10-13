@@ -11,6 +11,8 @@ export interface EffectTargets {
   listening(active: boolean): void;
   undo(): void;
   switchScene(direction: 'left' | 'right'): void;
+  /** Custom gesture: "what's this?" without speaking. */
+  explain(): void;
   lasso(step: 'start' | 'point' | 'end' | 'cancel', x?: number, y?: number): void;
 }
 
@@ -59,6 +61,9 @@ export function applyEffects(effects: readonly Effect[], t: EffectTargets, now: 
         break;
       case 'stopListening':
         t.listening(false);
+        break;
+      case 'explain':
+        t.explain();
         break;
       case 'switchScene':
         t.switchScene(e.direction);

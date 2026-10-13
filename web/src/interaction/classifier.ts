@@ -52,11 +52,6 @@ interface Hold {
   fired: boolean;
 }
 
-const HOLD_LABELS: [string, HoldGesture][] = [
-  ['Open_Palm', 'reset'],
-  ['Thumb_Down', 'undo'],
-];
-
 export class GestureClassifier {
   private readonly p: GestureParams;
   private readonly hands = new Map<Hand, HandState>();
@@ -187,7 +182,12 @@ export class GestureClassifier {
 
   private updateHold(t: number, ev: GestureEvent[]): void {
     let found: { gesture: HoldGesture; s: HandState } | null = null;
-    for (const [label, gesture] of HOLD_LABELS) {
+    const holdLabels: [string, HoldGesture][] = [
+      ['Open_Palm', 'reset'],
+      ['Thumb_Down', 'undo'],
+      [this.p.customExplainLabel, 'explain'],
+    ];
+    for (const [label, gesture] of holdLabels) {
       const s = [...this.hands.values()].find((h) => h.label.stable === label);
       if (s) {
         found = { gesture, s };
@@ -212,7 +212,8 @@ export class GestureClassifier {
     }
     const hold = this.hold;
     if (!hold || hold.fired) return;
-    const duration = hold.gesture === 'reset' ? this.p.resetHoldMs : this.p.undoHoldMs;
+    const durations = { reset: this.p.resetHoldMs, undo: this.p.undoHoldMs, explain: this.p.explainHoldMs }; // prettier-ignore
+    const duration = durations[hold.gesture];
     const progress = Math.min(1, (t - hold.start) / duration);
     ev.push({ kind: 'holdProgress', gesture: hold.gesture, progress });
     if (progress >= 1) {

@@ -542,3 +542,33 @@ body,
   display: flex;
   gap: 8px;
 }
+
+/* --- custom gesture capture (C) --- */
+.capture {
+  position: fixed;
+  top: 50%;
+  left: var(--gutter);
+  transform: translateY(-50%);
+  width: min(340px, calc(100vw - 2 * var(--gutter)));
+  padding: 14px 16px;
+  font-size: 13px;
+  z-index: 9;
+}
+
+.capture h2 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.capture .row {
+  display: flex;
+  gap: 8px;
+}
+
+.capture select {
+  padding: 4px 6px;
+  color: inherit;
+  background: #0f1726;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}

@@ -104,6 +104,10 @@ describe('GestureClassifier (synthetic hands)', () => {
     expect(run(20, (i) => [right({ pose: 'victory', gesture: i === 5 || i === 6 ? 'Victory' : 'None' })])).toEqual([]); // prettier-ignore
   });
 
+  it('custom Model Maker label held: explain', () => {
+    expect(run(30, () => [right({ gesture: 'Rock' })])).toEqual(['fire:explain']);
+  });
+
   it('🤟 held: lasso on while held, off on release', () => {
     expect(run(30, (i) => [right({ gesture: i >= 5 && i < 20 ? 'ILoveYou' : 'None' })])).toEqual([
       'lasso:on',
