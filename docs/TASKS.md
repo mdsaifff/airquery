@@ -67,6 +67,7 @@ Current phase: **1**
   - Needs you: record fixtures for point, pinch, pinch-drag, two-hand pinch,
     fist, open palm, victory, thumb down, and "talking with hands" (no
     gesture). Save them to `web/tests/fixtures/`.
+  - Note: hotkey is Shift+R (plain R is reset view). `web/tests/synthHand.ts` makes synthetic hands so gesture tests run before real fixtures exist. Recording real fixtures pending (user).
 - [ ] **T1.4 Globe scene**
   - Do: `src/scene/sceneManager.ts` (renderer, camera, resize, render loop)
     and `globeScene.ts`: faint sphere + quakes as `THREE.Points` placed at
