@@ -1,7 +1,7 @@
 // Wires the imperative parts together (tracking, scene, data, voice, agent).
 // React only mounts the DOM elements and the HUD; it never sees per-frame data.
 import { config } from './config.ts';
-import { askAgent } from './data/agentClient.ts';
+import { askAgent, compileSpec } from './data/agentClient.ts';
 import { QuerySession } from './data/querySession.ts';
 import { CursorView, MODE_COLORS } from './hud/cursor.ts';
 import { Hover } from './hud/hover.ts';
@@ -10,6 +10,7 @@ import { hudStore, toast } from './hud/store.ts';
 import { CameraController, orbitPosition } from './interaction/cameraController.ts';
 import { HandPipeline } from './interaction/handPipeline.ts';
 import type { StudyHost } from './interaction/study.ts';
+import type { QuerySpec } from './contracts/contracts.ts';
 import { attachMouse } from './interaction/mouseInput.ts';
 import { applyView } from './scene/applyView.ts';
 import { loadGlobe } from './scene/loadGlobe.ts';
@@ -29,6 +30,11 @@ export interface RuntimeElements {
 
 export interface Runtime {
   dispose(): void;
+  /** Mouse baseline: ignore hands and voice; specs come from dropdowns. */
+  setBaseline(on: boolean): void;
+  applySpec(spec: QuerySpec): void;
+  undo(): void;
+  resetView(): void;
   /** Typed-input fallback for every voice feature. */
   typed(text: string): void;
 }
@@ -66,6 +72,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
         hudStore.thinking = false;
       }
     },
+    compile: compileSpec,
     async run(sql, params) {
       if (!data) throw new Error('data is still loading');
       const t0 = performance.now();
@@ -166,6 +173,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
         sizeBy: null,
       });
       hudStore.legend = legend;
+      hudStore.placeOptions = loaded.schema.columns.find((c) => c.name === 'place')?.examples ?? [];
       hudStore.shown = hudStore.total = loaded.globe.count;
       hudStore.status = '';
       cleanups.push(() => {
@@ -182,7 +190,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
   cleanups.push(
     startTracking(els.camCanvas, {
       onFrame(frame, fps) {
-        hands.onFrame(frame, window.innerWidth, window.innerHeight);
+        if (!hudStore.baseline) hands.onFrame(frame, window.innerWidth, window.innerHeight);
         hudStore.trackingFps = fps;
         const fixture = recorder.push(frame, 'recording');
         if (fixture) downloadJson(`fixture-${Date.now()}.json`, fixture);
@@ -199,6 +207,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
     if (e.target instanceof HTMLInputElement || e.repeat) return;
     if (e.code === 'Space') {
       e.preventDefault();
+      if (hudStore.baseline) return; // no voice in the mouse baseline
       hands.dispatch({ kind: 'talk', active: true }); // push-to-talk while held
     } else if (e.code === 'KeyR' && e.shiftKey && import.meta.env.DEV) {
       recorder.start(performance.now(), config.recordDurationMs); // dev: record a fixture
@@ -229,5 +238,12 @@ export function startRuntime(els: RuntimeElements): Runtime {
       cleanups.reverse().forEach((fn) => fn());
     },
     typed: (text) => voice.typed(text),
+    setBaseline(on) {
+      hudStore.baseline = on;
+      if (on) hands.dispatch({ kind: 'handsLost' }); // drop any drag / cursor / listening
+    },
+    applySpec: (spec) => void session.applySpec(spec),
+    undo: () => session.undo(),
+    resetView: () => camera.reset(performance.now()),
   };
 }

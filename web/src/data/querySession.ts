@@ -1,6 +1,11 @@
 // Voice/typed utterance -> agent -> DuckDB -> scene, plus the undo/reset history.
 // All I/O is injected, so the whole flow runs in tests with a mocked agent.
-import type { QueryRequest, QueryResponse, QuerySpec } from '../contracts/contracts.ts';
+import type {
+  CompileRequest,
+  QueryRequest,
+  QueryResponse,
+  QuerySpec,
+} from '../contracts/contracts.ts';
 import type { Columns } from './arrow.ts';
 import type { Param } from './db.ts';
 
@@ -20,6 +25,8 @@ export interface Applied {
 export interface SessionDeps {
   dataset: string;
   ask(req: QueryRequest): Promise<QueryResponse>;
+  /** Validate + compile a spec built in the UI (mouse baseline). */
+  compile(req: CompileRequest): Promise<QueryResponse>;
   run(sql: string, params: Param[]): Promise<Columns>;
   /** Push a view to the scene; endedAt starts the voice-to-render clock. */
   show(view: SceneView, applied: Applied, endedAt: number): void;
@@ -39,6 +46,8 @@ export class QuerySession {
   /** history[history.length - 1] is what's on screen. */
   private history: Entry[] = [EMPTY];
   busy = false;
+  /** Bumped per request; a reply for an older request is dropped (latest wins). */
+  private seq = 0;
 
   constructor(deps: SessionDeps) {
     this.deps = deps;
@@ -54,16 +63,30 @@ export class QuerySession {
 
   async submit(utterance: string, endedAt: number): Promise<void> {
     const { deps } = this;
+    const req = { dataset: deps.dataset, utterance, current_spec: this.current };
+    await this.handle(() => deps.ask(req), endedAt);
+  }
+
+  /** Mouse baseline: apply a spec built from dropdowns (still validated by the agent). */
+  async applySpec(spec: QuerySpec, endedAt = performance.now()): Promise<void> {
+    await this.handle(() => this.deps.compile({ dataset: this.deps.dataset, spec }), endedAt);
+  }
+
+  private async handle(request: () => Promise<QueryResponse>, endedAt: number): Promise<void> {
+    const { deps } = this;
+    const id = ++this.seq;
     let resp: QueryResponse;
     this.busy = true;
     try {
-      resp = await deps.ask({ dataset: deps.dataset, utterance, current_spec: this.current });
+      resp = await request();
     } catch (err) {
-      deps.notify('error', `Agent unreachable or invalid reply (${String(err)})`);
+      if (id === this.seq)
+        deps.notify('error', `Agent unreachable or invalid reply (${String(err)})`);
       return;
     } finally {
-      this.busy = false;
+      if (id === this.seq) this.busy = false;
     }
+    if (id !== this.seq) return; // a newer request was made meanwhile
     if (resp.status === 'clarify')
       return deps.notify('clarify', resp.message ?? 'Can you rephrase?');
     if (resp.status === 'rejected')
@@ -83,6 +106,7 @@ export class QuerySession {
     if (!resp.sql) return deps.notify('error', 'Agent returned no SQL.');
     try {
       const result = await deps.run(resp.sql, resp.params);
+      if (id !== this.seq) return;
       const entry: Entry = { spec, sql: resp.sql, params: resp.params, result };
       this.history.push(entry);
       this.show(entry, endedAt);
@@ -93,6 +117,7 @@ export class QuerySession {
 
   /** Pop the last query (Thumb_Down, Z, or "undo"). */
   undo(endedAt = performance.now()): void {
+    this.seq++; // cancels any reply still in flight
     if (this.history.length <= 1) return this.deps.notify('info', 'Nothing to undo.');
     this.history.pop();
     this.show(this.top, endedAt);
@@ -100,6 +125,7 @@ export class QuerySession {
 
   /** Clear every query and reset the camera (Open_Palm, R, or "reset"). */
   reset(endedAt = performance.now()): void {
+    this.seq++;
     this.history = [EMPTY];
     this.deps.resetView();
     this.show(EMPTY, endedAt);

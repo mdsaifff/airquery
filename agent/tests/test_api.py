@@ -124,3 +124,16 @@ def test_cors_allows_the_web_origin(quakes_schema, log_path) -> None:
         headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "POST"},
     )
     assert "access-control-allow-origin" not in r.headers
+
+
+def test_compile_validates_and_compiles_ui_specs(quakes_schema, log_path) -> None:
+    c, mock = client(quakes_schema, log_path)
+    r = c.post("/compile", json={"dataset": "quakes", "spec": DEEP})
+    body = QueryResponse.model_validate(r.json())
+    assert body.status == "ok" and body.params == [300]
+    assert body.sql is not None and body.sql.endswith('"depth_km" > ?')
+    bad = {"dataset": "quakes", "filters": [{"field": "nope", "op": ">", "value": 1}]}
+    r = c.post("/compile", json={"dataset": "quakes", "spec": bad})
+    assert r.json()["status"] == "rejected" and "unknown field" in r.json()["message"]
+    assert mock is not None and mock.calls == []  # no LLM involved
+    assert not log_path.exists()  # only voice queries are logged

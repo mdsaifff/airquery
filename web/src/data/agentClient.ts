@@ -1,7 +1,12 @@
 // HTTP client for the agent. Every response is validated with zod before use;
 // the type assertions below fail to compile if zod and the generated contract drift.
 import { z } from 'zod';
-import type { QueryRequest, QueryResponse, QuerySpec } from '../contracts/contracts.ts';
+import type {
+  CompileRequest,
+  QueryRequest,
+  QueryResponse,
+  QuerySpec,
+} from '../contracts/contracts.ts';
 
 const Scalar = z.union([z.number(), z.string()]);
 
@@ -50,13 +55,22 @@ void responseMatches;
 export const AGENT_URL: string =
   (import.meta.env.VITE_AGENT_URL as string | undefined) ?? 'http://localhost:8000';
 
-/** POST /query. Throws on network errors or a response that fails validation. */
-export async function askAgent(req: QueryRequest, baseUrl = AGENT_URL): Promise<QueryResponse> {
-  const res = await fetch(`${baseUrl}/query`, {
+async function post(path: string, req: unknown, baseUrl: string): Promise<QueryResponse> {
+  const res = await fetch(`${baseUrl}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(req),
   });
   const body: unknown = await res.json();
   return QueryResponseSchema.parse(body);
+}
+
+/** POST /query. Throws on network errors or a response that fails validation. */
+export function askAgent(req: QueryRequest, baseUrl = AGENT_URL): Promise<QueryResponse> {
+  return post('/query', req, baseUrl);
+}
+
+/** POST /compile (mouse baseline): a UI-built spec -> validated SQL, no LLM. */
+export function compileSpec(req: CompileRequest, baseUrl = AGENT_URL): Promise<QueryResponse> {
+  return post('/compile', req, baseUrl);
 }

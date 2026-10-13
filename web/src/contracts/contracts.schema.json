@@ -108,6 +108,24 @@
       "title": "Column",
       "type": "object"
     },
+    "CompileRequest": {
+      "description": "POST /compile: a spec built in the UI (mouse baseline) -> validated SQL, no LLM.",
+      "properties": {
+        "dataset": {
+          "title": "Dataset",
+          "type": "string"
+        },
+        "spec": {
+          "$ref": "#/$defs/QuerySpec"
+        }
+      },
+      "required": [
+        "dataset",
+        "spec"
+      ],
+      "title": "CompileRequest",
+      "type": "object"
+    },
     "DatasetSchema": {
       "properties": {
         "dataset": {

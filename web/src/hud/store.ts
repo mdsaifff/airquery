@@ -35,6 +35,10 @@ export const hudStore = {
   timings: {} as Record<string, number>,
   /** A request is waiting on the agent. */
   thinking: false,
+  /** Mouse baseline mode (B): hands and voice off, dropdown filters on. */
+  baseline: false,
+  /** Place choices for the baseline dropdown (computed examples from the dataset schema). */
+  placeOptions: [] as string[],
 };
 
 export interface Toast {

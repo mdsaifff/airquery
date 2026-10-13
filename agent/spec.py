@@ -58,6 +58,13 @@ class QueryRequest(Contract):
     current_spec: QuerySpec | None = None
 
 
+class CompileRequest(Contract):
+    """POST /compile: a spec built in the UI (mouse baseline) -> validated SQL, no LLM."""
+
+    dataset: str
+    spec: QuerySpec
+
+
 class QueryResponse(Contract):
     status: Literal["ok", "clarify", "rejected"]
     spec: QuerySpec | None = None
@@ -109,6 +116,7 @@ class DatasetSchema(Contract):
 EXPORTED = {
     QuerySpec: "serialization",
     QueryRequest: "serialization",
+    CompileRequest: "serialization",
     QueryResponse: "serialization",
     DatasetSchema: "validation",
 }

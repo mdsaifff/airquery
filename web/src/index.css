@@ -384,3 +384,73 @@ body,
 .study td {
   padding: 1px 12px 1px 0;
 }
+
+.hidden {
+  display: none;
+}
+
+/* --- mouse baseline (B) and task timer (T) --- */
+.baseline {
+  position: fixed;
+  right: var(--gutter);
+  bottom: var(--gutter);
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  z-index: 4;
+}
+
+.baseline label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.baseline select,
+.tasks input {
+  padding: 4px 6px;
+  color: inherit;
+  background: #0f1726;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 13px;
+}
+
+.baseline .row,
+.tasks .row {
+  display: flex;
+  gap: 8px;
+}
+
+.tasks {
+  position: fixed;
+  top: 50%;
+  right: var(--gutter);
+  transform: translateY(-50%);
+  width: min(420px, calc(100vw - 2 * var(--gutter)));
+  padding: 12px 14px;
+  font-size: 13px;
+  z-index: 8;
+}
+
+.tasks h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.tasks ol {
+  padding-left: 18px;
+}
+
+.tasks li {
+  margin-bottom: 6px;
+}
+
+.tasks li.active {
+  color: var(--accent);
+}

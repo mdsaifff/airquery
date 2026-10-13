@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { config } from './config.ts';
+import { BaselinePanel, TaskPanel } from './hud/BaselinePanels.tsx';
 import { DebugPanel } from './hud/DebugPanel.tsx';
 import { GlassBox, Legend, Stats } from './hud/Hud.tsx';
 import { StudyPanel } from './hud/StudyPanel.tsx';
@@ -14,6 +15,8 @@ export function App() {
   const runtime = useRef<Runtime | null>(null);
   const [debug, setDebug] = useState(false);
   const [studyOpen, setStudyOpen] = useState(false);
+  const [tasksOpen, setTasksOpen] = useState(false);
+  const [baseline, setBaseline] = useState(false);
   const [study] = useState(() => new StudyHost());
 
   useEffect(() => {
@@ -24,10 +27,19 @@ export function App() {
   }, [study]);
 
   useEffect(() => {
+    runtime.current?.setBaseline(baseline);
+  }, [baseline]);
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
       if (e.code === 'KeyD' && import.meta.env.DEV) setDebug((d) => !d);
       if (e.code === 'KeyG') setStudyOpen((s) => !s); // gesture study
+      if (e.code === 'KeyT') setTasksOpen((s) => !s); // study task timer
+      if (e.code === 'KeyB') {
+        // mouse baseline: hands + voice off, dropdowns on
+        setBaseline((b) => !b);
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -38,7 +50,7 @@ export function App() {
       <div ref={sceneRef} className="scene" />
       <canvas
         ref={camRef}
-        className="cam"
+        className={baseline ? 'cam hidden' : 'cam'}
         width={config.cameraWidth / 2}
         height={config.cameraHeight / 2}
       />
@@ -46,11 +58,19 @@ export function App() {
       <Stats />
       <div className="bottom-left">
         <Legend />
-        <TranscriptBar onSubmit={(text) => runtime.current?.typed(text)} />
+        {!baseline && <TranscriptBar onSubmit={(text) => runtime.current?.typed(text)} />}
       </div>
       <Toasts />
       {debug && <DebugPanel />}
       {studyOpen && <StudyPanel host={study} />}
+      {baseline && (
+        <BaselinePanel
+          onApply={(spec) => runtime.current?.applySpec(spec)}
+          onUndo={() => runtime.current?.undo()}
+          onResetView={() => runtime.current?.resetView()}
+        />
+      )}
+      {tasksOpen && <TaskPanel mode={baseline ? 'mouse' : 'hands'} />}
     </>
   );
 }

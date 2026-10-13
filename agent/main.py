@@ -12,11 +12,12 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from compile_sql import InvalidSpecError, compile_spec
 from graph import AgentState, build_graph, run_agent
 from llm import LLMAdapter, LLMNotConfiguredError, make_llm
 from schema_registry import SchemaRegistry, UnknownDatasetError
 from settings import AGENT_DIR, settings
-from spec import QueryRequest, QueryResponse
+from spec import CompileRequest, QueryRequest, QueryResponse
 
 CACHE_SIZE = 256
 DEFAULT_LOG = AGENT_DIR / "logs" / "queries.jsonl"
@@ -104,7 +105,7 @@ def create_app(
     async def bad_request(request: Request, exc: RequestValidationError) -> JSONResponse:
         msg = "; ".join(f"{'.'.join(map(str, e['loc']))}: {e['msg']}" for e in exc.errors())
         resp = QueryResponse(status="rejected", message=f"Bad request: {msg}")
-        if request.url.path != "/query":
+        if request.url.path != "/query":  # only /query is logged
             return JSONResponse(resp.model_dump(mode="json"), status_code=422)
         return respond(None, resp, 422, errors=[msg])
 
@@ -152,6 +153,23 @@ def create_app(
             if len(cache) > CACHE_SIZE:
                 cache.popitem(last=False)
         return respond(req, resp, errors=state.get("errors") or [], tokens=state.get("tokens"))
+
+    @app.post("/compile")
+    def compile_endpoint(req: CompileRequest, request: Request) -> JSONResponse:
+        """Mouse baseline: the UI built the spec, the agent still validates and compiles it."""
+        ip = request.client.host if request.client else "unknown"
+        if not limiter.allow(ip, time.monotonic()):
+            resp = QueryResponse(status="rejected", message="Too many requests; wait a moment.")
+            return JSONResponse(resp.model_dump(mode="json"), status_code=429)
+        try:
+            query = compile_spec(req.spec, registry.get(req.dataset))
+        except UnknownDatasetError:
+            resp = QueryResponse(status="rejected", message=f"Unknown dataset {req.dataset!r}.")
+        except InvalidSpecError as err:
+            resp = QueryResponse(status="rejected", message="; ".join(err.errors))
+        else:
+            resp = QueryResponse(status="ok", spec=req.spec, sql=query.sql, params=query.params)
+        return JSONResponse(resp.model_dump(mode="json"))
 
     return app
 

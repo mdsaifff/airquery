@@ -238,9 +238,10 @@ on the deployed site. Ask the user to record the hero take.
     exports a confusion matrix CSV.
   - Needs you: run it with yourself and 4 other people.
   - Note: G opens the study panel: seeded shuffled trials (N per gesture), first discrete event wins, cursor-only = point, timeout = none; exports confusion + raw trial CSVs; includes the talking false-trigger counter (per 5 min). `make gestures ARGS="confusion-*.csv"` merges participants into CSV + SVG heatmap. Verified headless (prompt shown, timeout recorded). Sessions with 5 people pending (user).
-- [ ] **T4.5 Mouse baseline mode**
+- [x] **T4.5 Mouse baseline mode**
   - Do: a toggle that swaps gestures/voice for mouse orbit + dropdown filters;
     task timer for the 5 study tasks in `docs/EVAL.md`.
+  - Note: B toggles the baseline (tracking + push-to-talk ignored, webcam/transcript hidden, dropdowns: depth, magnitude, place, time, colour, top N, undo, reset view); specs go through the new `POST /compile` (D-010). T opens the task timer (5 EVAL tasks, errors, gave-up, CSV) in either mode. Found and fixed a stale-reply race: `QuerySession` now drops replies to superseded requests. Verified headless.
 - [ ] **T4.6 README**
   - Do: GIF at top, one-line pitch, architecture diagram, measured results,
     how to run, decision highlights from `docs/DECISIONS.md`.

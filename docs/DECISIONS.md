@@ -76,3 +76,14 @@ These double as material for LinkedIn posts.
   show up before any tokens are spent.
 - **Consequences:** it understands a handful of phrasings; accuracy numbers must
   come from `make eval` against a real provider.
+
+## D-010 Mouse baseline compiles through the agent (`POST /compile`)
+- **Context:** the hands-vs-mouse study needs dropdown filters, but hard rule 1
+  says only `compile_sql.py` produces SQL and the frontend never builds it.
+- **Decision:** dropdowns build a `QuerySpec`; the agent's `/compile` endpoint
+  validates and compiles it (no LLM). Same history/undo path as voice.
+- **Why:** one SQL generator, one validator, so both study arms run identical
+  queries; only the input method differs.
+- **Consequences:** the baseline needs the agent running (but no API key).
+  Replies are sequence-numbered so the latest request wins when dropdowns
+  change faster than the round trip.

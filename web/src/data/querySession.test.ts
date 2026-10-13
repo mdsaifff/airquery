@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { DatasetSchema, QuerySpec } from '../contracts/contracts.ts';
 import { applyView } from '../scene/applyView.ts';
 import { GlobeScene } from '../scene/globeScene.ts';
-import { askAgent } from './agentClient.ts';
+import { askAgent, compileSpec } from './agentClient.ts';
 import { numbers } from './arrow.ts';
 import type { Columns } from './arrow.ts';
 import { QuerySession } from './querySession.ts';
@@ -82,6 +82,7 @@ function rig() {
   const session = new QuerySession({
     dataset: 'quakes',
     ask: (req) => askAgent(req, 'http://agent.test'),
+    compile: (req) => compileSpec(req, 'http://agent.test'),
     // Fake DuckDB: deep quakes for "> ?" queries, otherwise everything.
     run: async (sql, params) => {
       runs.push(`${sql} ${JSON.stringify(params)}`);
@@ -188,5 +189,41 @@ describe('voice to scene (mocked agent)', () => {
     await r.session.submit('anything', 0);
     expect(r.notes[0]).toMatch(/^error:Agent unreachable or invalid reply/);
     expect(r.runs).toEqual([]);
+  });
+
+  it('mouse baseline: a UI-built spec goes through /compile, not the LLM', async () => {
+    const fetchMock = agentReplies(okResponse(DEEP, DEEP_SQL, [300]));
+    const r = rig();
+    await r.session.applySpec(DEEP);
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, { body: string }];
+    expect(url).toBe('http://agent.test/compile');
+    expect(JSON.parse(init.body)).toEqual({ dataset: 'quakes', spec: DEEP });
+    expect([...r.globe.visible]).toEqual([0, 1, 0, 1]);
+    r.session.undo();
+    expect([...r.globe.visible]).toEqual([1, 1, 1, 1]);
+  });
+
+  it('latest request wins when replies arrive out of order', async () => {
+    const deeper = spec({ filters: [{ field: 'depth_km', op: '>', value: 500 }] });
+    const releases: (() => void)[] = [];
+    const bodies = [okResponse(DEEP, DEEP_SQL, [300]), okResponse(deeper, DEEP_SQL, [500])];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        const body = bodies.shift();
+        await new Promise<void>((resolve) => releases.push(resolve));
+        return { json: async () => body };
+      }),
+    );
+    const r = rig();
+    const first = r.session.applySpec(DEEP);
+    const second = r.session.applySpec(deeper);
+    await vi.waitFor(() => expect(releases).toHaveLength(2));
+    releases[1](); // the newer reply arrives first...
+    await second;
+    releases[0](); // ...then the stale one
+    await first;
+    expect(r.session.current).toEqual(deeper);
+    expect(r.runs).toHaveLength(1);
   });
 });
