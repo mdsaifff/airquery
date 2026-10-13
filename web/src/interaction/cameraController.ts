@@ -106,6 +106,13 @@ export class CameraController {
     this.lastInputAt = now;
   }
 
+  /** Stop dragging and any spin, without a release fling. */
+  stop(now: number): void {
+    this.dragging = false;
+    this.vel = { yaw: 0, pitch: 0 };
+    this.lastInputAt = now;
+  }
+
   /** Clutch: stop all motion and ignore input until unfrozen. */
   setFrozen(frozen: boolean, now: number): void {
     this.frozen = frozen;

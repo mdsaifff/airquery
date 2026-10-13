@@ -2,7 +2,12 @@
 // components poll it (useTick) instead of holding per-frame data in state.
 import { useEffect, useReducer } from 'react';
 
+import type { Mode } from '../interaction/stateMachine.ts';
+
 export const hudStore = {
+  mode: 'idle' as Mode,
+  /** Push-to-talk is held (hand Victory or spacebar). */
+  listening: false,
   trackingFps: 0,
   renderFps: 0,
   /** Smoothed CPU time per render frame (ms). */

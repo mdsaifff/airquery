@@ -4,8 +4,10 @@ import { config } from './config.ts';
 import type { Columns } from './data/arrow.ts';
 import { Db } from './data/db.ts';
 import { indexIds, maskFromResult } from './data/resultMask.ts';
+import { CursorView, MODE_COLORS } from './hud/cursor.ts';
 import { hudStore } from './hud/store.ts';
 import { CameraController, orbitPosition } from './interaction/cameraController.ts';
+import { HandPipeline } from './interaction/handPipeline.ts';
 import { attachMouse } from './interaction/mouseInput.ts';
 import { GlobeScene } from './scene/globeScene.ts';
 import type { Polylines } from './scene/globeScene.ts';
@@ -71,8 +73,24 @@ export function startRuntime(els: RuntimeElements): Runtime {
     distance: config.cameraHomeDistance,
   });
   cleanups.push(attachMouse(sm.renderer.domElement, camera));
+
+  // --- gestures -> state machine -> camera / cursor / voice ---
+  const cursor = new CursorView(els.sceneEl);
+  cleanups.push(() => cursor.dispose());
+  const hands = new HandPipeline({
+    camera,
+    rotateGain: config.handRotateGain,
+    cursor: (visible, x, y) => cursor.set(visible, x, y),
+    listening: (active) => {
+      hudStore.listening = active;
+    },
+    undo: () => {},
+  });
+
   let globe: GlobeScene | null = null;
   sm.onFrame((now, dt) => {
+    cursor.style(hands.state.mode, hands.hold?.progress ?? 0);
+    hudStore.mode = hands.state.mode;
     const orbit = camera.update(now);
     sm.camera.position.set(...orbitPosition(orbit));
     sm.camera.lookAt(0, 0, 0);
@@ -129,7 +147,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
     const ctx = els.camCanvas.getContext('2d');
     const cam = video;
     tracker.start(cam, (frame) => {
-      if (ctx) drawSkeleton(ctx, cam, frame, recorder.recording ? '#f87171' : '#7dd3fc');
+      hands.onFrame(frame, window.innerWidth, window.innerHeight);
+      const color = recorder.recording ? '#ffffff' : MODE_COLORS[hands.state.mode];
+      if (ctx) drawSkeleton(ctx, cam, frame, color);
       hudStore.trackingFps = tracker?.fps ?? 0;
       const fixture = recorder.push(frame, 'recording');
       if (fixture) downloadJson(`fixture-${Date.now()}.json`, fixture);
@@ -142,15 +162,27 @@ export function startRuntime(els: RuntimeElements): Runtime {
 
   // --- keyboard fallbacks ---
   const onKey = (e: KeyboardEvent) => {
-    if (e.target instanceof HTMLInputElement) return;
-    if (e.code === 'KeyR' && e.shiftKey && import.meta.env.DEV) {
+    if (e.target instanceof HTMLInputElement || e.repeat) return;
+    if (e.code === 'Space') {
+      e.preventDefault();
+      hands.dispatch({ kind: 'talk', active: true }); // push-to-talk while held
+    } else if (e.code === 'KeyR' && e.shiftKey && import.meta.env.DEV) {
       recorder.start(performance.now(), config.recordDurationMs); // dev: record a fixture
     } else if (e.code === 'KeyR') {
       camera.reset(performance.now());
     }
   };
+  const onKeyUp = (e: KeyboardEvent) => {
+    if (e.code === 'Space' && !(e.target instanceof HTMLInputElement)) {
+      hands.dispatch({ kind: 'talk', active: false });
+    }
+  };
   window.addEventListener('keydown', onKey);
-  cleanups.push(() => window.removeEventListener('keydown', onKey));
+  window.addEventListener('keyup', onKeyUp);
+  cleanups.push(() => {
+    window.removeEventListener('keydown', onKey);
+    window.removeEventListener('keyup', onKeyUp);
+  });
 
   return {
     dispose() {

@@ -115,13 +115,14 @@ changes the scene. Ask the user to record a 10-second clip for the teaser.
   - Do: pure reducer implementing the transition table in ARCHITECTURE.md.
   - Done when: a table-driven test covers every row of the table.
   - Note: every table row (with the 'any' and 'pointing / rotating' rows expanded) is a test case. Small additions: clutched->pointing emits `unfreeze`; listening returns to idle if push-to-talk began without hands.
-- [ ] **T2.5 Camera controller**
+- [x] **T2.5 Camera controller**
   - Do: rotate from pinch-drag deltas, dolly from `twoHandZoom`, damping on
     release, animated reset, fly-to for `camera_target`. Mouse orbit stays as
     fallback.
   - Done when: controller logic is unit tested with synthetic events.
   - Needs you: rotate and zoom by hand; rate smoothness 1–5 and note anything
     that feels laggy or jumpy.
+  - Note: controller (from T1.4) now driven by gestures via state machine -> `effects.ts`; synthetic-event tests cover drag + damping, two-hand dolly, clutch, reset, fly-to. Mouse orbit unchanged. Smoothness rating pending (user).
 - [ ] **T2.6 Cursor, picking and feedback cues**
   - Do: screen cursor; raycast hover on points with tooltip (place,
     magnitude, depth, date); skeleton colour by state; hold ring for reset and

@@ -82,6 +82,8 @@ export const config = {
   animMs: 1200,
   /** Distance a fly-to ends at unless already closer (scene units). */
   flyToDistance: 2.2,
+  /** Extra gain on hand pinch-drag rotation vs. mouse drag (×). */
+  handRotateGain: 1.0,
   /** Wheel zoom: scale = exp(-deltaY * this) (1/px). */
   wheelZoomPerPx: 0.0015,
 };

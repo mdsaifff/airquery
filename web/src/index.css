@@ -73,3 +73,28 @@ body,
   display: flex;
   flex-direction: column;
 }
+
+.cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  color: #7dd3fc;
+  z-index: 5;
+}
+
+.cursor .dot {
+  fill: currentColor;
+  opacity: 0.9;
+}
+
+.cursor .ring {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  transition: opacity 0.15s;
+}

@@ -12,7 +12,10 @@ function Stats() {
       <div>
         render {hudStore.renderFps.toFixed(0)} fps · {hudStore.frameMs.toFixed(1)} ms
       </div>
-      <div>tracking {hudStore.trackingFps.toFixed(0)} fps</div>
+      <div>
+        tracking {hudStore.trackingFps.toFixed(0)} fps · {hudStore.mode}
+        {hudStore.listening && ' · listening'}
+      </div>
       <div>
         {hudStore.shown.toLocaleString()} / {hudStore.total.toLocaleString()} quakes
         {hudStore.queryMs > 0 && ` · query ${hudStore.queryMs.toFixed(0)} ms`}
