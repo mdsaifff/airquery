@@ -156,12 +156,13 @@ Tune `config.ts` and repeat until met.
   - Done when: tests cover unknown fields, wrong operator for type,
     out-of-range values, and each merge rule.
   - Note: validator lives in `agent/validate.py` and returns repair-friendly messages. Filter values are strict (no bool->number coercion). Extra rules: color_by must be numeric/timestamp, size_by numeric, navigate needs camera_target. Merge never carries camera_target over.
-- [ ] **T3.3 SQL compiler**
+- [x] **T3.3 SQL compiler**
   - Do: `compile_sql.py` turns a validated spec into DuckDB SQL with `?`
     params; identifiers only from the schema whitelist.
   - Done when: tests include injection attempts in values and field names
     (must be rejected or parameterized), `between`, `in`, `contains`,
     `last_days`, sort and limit.
+  - Note: also smoke-run against the real Parquet in DuckDB (every operator executes; 'deeper than 300 km' = 314 rows, same as the browser). `contains` = ILIKE with escaped wildcards; LIMIT inlined from the validated int; compiler refuses unvalidated specs.
 - [ ] **T3.4 LLM adapter**
   - Do: `LLMAdapter` protocol returning a `QuerySpec` via the provider's
     structured output or tool calling; `MockLLM` for tests; prompt built from
