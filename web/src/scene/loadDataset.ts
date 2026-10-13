@@ -5,8 +5,7 @@ import type { DatasetSchema } from '../contracts/contracts.ts';
 import type { Columns } from '../data/arrow.ts';
 import type { Db } from '../data/db.ts';
 import { indexIds } from '../data/resultMask.ts';
-import { createGlobeDecor } from './globeDecor.ts';
-import type { Polylines } from './globeDecor.ts';
+import { createGlobeDecor, loadCoastlines } from './globeDecor.ts';
 import { PointCloud } from './pointCloud.ts';
 import { positionsFor } from './positions.ts';
 
@@ -40,8 +39,7 @@ export async function loadDataset(
   const geo = schema.position.kind === 'geo';
   const cloud = new PointCloud(scene, positionsFor(schema, base, config.depthExaggeration), geo ? config.farSideDim : config.farSideDim / 2); // prettier-ignore
   if (geo) {
-    const coastlines = await fetchJson<{ lines: Polylines }>('data/coastlines.json').catch(() => null); // prettier-ignore
-    cloud.group.add(createGlobeDecor(coastlines?.lines ?? null));
+    cloud.group.add(createGlobeDecor(await loadCoastlines()));
   }
   const idIndex = indexIds(base.strings.get(schema.id ?? 'id') ?? []);
   return { schema, cloud, base, idIndex, mask: new Uint8Array(cloud.count) };

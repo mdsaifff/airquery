@@ -17,7 +17,7 @@ from graph import AgentState, build_graph, run_agent
 from llm import LLMAdapter, LLMNotConfiguredError, make_llm
 from schema_registry import SchemaRegistry, UnknownDatasetError
 from settings import AGENT_DIR, settings
-from spec import CompileRequest, ExplainRequest, QueryRequest, QueryResponse
+from spec import CompileRequest, DatasetSchema, ExplainRequest, QueryRequest, QueryResponse
 
 CACHE_SIZE = 256
 DEFAULT_LOG = AGENT_DIR / "logs" / "queries.jsonl"
@@ -85,6 +85,14 @@ def create_app(
         allow_headers=["Content-Type"],
     )
 
+    def resolve(dataset: str, provided: DatasetSchema | None) -> DatasetSchema:
+        """Server schemas by name; user CSVs (user_*) bring their own, validated like any other."""
+        if provided is not None and dataset.startswith("user_"):
+            if provided.dataset != dataset or provided.table != dataset:
+                raise UnknownDatasetError(dataset)
+            return provided
+        return registry.get(dataset)
+
     def respond(req: QueryRequest | None, resp: QueryResponse, code: int = 200, **extra: Any):
         log.write(
             dataset=req.dataset if req else None,
@@ -121,7 +129,7 @@ def create_app(
             resp = QueryResponse(status="rejected", message="Too many requests; wait a moment.")
             return respond(req, resp, 429, errors=["rate limited"])
         try:
-            schema = registry.get(req.dataset)
+            schema = resolve(req.dataset, req.dataset_schema)
         except UnknownDatasetError:
             resp = QueryResponse(status="rejected", message=f"Unknown dataset {req.dataset!r}.")
             return respond(req, resp, errors=["unknown dataset"])
@@ -130,6 +138,8 @@ def create_app(
             return respond(req, resp, errors=["llm not configured"])
 
         prev_json = req.current_spec.model_dump_json() if req.current_spec else ""
+        if req.dataset_schema:
+            prev_json += req.dataset_schema.model_dump_json()
         key = (req.dataset, " ".join(req.utterance.lower().split()), prev_json)
         if key in cache:
             cache.move_to_end(key)
@@ -175,7 +185,7 @@ def create_app(
     def explain_endpoint(req: ExplainRequest) -> JSONResponse:
         """What's this?: aggregate SQL over the selected ids; DuckDB computes the numbers."""
         try:
-            query = compile_explain(registry.get(req.dataset), req.ids)
+            query = compile_explain(resolve(req.dataset, req.dataset_schema), req.ids)
         except UnknownDatasetError:
             resp = QueryResponse(status="rejected", message=f"Unknown dataset {req.dataset!r}.")
         else:

@@ -146,3 +146,44 @@ def test_explain_compiles_aggregates_over_ids(quakes_schema, log_path) -> None:
     assert body["sql"].startswith('SELECT count(*) AS "n"')
     assert body["params"] == ["a", "b"]
     assert c.post("/explain", json={"dataset": "quakes", "ids": []}).status_code == 422
+
+
+USER_SCHEMA = {
+    "dataset": "user_listings",
+    "table": "user_listings",
+    "description": "Dropped CSV",
+    "id": "__id",
+    "position": {"kind": "geo", "lat": "latitude", "lon": "longitude", "height": "price"},
+    "columns": [
+        {"name": "price", "type": "number", "min": 10, "max": 900},
+        {
+            "name": "room type",
+            "type": "text",
+            "categorical": True,
+            "examples": ["Entire home/apt", "Private room"],
+        },
+    ],
+}
+
+
+def test_user_csv_datasets_bring_their_schema(quakes_schema, log_path) -> None:
+    cheap = {"dataset": "user_listings",
+             "filters": [{"field": "price", "op": "<", "value": 100}]}  # fmt: skip
+    c, _ = client(quakes_schema, log_path, [LLMReply(spec=cheap)])
+    r = c.post("/query", json={"dataset": "user_listings", "utterance": "under 100",
+                               "dataset_schema": USER_SCHEMA})  # fmt: skip
+    body = r.json()
+    assert body["status"] == "ok"
+    assert body["sql"] == (
+        'SELECT "__id", "latitude", "longitude", "price" FROM "user_listings" WHERE "price" < ?'
+    )
+    # a provided schema can't stand in for a server dataset, or under another name
+    r = c.post("/query", json={"dataset": "quakes", "utterance": "x",
+                               "dataset_schema": {**USER_SCHEMA, "dataset": "quakes"}})  # fmt: skip
+    assert r.json()["status"] != "ok" or "user_" not in r.json()["sql"]
+    bad = {**USER_SCHEMA, "dataset": "user_other"}
+    r = c.post("/query", json={"dataset": "user_listings", "utterance": "x", "dataset_schema": bad})
+    assert r.json()["status"] == "rejected"
+    r = c.post("/explain", json={"dataset": "user_listings", "ids": ["1"],
+                                 "dataset_schema": USER_SCHEMA})  # fmt: skip
+    assert 'mode("room type")' in r.json()["sql"]

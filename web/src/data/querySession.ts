@@ -2,6 +2,7 @@
 // All I/O is injected, so the whole flow runs in tests with a mocked agent.
 import type {
   CompileRequest,
+  DatasetSchema,
   QueryRequest,
   QueryResponse,
   QuerySpec,
@@ -24,6 +25,8 @@ export interface Applied {
 
 export interface SessionDeps {
   dataset: string;
+  /** Only for user-dropped CSVs: the schema inferred in the browser, sent along. */
+  datasetSchema?: DatasetSchema;
   ask(req: QueryRequest): Promise<QueryResponse>;
   /** Validate + compile a spec built in the UI (mouse baseline). */
   compile(req: CompileRequest): Promise<QueryResponse>;
@@ -65,7 +68,12 @@ export class QuerySession {
 
   async submit(utterance: string, endedAt: number): Promise<void> {
     const { deps } = this;
-    const req = { dataset: deps.dataset, utterance, current_spec: this.current };
+    const req = {
+      dataset: deps.dataset,
+      utterance,
+      current_spec: this.current,
+      dataset_schema: deps.datasetSchema ?? null,
+    };
     await this.handle(() => deps.ask(req), endedAt);
   }
 

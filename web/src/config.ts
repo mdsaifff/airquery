@@ -67,6 +67,8 @@ export const config = {
   farSideDim: 0.6,
   /** Hover picks the nearest point within this radius (px). */
   pickRadiusPx: 14,
+  /** Rows kept from a dropped CSV (count); every point is tweened per frame. */
+  csvMaxRows: 100_000,
   /** Lasso path keeps a point every this many px of cursor travel (px). */
   lassoMinStepPx: 6,
   /** "What's this?" summarizes visible points within this radius of the pointer (px). */

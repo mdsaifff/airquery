@@ -6,7 +6,15 @@ generated from these (see scripts/export_schema.py); a test fails if they drift.
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+    field_validator,
+)
 
 Op = Literal["=", "!=", ">", ">=", "<", "<=", "between", "in", "contains", "last_days"]
 # Strict: no silent bool->int or number->str coercion of filter values.
@@ -17,6 +25,10 @@ class Contract(BaseModel):
     # Fields with defaults are always present in responses, so the generated TS
     # types mark them required.
     model_config = ConfigDict(json_schema_serialization_defaults_required=True)
+
+
+class SchemaModel(BaseModel):
+    """Dataset schema models: files may omit optional keys, so defaults stay optional."""
 
 
 class Filter(Contract):
@@ -56,6 +68,8 @@ class QueryRequest(Contract):
     dataset: str
     utterance: str = Field(min_length=1, max_length=500)
     current_spec: QuerySpec | None = None
+    # Only for user-dropped CSVs (dataset "user_*"): the schema inferred in the browser.
+    dataset_schema: "DatasetSchema | None" = None
 
 
 class CompileRequest(Contract):
@@ -70,6 +84,7 @@ class ExplainRequest(Contract):
 
     dataset: str
     ids: list[str] = Field(min_length=1, max_length=5000)
+    dataset_schema: "DatasetSchema | None" = None
 
 
 class QueryResponse(Contract):
@@ -85,8 +100,9 @@ class QueryResponse(Contract):
 # --- Dataset schema (written by data_prep) ----------------------------------
 
 
-class Column(Contract):
-    name: str
+class Column(SchemaModel):
+    # Size caps matter for schemas inferred in the browser (bring-your-own CSV).
+    name: str = Field(min_length=1, max_length=64)
     type: Literal["number", "text", "timestamp"]
     unit: str | None = None
     min: float | str | None = None
@@ -96,15 +112,24 @@ class Column(Contract):
     # Text with a handful of values (all listed in examples): can drive colour.
     categorical: bool = False
 
+    @field_validator("synonyms", "examples")
+    @classmethod
+    def _short_lists(cls, v: list[str]) -> list[str]:
+        if len(v) > 20 or any(len(s) > 80 for s in v):
+            raise ValueError("at most 20 items of up to 80 characters")
+        return v
 
-class GeoPosition(Contract):
+
+class GeoPosition(SchemaModel):
     kind: Literal["geo"]
     lat: str
     lon: str
     depth: str | None = None
+    # Optional column drawn as height above the surface (bring-your-own CSV).
+    height: str | None = None
 
 
-class XyzPosition(Contract):
+class XyzPosition(SchemaModel):
     """Points already laid out in 3D (e.g. a UMAP of embeddings), scene units ~[-1, 1]."""
 
     kind: Literal["xyz"]
@@ -113,13 +138,13 @@ class XyzPosition(Contract):
     z: str
 
 
-class DatasetSchema(Contract):
+class DatasetSchema(SchemaModel):
     dataset: str
     table: str
     description: str
     id: str = "id"
     position: GeoPosition | XyzPosition = Field(discriminator="kind")
-    columns: list[Column]
+    columns: list[Column] = Field(max_length=64)
     default_color_by: str | None = None
     default_size_by: str | None = None
     row_count: int | None = None
@@ -129,18 +154,22 @@ class DatasetSchema(Contract):
 
     def position_columns(self) -> list[str]:
         p = self.position
-        cols = [p.lat, p.lon, p.depth] if isinstance(p, GeoPosition) else [p.x, p.y, p.z]
-        return [c for c in cols if c]
+        if isinstance(p, GeoPosition):
+            return [c for c in (p.lat, p.lon, p.depth, p.height) if c]
+        return [p.x, p.y, p.z]
 
+
+QueryRequest.model_rebuild()
+ExplainRequest.model_rebuild()
 
 # Models exported to TypeScript, with the JSON Schema mode each is exported in.
-# Specs/requests/responses always carry every field ("serialization"); dataset
-# schema files may omit optional keys ("validation").
+# One mode for all, so each model gets a single TS type (SchemaModel keeps
+# dataset-schema defaults optional either way).
 EXPORTED = {
     QuerySpec: "serialization",
     QueryRequest: "serialization",
     CompileRequest: "serialization",
     ExplainRequest: "serialization",
     QueryResponse: "serialization",
-    DatasetSchema: "validation",
+    DatasetSchema: "serialization",
 }

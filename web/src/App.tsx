@@ -1,6 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { CsvMapping } from './data/csvSchema.ts';
+import type { CsvImport } from './scene/loadCsv.ts';
 import { config } from './config.ts';
 import { BaselinePanel, TaskPanel } from './hud/BaselinePanels.tsx';
+import { CsvDrop } from './hud/CsvPanel.tsx';
 import { DebugPanel } from './hud/DebugPanel.tsx';
 import { GlassBox, Legend, Stats } from './hud/Hud.tsx';
 import { StudyPanel } from './hud/StudyPanel.tsx';
@@ -18,6 +21,14 @@ export function App() {
   const [tasksOpen, setTasksOpen] = useState(false);
   const [baseline, setBaseline] = useState(false);
   const [study] = useState(() => new StudyHost());
+  const importCsv = useCallback((file: File) => {
+    if (!runtime.current) return Promise.reject(new Error('still starting'));
+    return runtime.current.importCsv(file);
+  }, []);
+  const finishCsv = useCallback(
+    (imp: CsvImport, mapping: CsvMapping) => runtime.current?.finishCsv(imp, mapping) ?? Promise.resolve(), // prettier-ignore
+    [],
+  );
 
   useEffect(() => {
     if (!sceneRef.current || !camRef.current) return;
@@ -71,6 +82,7 @@ export function App() {
         />
       )}
       {tasksOpen && <TaskPanel mode={baseline ? 'mouse' : 'hands'} />}
+      <CsvDrop importCsv={importCsv} finishCsv={finishCsv} />
     </>
   );
 }

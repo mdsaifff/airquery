@@ -9,7 +9,7 @@ import type { LoadedDataset } from './scene/loadDataset.ts';
 
 export class Datasets {
   active: string;
-  private readonly names: readonly string[];
+  private readonly names: string[];
   private readonly scene: THREE.Scene;
   private readonly db: Promise<Db>;
   private readonly depsFor: (name: string) => SessionDeps;
@@ -23,7 +23,7 @@ export class Datasets {
     db: Promise<Db>,
     depsFor: (name: string) => SessionDeps,
   ) {
-    this.names = names;
+    this.names = [...names];
     this.active = names[0];
     this.scene = scene;
     this.db = db;
@@ -55,6 +55,15 @@ export class Datasets {
       this.loading.set(name, p);
     }
     return p;
+  }
+
+  /** Add a dataset built in the browser (a dropped CSV) to the swipe order. */
+  addCustom(name: string, d: LoadedDataset): void {
+    this.loaded.get(name)?.cloud.dispose(); // same file dropped again
+    if (!this.names.includes(name)) this.names.push(name);
+    this.loaded.set(name, d);
+    this.loading.set(name, Promise.resolve(d));
+    this.sessions.delete(name);
   }
 
   /** The dataset a swipe would show next (left = next, right = previous). */

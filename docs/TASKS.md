@@ -261,7 +261,8 @@ on the deployed site. Ask the user to record the hero take.
   - Note: LLM only classifies `explain`; the frontend collects visible ids near the pointer (front side on globes), `POST /explain` -> `compile_explain` (schema-driven avg/min/max, mode of categorical/region) -> DuckDB -> deterministic sentence -> toast + speechSynthesis; SQL shown in the glass box. Verified headless: 'This cluster has 569 earthquakes, 216 km deep on average, up to magnitude 7.3, mostly near Vanuatu.'
 - [x] **T5.3 Air lasso** — trace a loop with the index finger to select points.
   - Note: hold 🤟 (built-in ILoveYou) and trace with the index finger; new `lassoing` state; Shift+drag is the mouse fallback. Pure point-in-polygon selection in screen space (front side only on globes); selection focuses the scene, feeds 'what's this?', Esc or a new query clears. Verified headless: lasso -> 413 selected (no rotation) -> summary of those 413 -> Esc restores. Feel check by hand pending (user).
-- [ ] **T5.4 Bring your own CSV** — drop a CSV, infer `DatasetSchema`, pick
+- [x] **T5.4 Bring your own CSV** — drop a CSV, infer `DatasetSchema`, pick
   position columns.
+  - Note: drop a CSV anywhere -> DuckDB read_csv_auto in the browser (cap `csvMaxRows`, adds `__id`) -> lat/lon guessed from names, user confirms + optional height column -> schema inferred in JS (types, min/max, examples, categorical) -> points on the globe (height rises above the surface), added to the swipe order. `/query` and `/explain` accept `dataset_schema` for `user_*` datasets (Pydantic-validated, size-capped; SQL still only from compile_sql and runs in the user's own browser). Verified headless: 400-row CSV mapped, shown, and the agent answered using its columns. Ceiling: city-scale data looks small on a whole-Earth globe; a local map projection is the upgrade.
 - [ ] **T5.5 Custom gesture** — MediaPipe Model Maker notebook (Colab or
   Kaggle), export `.task`, load as custom classifier.

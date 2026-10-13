@@ -80,6 +80,9 @@ export interface DatasetSchema {
   description: string;
   id?: string;
   position: GeoPosition | XyzPosition;
+  /**
+   * @maxItems 64
+   */
   columns: Column[];
   default_color_by?: string | null;
   default_size_by?: string | null;
@@ -94,6 +97,7 @@ export interface GeoPosition {
   lat: string;
   lon: string;
   depth?: string | null;
+  height?: string | null;
 }
 /**
  * Points already laid out in 3D (e.g. a UMAP of embeddings), scene units ~[-1, 1].
@@ -120,6 +124,7 @@ export interface ExplainRequest {
    * @maxItems 5000
    */
   ids: [string, ...string[]];
+  dataset_schema: DatasetSchema | null;
 }
 /**
  * This interface was referenced by `AirQueryContracts`'s JSON-Schema
@@ -129,6 +134,7 @@ export interface QueryRequest {
   dataset: string;
   utterance: string;
   current_spec: QuerySpec | null;
+  dataset_schema: DatasetSchema | null;
 }
 /**
  * This interface was referenced by `AirQueryContracts`'s JSON-Schema

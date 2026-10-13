@@ -44,6 +44,16 @@ export class Db {
     await this.conn.query(`CREATE TABLE ${ds} AS SELECT * FROM '${ds}.parquet'`);
   }
 
+  /** A dropped CSV as table `name` (with a string row id `__id`), capped at maxRows. */
+  async addCsv(name: string, file: File, maxRows: number): Promise<void> {
+    if (!/^user_[a-z0-9_]{1,40}$/.test(name)) throw new Error(`bad dataset name: ${name}`);
+    await this.db.registerFileBuffer(`${name}.csv`, new Uint8Array(await file.arrayBuffer()));
+    await this.conn.query(
+      `CREATE OR REPLACE TABLE ${name} AS SELECT CAST(row_number() OVER () AS VARCHAR) AS __id, * ` +
+        `FROM read_csv_auto('${name}.csv') LIMIT ${Math.floor(maxRows)}`,
+    );
+  }
+
   readonly run: RunQuery = async (sql, params = []) => {
     const stmt = await this.conn.prepare(sql);
     try {

@@ -30,6 +30,8 @@
     "Column": {
       "properties": {
         "name": {
+          "maxLength": 64,
+          "minLength": 1,
           "title": "Name",
           "type": "string"
         },
@@ -172,6 +174,7 @@
           "items": {
             "$ref": "#/$defs/Column"
           },
+          "maxItems": 64,
           "title": "Columns",
           "type": "array"
         },
@@ -237,11 +240,23 @@
           "minItems": 1,
           "title": "Ids",
           "type": "array"
+        },
+        "dataset_schema": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatasetSchema"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
         "dataset",
-        "ids"
+        "ids",
+        "dataset_schema"
       ],
       "title": "ExplainRequest",
       "type": "object"
@@ -333,6 +348,18 @@
           ],
           "default": null,
           "title": "Depth"
+        },
+        "height": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Height"
         }
       },
       "required": [
@@ -365,12 +392,24 @@
             }
           ],
           "default": null
+        },
+        "dataset_schema": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatasetSchema"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
         "dataset",
         "utterance",
-        "current_spec"
+        "current_spec",
+        "dataset_schema"
       ],
       "title": "QueryRequest",
       "type": "object"

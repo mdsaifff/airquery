@@ -17,6 +17,9 @@ import { HandPipeline } from './interaction/handPipeline.ts';
 import { attachMouse } from './interaction/mouseInput.ts';
 import type { StudyHost } from './interaction/study.ts';
 import { applyView } from './scene/applyView.ts';
+import { buildCsvDataset, centroid, importCsv } from './scene/loadCsv.ts';
+import type { CsvImport } from './scene/loadCsv.ts';
+import type { CsvMapping } from './data/csvSchema.ts';
 import { SceneManager } from './scene/sceneManager.ts';
 import { downloadJson, LandmarkRecorder } from './tracking/recorder.ts';
 import { startTracking } from './tracking/trackingLoop.ts';
@@ -46,6 +49,9 @@ export interface Runtime {
   resetView(): void;
   /** Typed-input fallback for every voice feature. */
   typed(text: string): void;
+  /** Bring your own CSV: load and guess the mapping, then build it once confirmed. */
+  importCsv(file: File): Promise<CsvImport>;
+  finishCsv(imp: CsvImport, mapping: CsvMapping): Promise<void>;
 }
 
 export function startRuntime(els: RuntimeElements): Runtime {
@@ -67,6 +73,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
   // --- datasets: each has its point cloud and its own query history ---
   const sessionDeps = (name: string): SessionDeps => ({
     dataset: name,
+    get datasetSchema() {
+      return name.startsWith('user_') ? datasets.get(name)?.schema : undefined;
+    },
     async ask(req) {
       hudStore.thinking = true;
       const t0 = performance.now();
@@ -264,6 +273,14 @@ export function startRuntime(els: RuntimeElements): Runtime {
       if (on) hands.dispatch({ kind: 'handsLost' }); // drop any drag / cursor / listening
     },
     applySpec: (spec) => void datasets.session().applySpec(spec),
+    importCsv: async (file) => importCsv(await db, file),
+    async finishCsv(imp, mapping) {
+      datasets.addCustom(imp.name, buildCsvDataset(sm.scene, imp, mapping));
+      await showDataset(imp.name, false);
+      const c = centroid(imp.base, mapping);
+      camera.flyTo(c.lat, c.lon, performance.now());
+      toast('info', `${imp.fileName}: ${imp.base.numRows.toLocaleString()} rows. Ask about them by voice.`); // prettier-ignore
+    },
     undo: () => datasets.session().undo(),
     resetView: () => camera.reset(performance.now()),
   };

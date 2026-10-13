@@ -489,3 +489,56 @@ body,
   stroke-width: 2;
   stroke-dasharray: 6 4;
 }
+
+/* --- bring your own CSV --- */
+.dropzone {
+  position: fixed;
+  inset: 24px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  border: 2px dashed var(--accent);
+  border-radius: 16px;
+  background: rgb(5 7 13 / 70%);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.csv {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(380px, calc(100vw - 2 * var(--gutter)));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+  z-index: 9;
+}
+
+.csv h2 {
+  margin: 0;
+  font-size: 15px;
+  word-break: break-all;
+}
+
+.csv label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.csv select {
+  padding: 4px 6px;
+  color: inherit;
+  background: #0f1726;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.csv .row {
+  display: flex;
+  gap: 8px;
+}

@@ -30,7 +30,8 @@ export async function explainHere(ctx: ExplainContext, name: string): Promise<vo
   if (picked.length === 0) return toast('info', 'Point at some points first, then ask again.');
   try {
     const [first, ...rest] = picked.slice(0, 5000).map((i) => ids[i]); // non-empty: checked above
-    const resp = await explainIds({ dataset: name, ids: [first, ...rest] });
+    const userSchema = name.startsWith('user_') ? d.schema : null;
+    const resp = await explainIds({ dataset: name, ids: [first, ...rest], dataset_schema: userSchema }); // prettier-ignore
     if (resp.status !== 'ok' || !resp.sql)
       return toast('error', resp.message ?? 'Could not summarize.');
     const sentence = explainSentence(name, firstRow(await (await db).run(resp.sql, resp.params)));

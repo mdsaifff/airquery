@@ -7,6 +7,8 @@ export interface Columns {
   /** Numeric, timestamp (epoch ms) and date (epoch ms) columns. */
   numbers: Map<string, Float64Array>;
   strings: Map<string, string[]>;
+  /** Which `numbers` columns were timestamps/dates (epoch ms). */
+  timeColumns?: Set<string>;
 }
 
 const MS_PER_TIME_UNIT: Record<TimeUnit, number> = {
@@ -28,7 +30,8 @@ function numbersOf(vec: Vector): ArrayLike<number | bigint> {
 }
 
 export function arrowToColumns(table: Table): Columns {
-  const cols: Columns = { numRows: table.numRows, numbers: new Map(), strings: new Map() };
+  const timeColumns = new Set<string>();
+  const cols: Columns = { numRows: table.numRows, numbers: new Map(), strings: new Map(), timeColumns }; // prettier-ignore
   for (const field of table.schema.fields) {
     const vec = table.getChild(field.name);
     if (!vec) continue;
@@ -37,9 +40,11 @@ export function arrowToColumns(table: Table): Columns {
       cols.numbers.set(field.name, toFloat64(numbersOf(vec)));
     } else if (DataType.isTimestamp(type)) {
       cols.numbers.set(field.name, toFloat64(numbersOf(vec), MS_PER_TIME_UNIT[type.unit]));
+      timeColumns.add(field.name);
     } else if (DataType.isDate(type)) {
       const scale = type.unit === DateUnit.DAY ? 86_400_000 : 1;
       cols.numbers.set(field.name, toFloat64(numbersOf(vec), scale));
+      timeColumns.add(field.name);
     } else {
       cols.strings.set(field.name, Array.from(vec.toArray() as ArrayLike<unknown>, String));
     }

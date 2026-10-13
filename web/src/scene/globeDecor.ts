@@ -5,6 +5,17 @@ import { geoToXYZ } from './geo.ts';
 /** [lon, lat, lon, lat, ...] polylines in degrees. */
 export type Polylines = number[][];
 
+let coastlines: Promise<Polylines | null> | null = null;
+
+/** Natural Earth coastlines, fetched once; null if missing (the globe still works). */
+export function loadCoastlines(): Promise<Polylines | null> {
+  coastlines ??= fetch(new URL('data/coastlines.json', document.baseURI))
+    .then((r) => r.json() as Promise<{ lines: Polylines }>)
+    .then((d) => d.lines)
+    .catch(() => null);
+  return coastlines;
+}
+
 export function createGlobeDecor(coastlines: Polylines | null): THREE.Group {
   // Faint fill drawn first; an invisible depth-only sphere after the points
   // hides far-side lines without hiding the (sub-surface) points.
