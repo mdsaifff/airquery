@@ -245,6 +245,7 @@ on the deployed site. Ask the user to record the hero take.
 - [ ] **T4.6 README**
   - Do: GIF at top, one-line pitch, architecture diagram, measured results,
     how to run, decision highlights from `docs/DECISIONS.md`.
+  - Note: DRAFTED (box open): pitch, Mermaid architecture diagram, results table (targets + how each number is produced; rows say pending until measured), run/controls, deploy, decision highlights. Needs: demo GIF at docs/media/demo.gif and real numbers from make eval / make latency / the gesture study.
 
 **Gate 4:** README shows real numbers; launch post is published.
 

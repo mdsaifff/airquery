@@ -1,26 +1,95 @@
 # AirQuery
 
-Explore a 3D dataset with your hands and ask questions out loud.
+<!-- Demo GIF goes here: record the hero take (docs/PRD.md), export ~10 s as
+docs/media/demo.gif, then uncomment the next line.
+![AirQuery demo: rotating an earthquake globe by hand and filtering it by voice](docs/media/demo.gif)
+-->
 
-Work in progress. See `docs/PRD.md` for the spec and `docs/TASKS.md` for progress.
+**Explore a 3D dataset with your hands and ask questions out loud.** Hand tracking
+moves the camera; your voice becomes a validated query that runs locally in DuckDB;
+the scene re-renders in about a second. Runs in a browser on a normal laptop, no GPU.
 
-## Run locally
+The first scene is a year of earthquakes (USGS, 2024, M4.5+) plotted at their real
+depth inside the globe. Say *"only show quakes deeper than 300 kilometres"*, then
+*"colour them by magnitude"*, and watch the subducting slabs light up.
+
+## How it works
+
+```mermaid
+flowchart LR
+  subgraph Browser
+    cam[Webcam] --> mp[MediaPipe<br/>hand tracking]
+    mp --> gest[Smoothing +<br/>gesture rules]
+    gest --> sm[State machine]
+    sm -->|camera events| scene[three.js scene]
+    mic[Mic] --> stt[Speech to text]
+    duck[(DuckDB-Wasm<br/>Parquet)] -->|result ids| scene
+  end
+  subgraph Agent[Python agent]
+    parse[LLM fills QuerySpec] --> val[Validate<br/>Pydantic + schema]
+    val -->|invalid, max 2| parse
+    val --> merge[Refine merge] --> comp[compile_sql<br/>parameterized SQL]
+  end
+  stt -->|utterance + current spec| parse
+  comp -->|spec + SQL + params| duck
+```
+
+- **The LLM never writes SQL.** It fills a typed `QuerySpec`; deterministic code
+  validates it against the dataset schema (known columns, operators that fit the
+  type, values in range) and compiles it to SQL with bound parameters.
+- **Two loops, one scene.** Hand tracking runs every frame in the browser; the
+  voice loop makes one round trip to the agent. Rendering never waits on either.
+- **Nothing visual leaves the laptop.** Webcam frames stay in the browser; only
+  the transcript text goes to the agent.
+- **One contract, two languages.** `QuerySpec` is defined in Pydantic and the
+  TypeScript types are generated from its JSON Schema; tests fail if they drift.
+
+## Measured results
+
+Measured on the demo laptop (Chrome, plugged in). Method: `docs/EVAL.md`.
+
+| What | Target | Result |
+| --- | --- | --- |
+| Rendering | 60 fps | pending: HUD readout during a 2-min session |
+| Hand tracking | ≥ 25 fps | pending: HUD readout |
+| Voice → render latency (median) | < 1.5 s | pending: `make latency` (press **M** in the app for frontend timings) |
+| Query accuracy, result-set match (100 utterances) | ≥ 90 % | pending: `make eval` |
+| Gesture accuracy per gesture (5 people × 7 gestures × 20 tries) | ≥ 95 % | pending: study panel (**G**) + `make gestures` |
+| False triggers while talking | < 1 per 5 min | pending: study panel counter |
+| Invalid SQL reaching DuckDB | 0 | 0 by construction (every spec is validated, then compiled from a whitelist); checked by `make eval` |
+
+Ablations (repair loop on/off, model tiers, accuracy vs cost vs latency) land in
+`eval/reports/` via `make eval` + `make ablation`.
+
+## Run it
 
 Needs Node.js LTS, Python 3.12, [uv](https://docs.astral.sh/uv/) and GNU make.
 
 ```bash
-cp agent/.env.example agent/.env   # then set LLM_PROVIDER / LLM_MODEL / LLM_API_KEY
+cp agent/.env.example agent/.env   # set LLM_PROVIDER / LLM_MODEL / LLM_API_KEY
 make dev    # web on http://localhost:5173, agent on http://localhost:8000
-make test
+make test   # Vitest + pytest (agent, data_prep, eval)
 make lint
+make data   # re-download and rebuild the Parquet + schema (the 2024 set is committed)
 ```
 
 No API key yet? `cd agent && uv run python scripts/fake_agent.py` serves the real
-agent with a keyword-matching stand-in for the LLM (understands "deeper than 300",
-"colour them by magnitude", "the ten strongest", "near Japan", "undo", ...).
+agent with a keyword-matching stand-in for the LLM ("deeper than 300", "colour them
+by magnitude", "the ten strongest", "near Japan", "undo", ...).
 
-Keyboard: hold **space** to talk, **R** reset view, **Z** undo, **D** debug panel
-(dev), **Shift+R** record a landmark fixture (dev). Mouse: drag to rotate, wheel to zoom.
+| Input | Hands | Keyboard / mouse |
+| --- | --- | --- |
+| Move cursor, hover a quake | point (index finger up) | mouse |
+| Rotate | pinch and drag | drag |
+| Zoom | pinch with both hands, pull apart / together | wheel |
+| Talk | hold a victory sign ✌ | hold **space**, or type in the box |
+| Undo | hold thumb down 👎 | **Z** |
+| Reset view | hold open palm ✋ (0.5 s) | **R** |
+| Freeze the scene while repositioning | closed fist ✊ | – |
+
+Study tools: **G** gesture study + false-trigger counter, **B** mouse baseline
+(dropdown filters), **T** task timer, **M** download frontend timings.
+Dev only: **D** tuning panel, **Shift+R** record a landmark fixture.
 
 ## Deploy
 
@@ -38,31 +107,40 @@ make docker-agent && docker run --env-file agent/.env -p 8000:8000 airquery-agen
 VITE_AGENT_URL=http://localhost:8000 make preview      # http://localhost:4173
 ```
 
-Agent environment variables (set as secrets on the host, never in the web build):
+Agent environment variables (secrets on the host, never in the web build):
 `LLM_PROVIDER`, `LLM_MODEL`, `LLM_API_KEY`, `WEB_ORIGIN` (comma-separated allowed
-origins, e.g. `https://airquery.example`), `RATE_LIMIT_PER_MIN`. The image reads
-its `DatasetSchema` files from `/app/data` and listens on `$PORT` (default 8000).
+origins), `RATE_LIMIT_PER_MIN`. The image reads its `DatasetSchema` files from
+`/app/data` and listens on `$PORT` (default 8000).
 
-### Host options
+**Hosts.** Web: Netlify, Vercel or GitHub Pages (the DuckDB-Wasm binaries are
+~36–41 MB each, so Cloudflare Pages' 25 MiB file limit rules it out). Agent: Google
+Cloud Run (set min instances = 1 while recording to avoid cold starts), Fly.io,
+Render (free tier sleeps) or Railway.
 
-Web (static): **Netlify**, **Vercel** or **GitHub Pages** all work. The DuckDB-Wasm
-binaries are ~36–41 MB each, so **Cloudflare Pages** (25 MiB per-file limit) does
-not, unless DuckDB is switched to its jsDelivr bundles.
+## Design decisions
 
-Agent (container):
+Full log with context and consequences: `docs/DECISIONS.md`. Highlights:
 
-| Host | Notes |
-| --- | --- |
-| Google Cloud Run | Scales to zero; first request after idle pays a cold start (~1–3 s). Set min instances = 1 while recording. |
-| Fly.io | Small always-on machine; low latency if the region is near you. |
-| Render | Simple Docker deploys; free tier sleeps (slow first query). |
-| Railway | Docker deploys from the repo; usage-based pricing. |
+- **three.js, not deck.gl** (D-001): the globe needs points *below* the surface and
+  free camera pitch; one engine also covers the planned embedding galaxy.
+- **The LLM fills a spec, never SQL** (D-002): no injection, no hallucinated
+  columns, explainable failures, and evaluation by exact spec match.
+- **DuckDB-Wasm in a worker** (D-003): real SQL in milliseconds, no data leaves
+  the laptop, no database server to host.
+- **MediaPipe in its own frame-callback loop** (D-008): the JS API has no
+  `LIVE_STREAM` mode, so tracking runs beside the render loop, never inside it.
+- **The mouse baseline compiles through the agent too** (D-010): both arms of the
+  hands-vs-mouse study run identical, validated queries.
 
-For the demo video, pick something that stays warm: cold starts would show up
-in the voice→render counter.
+## Repo map
 
-### Privacy
+`web/` Vite + React + TypeScript frontend (three.js used imperatively) ·
+`agent/` FastAPI + LangGraph query service · `data_prep/` USGS → Parquet +
+schema · `eval/` utterance set, scoring, latency and gesture reports ·
+`docs/` spec, architecture, tasks, decisions, evaluation protocol.
+
+## Privacy
 
 Hand tracking runs fully in the browser; webcam frames never leave it. Only the
-transcript text goes to the agent. Note that Chrome's Web Speech API sends audio
-to Google for recognition (see `docs/DECISIONS.md`, D-004).
+transcript text goes to the agent. Chrome's Web Speech API sends audio to Google
+for recognition (D-004); the typed box is always available instead.
