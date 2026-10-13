@@ -1,0 +1,22 @@
+[project]
+name = "airquery-data-prep"
+version = "0.1.0"
+description = "Builds Parquet + DatasetSchema files for AirQuery"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "duckdb>=1.5.6",
+    "requests>=2.34.2",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.17.0",
+]

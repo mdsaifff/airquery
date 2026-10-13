@@ -13,7 +13,7 @@ Current phase: **0**
 
 ## Phase 0 — Project setup
 
-- [ ] **T0.1 Scaffold the monorepo**
+- [x] **T0.1 Scaffold the monorepo**
   - Do: create `web/` (Vite + React + TypeScript, strict), `agent/`
     (uv project, Python 3.12, FastAPI app with `GET /health`), `data_prep/`,
     `eval/`, root `Makefile` (`dev`, `test`, `lint`, `data`, `eval` targets;
