@@ -7,6 +7,7 @@ import { Db } from './data/db.ts';
 import type { SessionDeps } from './data/querySession.ts';
 import { Datasets } from './datasets.ts';
 import { explainHere } from './explainHere.ts';
+import { LassoSelect } from './lassoSelect.ts';
 import { CursorView, MODE_COLORS } from './hud/cursor.ts';
 import { Hover } from './hud/hover.ts';
 import { exportMetrics, metrics } from './hud/metrics.ts';
@@ -91,6 +92,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
     show(view, applied, endedAt) {
       const d = datasets.get(name);
       if (!d || datasets.active !== name) return;
+      lasso.selection = null; // a new query replaces any lasso focus
       const { shown, legend } = applyView(d.cloud, d.base, d.schema, d.idIndex, d.mask, view);
       Object.assign(hudStore, { shown, legend, glass: applied, total: d.cloud.count });
       latencyFrom = endedAt;
@@ -98,7 +100,10 @@ export function startRuntime(els: RuntimeElements): Runtime {
     flyTo: (lat, lon) => camera.flyTo(lat, lon, performance.now()),
     resetView: () => camera.reset(performance.now()),
     notify: toast,
-    explain: () => void explainHere({ datasets, hover, camera: sm.camera, db }, name),
+    explain: () => {
+      const ctx = { datasets, hover, camera: sm.camera, db, selection: () => lasso.selection };
+      void explainHere(ctx, name);
+    },
   });
 
   const db = Db.open();
@@ -156,11 +161,14 @@ export function startRuntime(els: RuntimeElements): Runtime {
     listening: (active) => voice.setListening(active),
     undo: () => datasets.session().undo(),
     switchScene,
+    lasso: (step, x, y) => lasso.step(step, x, y),
   });
   const studyHost = els.study;
   hands.listeners.push((e) => studyHost.onEvent(e, performance.now()));
   const hover = new Hover(els.sceneEl, sm.renderer.domElement);
   cleanups.push(() => hover.dispose());
+  const lasso = new LassoSelect(els.sceneEl, datasets, sm.camera);
+  cleanups.push(lasso.attachMouse(sm.renderer.domElement), () => lasso.dispose());
   if (import.meta.env.DEV) {
     // Dev-only handle for headless checks and console poking.
     const handle = { hud: hudStore, hands, camera, voice, datasets, switchScene };
@@ -226,6 +234,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
       datasets.session().undo();
     } else if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
       switchScene(e.code === 'ArrowLeft' ? 'left' : 'right');
+    } else if (e.code === 'Escape') {
+      lasso.clear();
     } else if (e.code === 'KeyM') {
       // Frontend timings for eval/latency.py.
       downloadJson(`frontend-timings-${Date.now()}.json`, exportMetrics(navigator.userAgent));

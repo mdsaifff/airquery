@@ -3,7 +3,8 @@
 // cursor and speech actions.
 import type { GestureEvent, Hand } from './types.ts';
 
-export type Mode = 'idle' | 'pointing' | 'rotating' | 'zooming' | 'clutched' | 'listening';
+export type Mode =
+  'idle' | 'pointing' | 'rotating' | 'zooming' | 'clutched' | 'listening' | 'lassoing';
 
 export interface InteractionState {
   mode: Mode;
@@ -32,7 +33,11 @@ export type Effect =
   | { kind: 'stopListening' }
   | { kind: 'resetView' }
   | { kind: 'undo' }
-  | { kind: 'switchScene'; direction: 'left' | 'right' };
+  | { kind: 'switchScene'; direction: 'left' | 'right' }
+  | { kind: 'lassoStart' }
+  | { kind: 'lassoPoint'; x: number; y: number }
+  | { kind: 'lassoEnd' }
+  | { kind: 'lassoCancel' };
 
 export const initialState: InteractionState = {
   mode: 'idle',
@@ -49,6 +54,7 @@ export function reduce(s: InteractionState, e: GestureEvent): Result {
   if (e.kind === 'handsLost') {
     const effects: Effect[] = [{ kind: 'hideCursor' }, { kind: 'stopDrag' }];
     if (s.mode === 'listening') effects.push({ kind: 'stopListening' });
+    if (s.mode === 'lassoing') effects.push({ kind: 'lassoCancel' });
     if (s.mode === 'clutched') effects.push({ kind: 'unfreeze' });
     return [{ ...initialState }, effects];
   }
@@ -72,9 +78,16 @@ export function reduce(s: InteractionState, e: GestureEvent): Result {
     return [s, []];
   }
 
+  if (e.kind === 'lasso') {
+    if (e.active && s.mode === 'pointing') return [{ ...s, mode: 'lassoing' }, [{ kind: 'lassoStart' }]]; // prettier-ignore
+    if (!e.active && s.mode === 'lassoing') return [{ ...s, mode: 'pointing' }, [{ kind: 'lassoEnd' }]]; // prettier-ignore
+    return [s, []];
+  }
+
   if (e.kind === 'cursor') {
     const move: Effect = { kind: 'moveCursor', x: e.x, y: e.y };
     if (s.mode === 'idle') return [{ ...s, mode: 'pointing' }, [{ kind: 'showCursor' }, move]];
+    if (s.mode === 'lassoing') return [s, [move, { kind: 'lassoPoint', x: e.x, y: e.y }]];
     return [s, [move]];
   }
 

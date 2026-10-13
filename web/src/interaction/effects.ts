@@ -11,6 +11,7 @@ export interface EffectTargets {
   listening(active: boolean): void;
   undo(): void;
   switchScene(direction: 'left' | 'right'): void;
+  lasso(step: 'start' | 'point' | 'end' | 'cancel', x?: number, y?: number): void;
 }
 
 export function applyEffects(effects: readonly Effect[], t: EffectTargets, now: number): void {
@@ -61,6 +62,18 @@ export function applyEffects(effects: readonly Effect[], t: EffectTargets, now: 
         break;
       case 'switchScene':
         t.switchScene(e.direction);
+        break;
+      case 'lassoStart':
+        t.lasso('start');
+        break;
+      case 'lassoPoint':
+        t.lasso('point', e.x, e.y);
+        break;
+      case 'lassoEnd':
+        t.lasso('end');
+        break;
+      case 'lassoCancel':
+        t.lasso('cancel');
         break;
     }
   }

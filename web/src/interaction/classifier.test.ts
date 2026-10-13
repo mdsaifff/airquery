@@ -104,6 +104,13 @@ describe('GestureClassifier (synthetic hands)', () => {
     expect(run(20, (i) => [right({ pose: 'victory', gesture: i === 5 || i === 6 ? 'Victory' : 'None' })])).toEqual([]); // prettier-ignore
   });
 
+  it('🤟 held: lasso on while held, off on release', () => {
+    expect(run(30, (i) => [right({ gesture: i >= 5 && i < 20 ? 'ILoveYou' : 'None' })])).toEqual([
+      'lasso:on',
+      'lasso:off',
+    ]);
+  });
+
   it('low-confidence labels are ignored', () => {
     expect(run(40, () => [right({ pose: 'victory', gesture: 'Victory', score: 0.3 })])).toEqual([]);
   });

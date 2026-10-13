@@ -62,6 +62,7 @@ export class GestureClassifier {
   private readonly hands = new Map<Hand, HandState>();
   private clutch = false;
   private talk = false;
+  private lasso = false;
   private hold: Hold | null = null;
   private zoomDist: number | null = null;
   private lastHandsAt = -Infinity;
@@ -143,6 +144,8 @@ export class GestureClassifier {
     if (clutch !== this.clutch) ev.push({ kind: 'clutch', active: (this.clutch = clutch) });
     const talk = labels.includes('Victory');
     if (talk !== this.talk) ev.push({ kind: 'talk', active: (this.talk = talk) });
+    const lasso = labels.includes('ILoveYou');
+    if (lasso !== this.lasso) ev.push({ kind: 'lasso', active: (this.lasso = lasso) });
     this.updateHold(t, ev);
 
     if (frame.hands.length > 0) {

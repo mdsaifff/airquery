@@ -12,4 +12,5 @@ export type GestureEvent =
   | { kind: 'clutch'; active: boolean }
   | { kind: 'talk'; active: boolean }
   | { kind: 'swipe'; direction: 'left' | 'right' } // switch scene
+  | { kind: 'lasso'; active: boolean } // 🤟 held: trace a loop with the index finger
   | { kind: 'handsLost' };

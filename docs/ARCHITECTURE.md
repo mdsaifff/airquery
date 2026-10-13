@@ -189,13 +189,15 @@ type GestureEvent =
   | { kind: 'clutch'; active: boolean }
   | { kind: 'talk'; active: boolean }
   | { kind: 'swipe'; direction: 'left' | 'right' }               // switch scene (stretch)
+  | { kind: 'lasso'; active: boolean }                           // 🤟 held: air lasso (stretch)
   | { kind: 'handsLost' };
 type HoldGesture = 'reset' | 'undo';
 ```
 
 ## Interaction state machine
 
-States: `idle`, `pointing`, `rotating`, `zooming`, `clutched`, `listening`.
+States: `idle`, `pointing`, `rotating`, `zooming`, `clutched`, `listening`,
+`lassoing` (stretch).
 
 | From | Event | To | Side effect |
 | --- | --- | --- | --- |
@@ -212,6 +214,9 @@ States: `idle`, `pointing`, `rotating`, `zooming`, `clutched`, `listening`.
 | listening | talk inactive | pointing | stop STT, send utterance |
 | pointing | fire reset / undo | pointing | reset view / pop history |
 | pointing / idle | swipe | (same) | switch scene (left = next) |
+| pointing | lasso active | lassoing | start loop |
+| lassoing | cursor | lassoing | add loop point |
+| lassoing | lasso inactive | pointing | select points inside the loop |
 | any | handsLost (> 500 ms) | idle | hide cursor, stop drag |
 
 The state machine is a pure reducer: `(state, event) => [state, effects[]]`.

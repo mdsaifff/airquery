@@ -46,6 +46,10 @@ const TABLE: Row[] = [
   { row: 'pointing + fire undo', from: st('pointing'), event: { kind: 'fire', gesture: 'undo' }, to: 'pointing', effects: ['undo'] },
   { row: 'pointing + swipe', from: st('pointing'), event: { kind: 'swipe', direction: 'left' }, to: 'pointing', effects: ['switchScene'] },
   { row: 'idle + swipe', from: st('idle'), event: { kind: 'swipe', direction: 'right' }, to: 'idle', effects: ['switchScene'] },
+  { row: 'pointing + lasso active', from: st('pointing'), event: { kind: 'lasso', active: true }, to: 'lassoing', effects: ['lassoStart'] },
+  { row: 'lassoing + cursor', from: st('lassoing'), event: { kind: 'cursor', x: 5, y: 6 }, to: 'lassoing', effects: ['moveCursor', 'lassoPoint'] },
+  { row: 'lassoing + lasso inactive', from: st('lassoing'), event: { kind: 'lasso', active: false }, to: 'pointing', effects: ['lassoEnd'] },
+  { row: 'lassoing + handsLost', from: st('lassoing'), event: { kind: 'handsLost' }, to: 'idle', effects: ['hideCursor', 'stopDrag', 'lassoCancel'] },
   ...(['idle', 'pointing', 'rotating', 'zooming'] as const).map((m): Row => ({
     row: `${m} + handsLost`, from: m === 'rotating' ? rotating : st(m), event: { kind: 'handsLost' }, to: 'idle', effects: ['hideCursor', 'stopDrag'],
   })),
@@ -102,6 +106,7 @@ describe('interaction state machine: details', () => {
 
   it('moves the cursor in every non-idle state', () => {
     for (const mode of ['pointing', 'rotating', 'zooming', 'clutched', 'listening'] as Mode[]) {
+      // (lassoing also adds a lassoPoint: covered by the table)
       expect(reduce(st(mode), { kind: 'cursor', x: 3, y: 4 })[1]).toEqual([
         { kind: 'moveCursor', x: 3, y: 4 },
       ]);

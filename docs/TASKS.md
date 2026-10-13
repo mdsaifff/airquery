@@ -259,7 +259,8 @@ on the deployed site. Ask the user to record the hero take.
 - [x] **T5.2 "What's this?"** — selection summary via the agent (`explain`
   intent, aggregates computed in DuckDB, not by the LLM) + speechSynthesis.
   - Note: LLM only classifies `explain`; the frontend collects visible ids near the pointer (front side on globes), `POST /explain` -> `compile_explain` (schema-driven avg/min/max, mode of categorical/region) -> DuckDB -> deterministic sentence -> toast + speechSynthesis; SQL shown in the glass box. Verified headless: 'This cluster has 569 earthquakes, 216 km deep on average, up to magnitude 7.3, mostly near Vanuatu.'
-- [ ] **T5.3 Air lasso** — trace a loop with the index finger to select points.
+- [x] **T5.3 Air lasso** — trace a loop with the index finger to select points.
+  - Note: hold 🤟 (built-in ILoveYou) and trace with the index finger; new `lassoing` state; Shift+drag is the mouse fallback. Pure point-in-polygon selection in screen space (front side only on globes); selection focuses the scene, feeds 'what's this?', Esc or a new query clears. Verified headless: lasso -> 413 selected (no rotation) -> summary of those 413 -> Esc restores. Feel check by hand pending (user).
 - [ ] **T5.4 Bring your own CSV** — drop a CSV, infer `DatasetSchema`, pick
   position columns.
 - [ ] **T5.5 Custom gesture** — MediaPipe Model Maker notebook (Colab or

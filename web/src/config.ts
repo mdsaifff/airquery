@@ -67,6 +67,8 @@ export const config = {
   farSideDim: 0.6,
   /** Hover picks the nearest point within this radius (px). */
   pickRadiusPx: 14,
+  /** Lasso path keeps a point every this many px of cursor travel (px). */
+  lassoMinStepPx: 6,
   /** "What's this?" summarizes visible points within this radius of the pointer (px). */
   explainRadiusPx: 70,
   /** Fade time for points entering/leaving a filter (ms). */
