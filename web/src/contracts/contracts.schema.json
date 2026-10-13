@@ -149,6 +149,18 @@
           "default": null,
           "title": "Default Color By"
         },
+        "default_size_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default Size By"
+        },
         "row_count": {
           "anyOf": [
             {

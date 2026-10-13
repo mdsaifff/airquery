@@ -38,6 +38,7 @@ export interface DatasetSchema {
   position: GeoPosition;
   columns: Column[];
   default_color_by?: string | null;
+  default_size_by?: string | null;
   row_count?: number | null;
 }
 /**

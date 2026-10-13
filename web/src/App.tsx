@@ -65,11 +65,6 @@ export function App() {
       {debug && <DebugPanel />}
       <TranscriptBar onSubmit={(text) => runtime.current?.typed(text)} />
       <Toasts />
-      {/* Temporary (T1.5): proves a parameterized query changes the scene. */}
-      <div className="temp-controls">
-        <button onClick={() => void runtime.current?.depthFilter(300)}>deeper than 300 km</button>
-        <button onClick={() => void runtime.current?.depthFilter(null)}>show all</button>
-      </div>
     </>
   );
 }

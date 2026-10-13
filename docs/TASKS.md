@@ -193,12 +193,13 @@ Tune `config.ts` and repeat until met.
   - Done when: interface has a fake implementation used in tests.
   - Needs you: test in Chrome; say 5 commands and note any mis-transcriptions.
   - Note: verified headless: typed input submits; spacebar drives idle->listening->idle through the state machine. `FakeSpeechToText` drives the `VoiceController` tests. Dev-only `window.__airquery` handle for headless checks. Chrome mic test pending (user).
-- [ ] **T3.8 Wire voice to scene**
+- [x] **T3.8 Wire voice to scene**
   - Do: send utterance + current spec, validate response with zod, run SQL in
     DuckDB, animate points out/in, update legend; history stack for undo and
     reset; handle `clarify` and `rejected` with toasts.
   - Done when: an end-to-end test with a mocked agent response updates the
     point buffer.
+  - Note: `QuerySession` (history stack) + `applyView`; zod schemas carry compile-time equality checks against the generated types. E2E test drives mocked agent JSON through zod, session, fake DuckDB and a real GlobeScene buffer. Also verified in headless Chrome against `agent/scripts/fake_agent.py` (keyword MockLLM, dev only): filter -> refine colour -> Z undo -> clarify toast. Added `default_size_by` to DatasetSchema. Open palm/R reset the camera; spoken 'reset' clears queries too.
 - [ ] **T3.9 HUD**
   - Do: glass box (spec as compact JSON + SQL), transcript strip, latency
     counter (voice-to-render), mic indicator, toasts. Clean layout for video.

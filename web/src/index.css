@@ -45,14 +45,6 @@ body,
   touch-action: none;
 }
 
-.temp-controls {
-  position: fixed;
-  left: 16px;
-  bottom: 16px;
-  display: flex;
-  gap: 8px;
-}
-
 .debug-panel {
   position: fixed;
   top: 12px;

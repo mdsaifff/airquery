@@ -96,6 +96,7 @@ class DatasetSchema(Contract):
     position: GeoPosition
     columns: list[Column]
     default_color_by: str | None = None
+    default_size_by: str | None = None
     row_count: int | None = None
 
     def column(self, name: str) -> Column | None:

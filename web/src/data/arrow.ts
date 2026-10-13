@@ -46,3 +46,19 @@ export function arrowToColumns(table: Table): Columns {
   }
   return cols;
 }
+
+export function numbers(cols: Columns, name: string): Float64Array {
+  const col = cols.numbers.get(name);
+  if (!col) throw new Error(`missing column ${name}`);
+  return col;
+}
+
+export function range(values: ArrayLike<number>): [number, number] {
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (let i = 0; i < values.length; i++) {
+    if (values[i] < lo) lo = values[i];
+    if (values[i] > hi) hi = values[i];
+  }
+  return [lo, hi];
+}

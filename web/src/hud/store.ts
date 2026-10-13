@@ -2,7 +2,9 @@
 // components poll it (useTick) instead of holding per-frame data in state.
 import { useEffect, useState } from 'react';
 
+import type { QuerySpec } from '../contracts/contracts.ts';
 import type { Mode } from '../interaction/stateMachine.ts';
+import type { Legend } from '../scene/applyView.ts';
 
 export const hudStore = {
   mode: 'idle' as Mode,
@@ -25,6 +27,14 @@ export const hudStore = {
   transcript: '',
   transcriptFinal: false,
   toasts: [] as Toast[],
+  /** What is on screen: the spec, and the exact SQL + params DuckDB ran ("glass box"). */
+  glass: { spec: null as QuerySpec | null, sql: null as string | null, params: [] as unknown[] },
+  legend: null as Legend | null,
+  /** Last voice-to-render latency (ms) and the agent's per-stage timings. */
+  latencyMs: 0,
+  timings: {} as Record<string, number>,
+  /** A request is waiting on the agent. */
+  thinking: false,
 };
 
 export interface Toast {

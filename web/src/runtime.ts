@@ -1,7 +1,8 @@
-// Wires the imperative parts together (tracking, scene, data). React only
-// mounts the DOM elements and the HUD; it never sees per-frame data.
+// Wires the imperative parts together (tracking, scene, data, voice, agent).
+// React only mounts the DOM elements and the HUD; it never sees per-frame data.
 import { config } from './config.ts';
-import { maskFromResult } from './data/resultMask.ts';
+import { askAgent } from './data/agentClient.ts';
+import { QuerySession } from './data/querySession.ts';
 import { CursorView, MODE_COLORS } from './hud/cursor.ts';
 import { Hover } from './hud/hover.ts';
 import { metrics } from './hud/metrics.ts';
@@ -9,6 +10,7 @@ import { hudStore, toast } from './hud/store.ts';
 import { CameraController, orbitPosition } from './interaction/cameraController.ts';
 import { HandPipeline } from './interaction/handPipeline.ts';
 import { attachMouse } from './interaction/mouseInput.ts';
+import { applyView } from './scene/applyView.ts';
 import { loadGlobe } from './scene/loadGlobe.ts';
 import type { LoadedGlobe } from './scene/loadGlobe.ts';
 import { SceneManager } from './scene/sceneManager.ts';
@@ -24,8 +26,6 @@ export interface RuntimeElements {
 
 export interface Runtime {
   dispose(): void;
-  /** Temporary (T1.5): show only quakes deeper than km, via a DuckDB prepared statement. */
-  depthFilter(km: number | null): Promise<void>;
   /** Typed-input fallback for every voice feature. */
   typed(text: string): void;
 }
@@ -33,6 +33,10 @@ export interface Runtime {
 export function startRuntime(els: RuntimeElements): Runtime {
   let disposed = false;
   const cleanups: (() => void)[] = [];
+  let data: LoadedGlobe | null = null;
+  let mask = new Uint8Array(0);
+  /** performance.now() when the last voice/typed request ended; cleared on the next frame. */
+  let latencyFrom: number | null = null;
 
   // --- scene + camera (render loop) ---
   const sm = new SceneManager(els.sceneEl);
@@ -43,6 +47,40 @@ export function startRuntime(els: RuntimeElements): Runtime {
     distance: config.cameraHomeDistance,
   });
   cleanups.push(attachMouse(sm.renderer.domElement, camera));
+
+  // --- queries: agent -> DuckDB -> globe, with undo/reset history ---
+  const session = new QuerySession({
+    dataset: 'quakes',
+    async ask(req) {
+      hudStore.thinking = true;
+      try {
+        const resp = await askAgent(req);
+        hudStore.timings = resp.timings_ms;
+        return resp;
+      } finally {
+        hudStore.thinking = false;
+      }
+    },
+    async run(sql, params) {
+      if (!data) throw new Error('data is still loading');
+      const t0 = performance.now();
+      const result = await data.db.run(sql, params);
+      hudStore.queryMs = performance.now() - t0;
+      metrics.query.push(hudStore.queryMs);
+      return result;
+    },
+    show(view, applied, endedAt) {
+      if (!data) return;
+      const { shown, legend } = applyView(data.globe, data.base, data.schema, data.idIndex, mask, view); // prettier-ignore
+      hudStore.shown = shown;
+      hudStore.legend = legend;
+      hudStore.glass = applied;
+      latencyFrom = endedAt;
+    },
+    flyTo: (lat, lon) => camera.flyTo(lat, lon, performance.now()),
+    resetView: () => camera.reset(performance.now()),
+    notify: toast,
+  });
 
   // --- voice: push-to-talk -> transcript -> utterance ---
   const voice = new VoiceController(
@@ -57,7 +95,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       },
       error: (message) => toast('error', message),
     },
-    (utterance) => toast('info', `heard: ${utterance}`), // T3.8 sends this to the agent
+    (utterance, endedAt) => void session.submit(utterance, endedAt),
   );
 
   // --- gestures -> state machine -> camera / cursor / voice ---
@@ -68,17 +106,22 @@ export function startRuntime(els: RuntimeElements): Runtime {
     rotateGain: config.handRotateGain,
     cursor: (visible, x, y) => cursor.set(visible, x, y),
     listening: (active) => voice.setListening(active),
-    undo: () => {},
+    undo: () => session.undo(),
   });
   const hover = new Hover(els.sceneEl, sm.renderer.domElement);
+  cleanups.push(() => hover.dispose());
   if (import.meta.env.DEV) {
     // Dev-only handle for headless checks and console poking.
-    Object.assign(window, { __airquery: { hud: hudStore, hands, camera, voice } });
+    Object.assign(window, { __airquery: { hud: hudStore, hands, camera, voice, session } });
   }
-  cleanups.push(() => hover.dispose());
 
-  let data: LoadedGlobe | null = null;
   sm.onFrame((now, dt) => {
+    if (latencyFrom !== null) {
+      // First frame after the scene changed: close the voice-to-render clock.
+      hudStore.latencyMs = now - latencyFrom;
+      metrics.voiceToRender.push(hudStore.latencyMs);
+      latencyFrom = null;
+    }
     const mode = hands.state.mode;
     cursor.style(mode, hands.hold?.progress ?? 0);
     hudStore.mode = mode;
@@ -98,7 +141,6 @@ export function startRuntime(els: RuntimeElements): Runtime {
   sm.start();
 
   // --- data ---
-  let mask = new Uint8Array(0);
   void loadGlobe(sm.scene)
     .then((loaded) => {
       if (disposed) {
@@ -107,6 +149,12 @@ export function startRuntime(els: RuntimeElements): Runtime {
       }
       data = loaded;
       mask = new Uint8Array(loaded.globe.count);
+      const { legend } = applyView(loaded.globe, loaded.base, loaded.schema, loaded.idIndex, mask, {
+        result: null,
+        colorBy: null,
+        sizeBy: null,
+      });
+      hudStore.legend = legend;
       hudStore.shown = hudStore.total = loaded.globe.count;
       hudStore.status = '';
       cleanups.push(() => {
@@ -135,7 +183,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
     }),
   );
 
-  // --- keyboard fallbacks ---
+  // --- keyboard fallbacks: space = talk, R = reset view, Z = undo ---
   const onKey = (e: KeyboardEvent) => {
     if (e.target instanceof HTMLInputElement || e.repeat) return;
     if (e.code === 'Space') {
@@ -145,6 +193,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
       recorder.start(performance.now(), config.recordDurationMs); // dev: record a fixture
     } else if (e.code === 'KeyR') {
       camera.reset(performance.now());
+    } else if (e.code === 'KeyZ') {
+      session.undo();
     }
   };
   const onKeyUp = (e: KeyboardEvent) => {
@@ -165,20 +215,5 @@ export function startRuntime(els: RuntimeElements): Runtime {
       cleanups.reverse().forEach((fn) => fn());
     },
     typed: (text) => voice.typed(text),
-    async depthFilter(km) {
-      if (!data) return;
-      const { globe, db, idIndex } = data;
-      if (km === null) {
-        globe.setVisibility(null);
-        hudStore.shown = globe.count;
-        return;
-      }
-      const t0 = performance.now();
-      const result = await db.run('SELECT id FROM quakes WHERE depth_km > ?', [km]);
-      hudStore.queryMs = performance.now() - t0;
-      metrics.query.push(hudStore.queryMs);
-      hudStore.shown = maskFromResult(result, 'id', idIndex, mask);
-      globe.setVisibility(mask);
-    },
   };
 }

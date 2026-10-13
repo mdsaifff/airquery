@@ -132,6 +132,7 @@ def build(csv_paths: Sequence[Path], out_dir: Path, description: str) -> dict[st
         "position": {"kind": "geo", "lat": "lat", "lon": "lon", "depth": "depth_km"},
         "columns": columns,
         "default_color_by": "depth_km",
+        "default_size_by": "magnitude",
         "row_count": con.execute("SELECT count(*) FROM quakes").fetchone()[0],
     }
     (out_dir / "quakes.schema.json").write_text(json.dumps(schema, indent=2) + "\n", newline="\n")

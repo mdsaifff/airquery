@@ -106,5 +106,6 @@
     }
   ],
   "default_color_by": "depth_km",
+  "default_size_by": "magnitude",
   "row_count": 6397
 }

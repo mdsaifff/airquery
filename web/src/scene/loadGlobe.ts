@@ -1,10 +1,12 @@
 // Opens DuckDB, loads the quakes table once, and builds the globe from it.
+import { numbers, range } from '../data/arrow.ts';
 import type { Columns } from '../data/arrow.ts';
 import { Db } from '../data/db.ts';
 import { indexIds } from '../data/resultMask.ts';
 import { GlobeScene } from './globeScene.ts';
 import type { Polylines } from './globeScene.ts';
 import type * as THREE from 'three';
+import type { DatasetSchema } from '../contracts/contracts.ts';
 
 export interface LoadedGlobe {
   db: Db;
@@ -12,25 +14,10 @@ export interface LoadedGlobe {
   /** Every row, in point order; encodings and tooltips read from here. */
   base: Columns;
   idIndex: Map<string, number>;
+  schema: DatasetSchema;
 }
 
 const BASE_QUERY = 'SELECT * FROM quakes';
-
-export function numbers(cols: Columns, name: string): Float64Array {
-  const col = cols.numbers.get(name);
-  if (!col) throw new Error(`missing column ${name}`);
-  return col;
-}
-
-export function range(values: ArrayLike<number>): [number, number] {
-  let lo = Infinity;
-  let hi = -Infinity;
-  for (let i = 0; i < values.length; i++) {
-    if (values[i] < lo) lo = values[i];
-    if (values[i] > hi) hi = values[i];
-  }
-  return [lo, hi];
-}
 
 async function fetchCoastlines(): Promise<Polylines | null> {
   try {
@@ -41,8 +28,18 @@ async function fetchCoastlines(): Promise<Polylines | null> {
   }
 }
 
+async function fetchSchema(dataset: string): Promise<DatasetSchema> {
+  const res = await fetch(new URL(`data/${dataset}.schema.json`, document.baseURI));
+  if (!res.ok) throw new Error(`schema ${dataset}: HTTP ${res.status}`);
+  return (await res.json()) as DatasetSchema;
+}
+
 export async function loadGlobe(scene: THREE.Scene): Promise<LoadedGlobe> {
-  const [db, coastlines] = await Promise.all([Db.open(['quakes']), fetchCoastlines()]);
+  const [db, coastlines, schema] = await Promise.all([
+    Db.open(['quakes']),
+    fetchCoastlines(),
+    fetchSchema('quakes'),
+  ]);
   const base = await db.run(BASE_QUERY);
   const depth = numbers(base, 'depth_km');
   const mag = numbers(base, 'magnitude');
@@ -53,5 +50,5 @@ export async function loadGlobe(scene: THREE.Scene): Promise<LoadedGlobe> {
   );
   globe.setColors(depth, ...range(depth));
   globe.setSizes(mag, ...range(mag));
-  return { db, globe, base, idIndex: indexIds(base.strings.get('id') ?? []) };
+  return { db, globe, base, schema, idIndex: indexIds(base.strings.get(schema.id ?? 'id') ?? []) };
 }
