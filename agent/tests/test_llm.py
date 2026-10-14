@@ -7,7 +7,9 @@ from typing import Any
 import pytest
 
 from llm import (
+    GROQ_OUTPUT_SCHEMA,
     ClaudeLLM,
+    GroqLLM,
     LLMNotConfiguredError,
     LLMOutput,
     LLMRefusedError,
@@ -88,6 +90,7 @@ def test_unconfigured_provider_fails_clearly() -> None:
     with pytest.raises(LLMNotConfiguredError, match="not supported"):
         make_llm("openai", "", "")
     assert make_llm("anthropic", "", "key").name == "claude-opus-5-5"
+    assert make_llm("groq", "", "key").name == "openai/gpt-oss-120b"
 
 
 class FakeMessages:
@@ -173,3 +176,52 @@ def test_papers_examples_are_valid() -> None:
         if out.spec:
             assert validate_spec(out.spec, PAPERS) == [], ex["utterance"]
     assert "papers about diffusion models" in build_prompt(PAPERS, "x", None).system
+
+
+def test_groq_schema_requires_every_property() -> None:
+    def objects(node: Any) -> list[dict[str, Any]]:
+        if isinstance(node, list):
+            return [o for v in node for o in objects(v)]
+        if not isinstance(node, dict):
+            return []
+        own = [node] if node.get("type") == "object" and "properties" in node else []
+        return own + [o for v in node.values() for o in objects(v)]
+
+    objs = objects(GROQ_OUTPUT_SCHEMA)
+    assert len(objs) >= 5  # LLMOutput, QuerySpec, Filter, Sort, CameraTarget
+    for o in objs:
+        assert set(o["required"]) == set(o["properties"])
+        assert o["additionalProperties"] is False
+
+
+class FakeCompletions:
+    def __init__(self, content: str, finish_reason: str = "stop") -> None:
+        self.content, self.finish_reason = content, finish_reason
+        self.kwargs: dict[str, Any] = {}
+
+    async def create(self, **kwargs: Any) -> SimpleNamespace:
+        self.kwargs = kwargs
+        msg = SimpleNamespace(content=self.content)
+        return SimpleNamespace(
+            choices=[SimpleNamespace(message=msg, finish_reason=self.finish_reason)],
+            usage=SimpleNamespace(prompt_tokens=50, completion_tokens=7),
+        )
+
+
+def groq_with(fake: FakeCompletions) -> GroqLLM:
+    client: Any = SimpleNamespace(chat=SimpleNamespace(completions=fake))
+    return GroqLLM(client)
+
+
+def test_groq_adapter_returns_raw_spec_and_tokens() -> None:
+    fake = FakeCompletions('{"spec": {"dataset": "quakes", "color_by": null}, "clarify": null}')
+    reply = asyncio.run(groq_with(fake).complete(Prompt(system="sys", user="u")))
+    assert reply.spec == {"dataset": "quakes", "color_by": None}
+    assert (reply.input_tokens, reply.output_tokens) == (50, 7)
+    kw = fake.kwargs
+    assert kw["messages"][0] == {"role": "system", "content": "sys"}
+    assert kw["response_format"]["json_schema"]["strict"] is True
+    assert kw["reasoning_effort"] == "low"
+    truncated = FakeCompletions("{", finish_reason="length")
+    with pytest.raises(RuntimeError, match="max_completion_tokens"):
+        asyncio.run(groq_with(truncated).complete(Prompt("s", "u")))

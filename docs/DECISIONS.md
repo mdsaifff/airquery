@@ -114,3 +114,18 @@ These double as material for LinkedIn posts.
   off on Opus 5.5; caching cuts cost and latency on every repeat request.
 - **Consequences:** latency vs. accuracy per tier is measured in T4.2 (Opus 5.5,
   Sonnet 5.5, Haiku 5.5). If Opus misses the latency budget, switch `LLM_MODEL`.
+
+## D-013 Groq free tier as the default LLM provider
+- **Context:** the user has no Claude API key and wants a free option.
+- **Decision:** `GroqLLM` (official `groq` SDK) is the default
+  (`LLM_PROVIDER=groq`, `openai/gpt-oss-120b`, `reasoning_effort: low`), with
+  `response_format` json_schema in strict mode. Strict mode requires every
+  property in `required`, so `GROQ_OUTPUT_SCHEMA` lists them all; optional
+  fields stay nullable, and `merge.py` already treats null as "keep".
+  `ClaudeLLM` (D-012) stays as a one-line switch.
+- **Why:** free key, open-weight models, fast enough for the voice budget,
+  and works from the deployed agent. Local Ollama was too slow on a 16 GB
+  laptop without a GPU and doesn't work once deployed.
+- **Consequences:** free-tier rate limits (roughly 30 requests/min, ~1k/day
+  on the 120B model) cap eval runs. The model-tier ablation compares
+  gpt-oss-20b vs 120b (and Claude tiers if a key turns up).

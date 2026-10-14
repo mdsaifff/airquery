@@ -49,7 +49,7 @@ Ask the user before adding anything not listed here.
   (runtime validation of agent responses); dev: `vite`, `typescript`,
   `vitest`, `eslint`, `prettier`, `json-schema-to-typescript`.
 - **agent:** `fastapi`, `uvicorn`, `pydantic`, `pydantic-settings`,
-  `langgraph`, `httpx`, `anthropic` (Claude, chosen in T3.4);
+  `langgraph`, `httpx`, `groq` (free tier, default) and `anthropic` (Claude), see T3.4 / D-013;
   dev: `pytest`, `ruff`.
 - **data_prep:** `pandas` or `duckdb` (Python), `pyarrow`, `requests`;
   stretch only: `sentence-transformers`, `umap-learn`.

@@ -66,7 +66,7 @@ Ablations (repair loop on/off, model tiers, accuracy vs cost vs latency) land in
 Needs Node.js LTS, Python 3.12, [uv](https://docs.astral.sh/uv/) and GNU make.
 
 ```bash
-cp agent/.env.example agent/.env   # set LLM_PROVIDER / LLM_MODEL / LLM_API_KEY
+cp agent/.env.example agent/.env   # paste a free Groq key (console.groq.com/keys) into LLM_API_KEY
 make dev    # web on http://localhost:5173, agent on http://localhost:8000
 make test   # Vitest + pytest (agent, data_prep, eval)
 make lint

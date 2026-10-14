@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 import anthropic
+import groq
 from pydantic import BaseModel
 
 from spec import QuerySpec
@@ -76,6 +77,23 @@ OUTPUT_SCHEMA = anthropic.transform_schema(LLMOutput)
 # Models that accept server-side refusal fallbacks (`fallbacks: "default"`).
 FALLBACK_MODELS = {"claude-fable-5-1", "claude-opus-5-5", "claude-opus-5", "claude-sonnet-5-5"}
 DEFAULT_MODEL = "claude-opus-5-5"
+GROQ_DEFAULT_MODEL = "openai/gpt-oss-120b"
+
+
+def _all_required(node: Any) -> Any:
+    """Groq strict mode: every property listed in `required` (optional ones stay nullable)."""
+    if isinstance(node, dict):
+        node = {k: _all_required(v) for k, v in node.items()}
+        if node.get("type") == "object" and "properties" in node:
+            node["required"] = list(node["properties"])
+        return node
+    if isinstance(node, list):
+        return [_all_required(v) for v in node]
+    return node
+
+
+# Explicit nulls are safe: merge.py treats a null field as "keep the previous value".
+GROQ_OUTPUT_SCHEMA = _all_required(OUTPUT_SCHEMA)
 
 
 @dataclass
@@ -125,12 +143,61 @@ class ClaudeLLM:
         )
 
 
+@dataclass
+class GroqLLM:
+    """Open-weight models on Groq (free tier), JSON in strict json_schema mode.
+
+    Strict mode is supported on openai/gpt-oss-120b, openai/gpt-oss-20b and qwen/qwen3.8-27b.
+    """
+
+    client: groq.AsyncGroq
+    model: str = GROQ_DEFAULT_MODEL
+    effort: str = "low"  # gpt-oss reasoning_effort: low | medium | high
+
+    @property
+    def name(self) -> str:
+        return self.model
+
+    async def complete(self, prompt: Prompt) -> LLMReply:
+        resp = await self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": prompt.system},
+                {"role": "user", "content": prompt.user},
+            ],
+            response_format={
+                "type": "json_schema",
+                "json_schema": {"name": "llm_output", "strict": True, "schema": GROQ_OUTPUT_SCHEMA},
+            },
+            reasoning_effort=self.effort,  # type: ignore[arg-type]
+            max_completion_tokens=4096,
+        )
+        choice = resp.choices[0]
+        if choice.finish_reason == "length":
+            raise RuntimeError("model reply hit max_completion_tokens")
+        out = json.loads(choice.message.content or "{}")
+        u = resp.usage
+        return LLMReply(
+            spec=out.get("spec"),
+            clarify=out.get("clarify"),
+            input_tokens=u.prompt_tokens if u else 0,
+            output_tokens=u.completion_tokens if u else 0,
+        )
+
+
 def make_llm(provider: str, model: str, api_key: str, effort: str = "low") -> LLMAdapter:
     """Build the real adapter from settings (LLM_PROVIDER / LLM_MODEL / LLM_API_KEY)."""
+    # An empty key lets each SDK fall back to its own env var (GROQ_API_KEY, ANTHROPIC_API_KEY).
+    if provider == "groq":
+        try:
+            client = groq.AsyncGroq(api_key=api_key or None, timeout=30.0)
+        except groq.GroqError as exc:  # no key anywhere
+            raise LLMNotConfiguredError(f"Groq API key missing: set LLM_API_KEY ({exc})") from exc
+        return GroqLLM(client, model or GROQ_DEFAULT_MODEL, effort)
+    if provider == "anthropic":
+        client = anthropic.AsyncAnthropic(api_key=api_key or None, timeout=30.0)
+        return ClaudeLLM(client, model or DEFAULT_MODEL, effort)
+    hint = "set LLM_PROVIDER=groq (free) or anthropic in agent/.env"
     if not provider:
-        raise LLMNotConfiguredError("LLM_PROVIDER is not set in agent/.env (use 'anthropic')")
-    if provider != "anthropic":
-        raise LLMNotConfiguredError(f"LLM provider {provider!r} is not supported (use 'anthropic')")
-    # An empty key lets the SDK fall back to ANTHROPIC_API_KEY or an `ant auth login` profile.
-    client = anthropic.AsyncAnthropic(api_key=api_key or None, timeout=30.0)
-    return ClaudeLLM(client, model or DEFAULT_MODEL, effort)
+        raise LLMNotConfiguredError(f"LLM_PROVIDER is not set: {hint}")
+    raise LLMNotConfiguredError(f"LLM provider {provider!r} is not supported: {hint}")

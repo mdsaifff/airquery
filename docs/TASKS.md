@@ -172,7 +172,7 @@ Tune `config.ts` and repeat until met.
   - Done when: unit tests pass with `MockLLM`; a manual script hits the real
     provider with 5 utterances and prints specs.
   - Needs you: put the API key in `agent/.env`.
-  - Note: CODE DONE, real run pending (box open): provider is Claude (`ClaudeLLM` in `llm.py`, `anthropic` SDK; default `claude-opus-5-5`, effort low, JSON constrained by structured outputs, cached system prompt, refusal fallbacks; D-012). Tested with a fake client. Needs: a key in `agent/.env` (or `ANTHROPIC_API_KEY`), then `cd agent && uv run python scripts/try_llm.py`.
+  - Note: CODE DONE, real run pending (box open): default provider is Groq's free tier (`GroqLLM`, `groq` SDK, `openai/gpt-oss-120b`, strict json_schema, reasoning_effort low; D-013); Claude stays available (`ClaudeLLM`, `LLM_PROVIDER=anthropic`; D-012). Both tested with fake clients. Needs: a free Groq key in `agent/.env`, then `cd agent && uv run python scripts/try_llm.py`.
 - [x] **T3.5 LangGraph agent**
   - Do: `graph.py`: parse → validate → (repair, max 2 retries | clarify) →
     merge → compile. Clarify when the LLM signals ambiguity or repairs run out
