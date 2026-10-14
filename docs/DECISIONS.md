@@ -118,14 +118,21 @@ These double as material for LinkedIn posts.
 ## D-013 Groq free tier as the default LLM provider
 - **Context:** the user has no Claude API key and wants a free option.
 - **Decision:** `GroqLLM` (official `groq` SDK) is the default
-  (`LLM_PROVIDER=groq`, `openai/gpt-oss-120b`, `reasoning_effort: low`), with
-  `response_format` json_schema in strict mode. Strict mode requires every
-  property in `required`, so `GROQ_OUTPUT_SCHEMA` lists them all; optional
-  fields stay nullable, and `merge.py` already treats null as "keep".
+  (`LLM_PROVIDER=groq`, `openai/gpt-oss-120b`, `reasoning_effort: low`) in
+  plain JSON mode (`response_format: json_object`), with no schema sent.
   `ClaudeLLM` (D-012) stays as a one-line switch.
+- **Prompt trim:** the free tier allows 8k tokens/min per model. Strict
+  json_schema mode added ~730 prompt tokens per call (measured), and Groq only
+  checks the schema after generation (it 400'd on omitted defaulted fields),
+  so it guaranteed nothing the validator doesn't. Also dropped 3 worked
+  examples that repeated a rule word for word, and added one rule for
+  dropping a single filter. Same 30-item eval sample (`--sample 30`): strict
+  schema 30/30, 433 s, p50 19 s (rate-limited); JSON mode 29/30, 141 s, p50
+  4.3 s. The miss (c09, removing one filter) is fixed by the new rule (3/3 on
+  rerun).
 - **Why:** free key, open-weight models, fast enough for the voice budget,
   and works from the deployed agent. Local Ollama was too slow on a 16 GB
   laptop without a GPU and doesn't work once deployed.
-- **Consequences:** free-tier rate limits (roughly 30 requests/min, ~1k/day
-  on the 120B model) cap eval runs. The model-tier ablation compares
+- **Consequences:** free-tier limits (8k tokens/min and 1k requests/day per
+  model, likely ~200k tokens/day) cap eval runs: use `--sample` for A/B checks. The model-tier ablation compares
   gpt-oss-20b vs 120b (and Claude tiers if a key turns up).

@@ -4,11 +4,9 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
-import groq
 import pytest
 
 from llm import (
-    GROQ_OUTPUT_SCHEMA,
     ClaudeLLM,
     GroqLLM,
     LLMNotConfiguredError,
@@ -49,7 +47,7 @@ def test_prompt_contains_schema_examples_spec_and_utterance(real_quakes: Dataset
     assert "`depth_km` (number, km)" in p.system
     assert "people say: depth, deep, shallow" in p.system
     assert "Japan" in p.system  # computed examples from data_prep
-    assert 'Request: "show the ten strongest"' in p.system  # worked example
+    assert 'Request: "fly to Chile"' in p.system  # worked example
     assert "{{" not in p.system
     assert p.user == (
         'Current spec: {"dataset":"quakes","color_by":"magnitude"}\nRequest: "only \\"deep\\" ones"'
@@ -179,24 +177,6 @@ def test_papers_examples_are_valid() -> None:
     assert "papers about diffusion models" in build_prompt(PAPERS, "x", None).system
 
 
-def test_groq_schema_requires_every_property() -> None:
-    def objects(node: Any) -> list[dict[str, Any]]:
-        if isinstance(node, list):
-            return [o for v in node for o in objects(v)]
-        if not isinstance(node, dict):
-            return []
-        own = [node] if node.get("type") == "object" and "properties" in node else []
-        return own + [o for v in node.values() for o in objects(v)]
-
-    objs = objects(GROQ_OUTPUT_SCHEMA)
-    assert len(objs) >= 5  # LLMOutput, QuerySpec, Filter, Sort, CameraTarget
-    for o in objs:
-        assert set(o["required"]) == set(o["properties"])
-        assert o["additionalProperties"] is False
-    # Groq rejects integer|number unions as ambiguous.
-    assert '"integer"' not in json.dumps(GROQ_OUTPUT_SCHEMA["$defs"]["Filter"])
-
-
 class FakeCompletions:
     def __init__(self, content: str, finish_reason: str = "stop") -> None:
         self.content, self.finish_reason = content, finish_reason
@@ -223,26 +203,8 @@ def test_groq_adapter_returns_raw_spec_and_tokens() -> None:
     assert (reply.input_tokens, reply.output_tokens) == (50, 7)
     kw = fake.kwargs
     assert kw["messages"][0] == {"role": "system", "content": "sys"}
-    assert kw["response_format"]["json_schema"]["strict"] is True
+    assert kw["response_format"] == {"type": "json_object"}
     assert kw["reasoning_effort"] == "low"
     truncated = FakeCompletions("{", finish_reason="length")
     with pytest.raises(RuntimeError, match="max_completion_tokens"):
         asyncio.run(groq_with(truncated).complete(Prompt("s", "u")))
-
-
-def test_groq_schema_mismatch_falls_back_to_raw_generation() -> None:
-    import httpx  # the SDK's error types wrap an httpx2-compatible response
-
-    class Rejecting(FakeCompletions):
-        async def create(self, **kwargs: Any) -> SimpleNamespace:
-            req = httpx.Request("POST", "https://api.groq.com/openai/v1/chat/completions")
-            body = {
-                "error": {
-                    "code": "json_validate_failed",
-                    "failed_generation": '{"spec": {"dataset": "quakes"}, "clarify": null}',
-                }
-            }
-            raise groq.BadRequestError("400", response=httpx.Response(400, request=req), body=body)
-
-    reply = asyncio.run(groq_with(Rejecting("")).complete(Prompt("s", "u")))
-    assert reply.spec == {"dataset": "quakes"}

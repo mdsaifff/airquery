@@ -5,6 +5,7 @@ Usage (from the repo root):
   cd agent && uv run --with duckdb python ../eval/score.py --llm gold   # harness check (100%)
   ... --llm fake                                 # keyword stand-in (scripts/fake_agent.py)
   ... --no-repair --model <id> --price-in 4 --price-out 20 --tag refine --limit 20
+  ... --sample 30                                 # spread across categories (free-tier budget)
 
 Writes eval/reports/<date>_<label>.json and .md; never overwrites an earlier report.
 """
@@ -27,7 +28,7 @@ sys.path.insert(0, str(EVAL_DIR))
 import duckdb  # noqa: E402
 from compile_sql import compile_spec  # noqa: E402
 from graph import MAX_RETRIES, build_graph, run_agent  # noqa: E402
-from llm import LLMAdapter, LLMReply, MockLLM, Prompt, make_llm  # noqa: E402
+from llm import GroqLLM, LLMAdapter, LLMReply, MockLLM, Prompt, make_llm  # noqa: E402
 from schema_registry import SchemaRegistry  # noqa: E402
 from settings import settings  # noqa: E402
 from spec import DatasetSchema, QuerySpec  # noqa: E402
@@ -61,7 +62,11 @@ def pick_llm(kind: str, model: str | None) -> LLMAdapter:
         from fake_agent import understand  # noqa: PLC0415
 
         return MockLLM(fn=understand, name="fake-keywords")
-    return make_llm(settings.llm_provider, model or settings.llm_model, settings.llm_api_key)
+    llm = make_llm(settings.llm_provider, model or settings.llm_model, settings.llm_api_key)
+    if isinstance(llm, GroqLLM):
+        # Free tier: 8k tokens/min. Wait out 429s rather than scoring them as failures.
+        llm.client = llm.client.with_options(max_retries=10)
+    return llm
 
 
 class Db:
@@ -215,6 +220,7 @@ def main() -> None:
     ap.add_argument("--no-repair", action="store_true", help="ablation: no repair retries")
     ap.add_argument("--tag", help="only items whose first tag matches")
     ap.add_argument("--limit", type=int)
+    ap.add_argument("--sample", type=int, help="N evenly spaced items across all categories")
     ap.add_argument("--price-in", type=float, help="USD per 1M input tokens")
     ap.add_argument("--price-out", type=float, help="USD per 1M output tokens")
     args = ap.parse_args()
@@ -223,12 +229,15 @@ def main() -> None:
     if args.tag:
         items = [i for i in items if i["tags"][0] == args.tag]
     items = items[: args.limit] if args.limit else items
+    if args.sample:
+        items = [items[i * len(items) // args.sample] for i in range(min(args.sample, len(items)))]
     llm = gold_oracle(items) if args.llm == "gold" else pick_llm(args.llm, args.model)
     t0 = time.perf_counter()
     rows = asyncio.run(evaluate(items, llm, repair=not args.no_repair))
     summary = summarize(rows, args.price_in, args.price_out)
     model = args.model or (llm.name if args.llm != "real" else settings.llm_model)
     label = model.replace("/", "_") + ("-norepair" if args.no_repair else "")
+    label += f"-sample{len(items)}" if args.sample else ""
     meta = {
         "date": date.today().isoformat(),
         "model": model,

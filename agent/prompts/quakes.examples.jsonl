@@ -1,9 +1,6 @@
 {"utterance": "only show quakes deeper than 300 kilometres", "current_spec": null, "output": {"spec": {"dataset": "quakes", "filters": [{"field": "depth_km", "op": ">", "value": 300}]}, "clarify": null}}
 {"utterance": "colour them by magnitude", "current_spec": {"dataset": "quakes", "filters": [{"field": "depth_km", "op": ">", "value": 300}]}, "output": {"spec": {"dataset": "quakes", "color_by": "magnitude"}, "clarify": null}}
-{"utterance": "show the ten strongest", "current_spec": null, "output": {"spec": {"dataset": "quakes", "sort": {"field": "magnitude", "direction": "desc"}, "limit": 10}, "clarify": null}}
 {"utterance": "now only near Japan", "current_spec": {"dataset": "quakes", "color_by": "magnitude"}, "output": {"spec": {"dataset": "quakes", "filters": [{"field": "place", "op": "contains", "value": "Japan"}]}, "clarify": null}}
-{"utterance": "just 2024", "current_spec": null, "output": {"spec": {"dataset": "quakes", "filters": [{"field": "time", "op": "between", "value": ["2024-01-01", "2024-12-31T23:59:59"]}]}, "clarify": null}}
-{"utterance": "what happened in the last 30 days", "current_spec": null, "output": {"spec": {"dataset": "quakes", "filters": [{"field": "time", "op": "last_days", "value": 30}]}, "clarify": null}}
 {"utterance": "shallow ones between magnitude five and six", "current_spec": null, "output": {"spec": {"dataset": "quakes", "filters": [{"field": "depth_km", "op": "<", "value": 70}, {"field": "magnitude", "op": "between", "value": [5, 6]}]}, "clarify": null}}
 {"utterance": "fly to Chile", "current_spec": {"dataset": "quakes", "filters": [{"field": "depth_km", "op": ">", "value": 300}]}, "output": {"spec": {"dataset": "quakes", "intent": "navigate", "camera_target": {"lat": -33.4, "lon": -70.6, "label": "Chile"}}, "clarify": null}}
 {"utterance": "undo", "current_spec": {"dataset": "quakes", "color_by": "magnitude"}, "output": {"spec": {"dataset": "quakes", "intent": "undo"}, "clarify": null}}
