@@ -1,0 +1,4438 @@
+{
+  "meta": {
+    "date": "2026-10-14",
+    "model": "openai/gpt-oss-20b",
+    "provider": "groq",
+    "repair": true,
+    "seconds": 872.7
+  },
+  "summary": {
+    "n": 100,
+    "spec_exact_match": 0.9,
+    "result_set_match": 0.92,
+    "by_category": {
+      "ambiguous": {
+        "n": 5,
+        "spec": 1.0,
+        "result": 1.0
+      },
+      "encoding": {
+        "n": 15,
+        "spec": 1.0,
+        "result": 1.0
+      },
+      "filter": {
+        "n": 30,
+        "spec": 0.933,
+        "result": 0.933
+      },
+      "noisy": {
+        "n": 10,
+        "spec": 0.8,
+        "result": 0.8
+      },
+      "rank": {
+        "n": 10,
+        "spec": 0.9,
+        "result": 0.9
+      },
+      "refine": {
+        "n": 20,
+        "spec": 0.9,
+        "result": 0.95
+      },
+      "time": {
+        "n": 10,
+        "spec": 0.7,
+        "result": 0.8
+      }
+    },
+    "clarify": {
+      "tp": 5,
+      "fp": 5,
+      "fn": 0,
+      "precision": 0.5,
+      "recall": 1.0
+    },
+    "invalid_sql": 0,
+    "repairs_used": 0,
+    "latency_ms": {
+      "total_p50": 12027.0,
+      "total_p90": 13184.4,
+      "llm_p50": 12023.1,
+      "llm_p90": 13182.1
+    },
+    "tokens": {
+      "input": 156739,
+      "output": 7082
+    },
+    "cost_usd_per_100_queries": null
+  },
+  "rows": [
+    {
+      "id": "f01",
+      "tags": [
+        "filter",
+        "depth"
+      ],
+      "utterance": "show only the earthquakes deeper than 400 km",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 400
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 400
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 827.2,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 857.4
+      },
+      "tokens": {
+        "input": 1582,
+        "output": 53
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f02",
+      "tags": [
+        "filter",
+        "depth"
+      ],
+      "utterance": "show earthquakes shallower than 70 km",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": "<",
+            "value": 70
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": "<",
+            "value": 70
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 352.0,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 356.7
+      },
+      "tokens": {
+        "input": 1581,
+        "output": 57
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f03",
+      "tags": [
+        "filter",
+        "magnitude"
+      ],
+      "utterance": "magnitude six or more",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": ">=",
+            "value": 6
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": ">=",
+            "value": 6
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 402.6,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 405.5
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 72
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f04",
+      "tags": [
+        "filter",
+        "magnitude"
+      ],
+      "utterance": "quakes stronger than magnitude 7",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": ">",
+            "value": 7
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": ">",
+            "value": 7
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 492.4,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 497.7
+      },
+      "tokens": {
+        "input": 1580,
+        "output": 64
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f05",
+      "tags": [
+        "filter",
+        "depth"
+      ],
+      "utterance": "depth between 100 and 300 kilometres",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": "between",
+            "value": [
+              100,
+              300
+            ]
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": "between",
+            "value": [
+              100,
+              300
+            ]
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1975.0,
+        "validate": 0.1,
+        "compile": 0.2,
+        "total": 1980.0
+      },
+      "tokens": {
+        "input": 1581,
+        "output": 64
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f06",
+      "tags": [
+        "filter",
+        "place"
+      ],
+      "utterance": "only the ones in Japan",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Japan"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Japan"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11841.1,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 11844.9
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 53
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f07",
+      "tags": [
+        "filter",
+        "place"
+      ],
+      "utterance": "earthquakes near Chile",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Chile"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Chile"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11618.7,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 11623.4
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 50
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f08",
+      "tags": [
+        "filter",
+        "place"
+      ],
+      "utterance": "show quakes in Indonesia",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Indonesia"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Indonesia"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12510.9,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12515.0
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 67
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f09",
+      "tags": [
+        "filter",
+        "place"
+      ],
+      "utterance": "anything in Alaska",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Alaska"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Alaska"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11588.0,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 11591.7
+      },
+      "tokens": {
+        "input": 1576,
+        "output": 63
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f10",
+      "tags": [
+        "filter",
+        "place"
+      ],
+      "utterance": "just the ones in Tonga",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Tonga"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Tonga"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12632.1,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 12635.5
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 56
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f11",
+      "tags": [
+        "filter",
+        "magnitude"
+      ],
+      "utterance": "magnitude between 5 and 5.5",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": "between",
+            "value": [
+              5,
+              5.5
+            ]
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": "between",
+            "value": [
+              5,
+              5.5
+            ]
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 13523.4,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 13527.3
+      },
+      "tokens": {
+        "input": 1583,
+        "output": 64
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f12",
+      "tags": [
+        "filter",
+        "depth",
+        "term"
+      ],
+      "utterance": "deep earthquakes",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11722.5,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 11726.6
+      },
+      "tokens": {
+        "input": 1575,
+        "output": 67
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f13",
+      "tags": [
+        "filter",
+        "depth",
+        "term"
+      ],
+      "utterance": "shallow earthquakes",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": "<",
+            "value": 70
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": "<",
+            "value": 70
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12361.0,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12367.3
+      },
+      "tokens": {
+        "input": 1576,
+        "output": 50
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f14",
+      "tags": [
+        "filter",
+        "depth",
+        "term"
+      ],
+      "utterance": "intermediate depth quakes",
+      "status": "clarify",
+      "message": "What depth range do you consider intermediate? For example, 70\u2013300\u202fkm?",
+      "retries": 0,
+      "pred_spec": null,
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": "between",
+            "value": [
+              70,
+              300
+            ]
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": true,
+      "timings_ms": {
+        "llm": 12502.2,
+        "total": 12503.9
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 49
+      },
+      "invalid_sql": false,
+      "spec_match": false,
+      "result_match": false
+    },
+    {
+      "id": "f15",
+      "tags": [
+        "filter",
+        "mag_type"
+      ],
+      "utterance": "only events measured with mww",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "mag_type",
+            "op": "=",
+            "value": "mww"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "mag_type",
+            "op": "=",
+            "value": "mww"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11552.7,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 11559.1
+      },
+      "tokens": {
+        "input": 1579,
+        "output": 55
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f16",
+      "tags": [
+        "filter",
+        "magnitude"
+      ],
+      "utterance": "quakes below magnitude 5",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": "<",
+            "value": 5
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": "<",
+            "value": 5
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11619.0,
+        "validate": 0.0,
+        "compile": 0.1,
+        "total": 11623.2
+      },
+      "tokens": {
+        "input": 1579,
+        "output": 47
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f17",
+      "tags": [
+        "filter",
+        "lat"
+      ],
+      "utterance": "show the southern hemisphere",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "lat",
+            "op": "<",
+            "value": 0
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "lat",
+            "op": "<",
+            "value": 0
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1495.9,
+        "validate": 0.0,
+        "compile": 0.1,
+        "total": 1499.4
+      },
+      "tokens": {
+        "input": 1577,
+        "output": 88
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f18",
+      "tags": [
+        "filter",
+        "lat"
+      ],
+      "utterance": "northern hemisphere only",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "lat",
+            "op": ">",
+            "value": 0
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "lat",
+            "op": ">",
+            "value": 0
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12502.4,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 12506.4
+      },
+      "tokens": {
+        "input": 1577,
+        "output": 62
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f19",
+      "tags": [
+        "filter",
+        "lon"
+      ],
+      "utterance": "quakes east of 150 degrees longitude",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "lon",
+            "op": ">",
+            "value": 150
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "lon",
+            "op": ">",
+            "value": 150
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 13042.9,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 13047.0
+      },
+      "tokens": {
+        "input": 1581,
+        "output": 71
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f20",
+      "tags": [
+        "filter",
+        "lat"
+      ],
+      "utterance": "between latitude 30 and 45 north",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "lat",
+            "op": "between",
+            "value": [
+              30,
+              45
+            ]
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "lat",
+            "op": "between",
+            "value": [
+              30,
+              45
+            ]
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1746.6,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 1751.8
+      },
+      "tokens": {
+        "input": 1581,
+        "output": 63
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f21",
+      "tags": [
+        "filter",
+        "depth"
+      ],
+      "utterance": "deeper than 500 km",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 500
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 500
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1631.5,
+        "validate": 0.0,
+        "compile": 0.1,
+        "total": 1635.2
+      },
+      "tokens": {
+        "input": 1579,
+        "output": 55
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f22",
+      "tags": [
+        "filter",
+        "magnitude"
+      ],
+      "utterance": "at least magnitude 6.5",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": ">=",
+            "value": 6.5
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": ">=",
+            "value": 6.5
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 10321.6,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 10328.8
+      },
+      "tokens": {
+        "input": 1580,
+        "output": 55
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f23",
+      "tags": [
+        "filter",
+        "place"
+      ],
+      "utterance": "earthquakes in the Philippines",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Philippines"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Philippines"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 296.0,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 301.1
+      },
+      "tokens": {
+        "input": 1579,
+        "output": 54
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f24",
+      "tags": [
+        "filter",
+        "place"
+      ],
+      "utterance": "show me Papua New Guinea",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Papua New Guinea"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Papua New Guinea"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 581.2,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 585.4
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 79
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f25",
+      "tags": [
+        "filter",
+        "place"
+      ],
+      "utterance": "quakes near Taiwan",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Taiwan"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Taiwan"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12464.3,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12468.7
+      },
+      "tokens": {
+        "input": 1577,
+        "output": 52
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f26",
+      "tags": [
+        "filter",
+        "place"
+      ],
+      "utterance": "anything in Mexico",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Mexico"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Mexico"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12098.0,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12104.2
+      },
+      "tokens": {
+        "input": 1576,
+        "output": 50
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f27",
+      "tags": [
+        "filter",
+        "depth"
+      ],
+      "utterance": "depth less than 20 kilometers",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": "<",
+            "value": 20
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": "<",
+            "value": 20
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 384.8,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 388.8
+      },
+      "tokens": {
+        "input": 1579,
+        "output": 62
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f28",
+      "tags": [
+        "filter",
+        "magnitude"
+      ],
+      "utterance": "magnitude exactly 7.5",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": "=",
+            "value": 7.5
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": "=",
+            "value": 7.5
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12344.7,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12349.4
+      },
+      "tokens": {
+        "input": 1580,
+        "output": 66
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f29",
+      "tags": [
+        "filter",
+        "place",
+        "depth",
+        "multi"
+      ],
+      "utterance": "show quakes in Peru deeper than 100 km",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Peru"
+          },
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 100
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Peru"
+          },
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 100
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12372.4,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12376.6
+      },
+      "tokens": {
+        "input": 1583,
+        "output": 71
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "f30",
+      "tags": [
+        "filter",
+        "magnitude",
+        "depth",
+        "multi"
+      ],
+      "utterance": "strong shallow quakes, magnitude 6 plus and under 70 km deep",
+      "status": "rejected",
+      "message": "The language model is unavailable (BadRequestError).",
+      "retries": 0,
+      "pred_spec": null,
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": ">=",
+            "value": 6
+          },
+          {
+            "field": "depth_km",
+            "op": "<",
+            "value": 70
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": true,
+      "timings_ms": {
+        "llm": 12819.7,
+        "total": 12821.2
+      },
+      "tokens": {},
+      "invalid_sql": false,
+      "spec_match": false,
+      "result_match": false
+    },
+    {
+      "id": "e01",
+      "tags": [
+        "encoding",
+        "color"
+      ],
+      "utterance": "can you colour them by magnitude",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ],
+        "color_by": "magnitude"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ],
+        "color_by": "magnitude"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12405.4,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12411.2
+      },
+      "tokens": {
+        "input": 1601,
+        "output": 54
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "e02",
+      "tags": [
+        "encoding",
+        "color"
+      ],
+      "utterance": "color by depth",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "color_by": "depth_km"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "color_by": "depth_km"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12393.8,
+        "validate": 0.0,
+        "compile": 0.1,
+        "total": 12399.3
+      },
+      "tokens": {
+        "input": 1576,
+        "output": 59
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "e03",
+      "tags": [
+        "encoding",
+        "color"
+      ],
+      "utterance": "colour the points by date",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "color_by": "time"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "color_by": "time"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12621.7,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 12625.8
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 54
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "e04",
+      "tags": [
+        "encoding",
+        "size"
+      ],
+      "utterance": "size them by magnitude",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "size_by": "magnitude"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "size_by": "magnitude"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11320.1,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 11324.3
+      },
+      "tokens": {
+        "input": 1577,
+        "output": 46
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "e05",
+      "tags": [
+        "encoding",
+        "size"
+      ],
+      "utterance": "make the size show depth",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "size_by": "depth_km"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "size_by": "depth_km"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12616.7,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 12620.2
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 58
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "e06",
+      "tags": [
+        "encoding",
+        "color"
+      ],
+      "utterance": "colour by how strong they are",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "color_by": "magnitude"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "color_by": "magnitude"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12916.0,
+        "validate": 0.0,
+        "compile": 0.1,
+        "total": 12919.5
+      },
+      "tokens": {
+        "input": 1579,
+        "output": 79
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "e07",
+      "tags": [
+        "encoding",
+        "color"
+      ],
+      "utterance": "shade them by time of year",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "color_by": "time"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "color_by": "time"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12023.1,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 12027.0
+      },
+      "tokens": {
+        "input": 1579,
+        "output": 81
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "e08",
+      "tags": [
+        "encoding",
+        "color",
+        "size"
+      ],
+      "utterance": "colour by depth and size by magnitude",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "color_by": "depth_km",
+        "size_by": "magnitude"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "color_by": "depth_km",
+        "size_by": "magnitude"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12517.0,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 12520.7
+      },
+      "tokens": {
+        "input": 1580,
+        "output": 72
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "e09",
+      "tags": [
+        "encoding",
+        "color"
+      ],
+      "utterance": "use magnitude for the colour",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Japan"
+          }
+        ],
+        "color_by": "magnitude"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Japan"
+          }
+        ],
+        "color_by": "magnitude"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 459.6,
+        "validate": 0.0,
+        "compile": 0.1,
+        "total": 462.9
+      },
+      "tokens": {
+        "input": 1598,
+        "output": 53
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "e10",
+      "tags": [
+        "encoding",
+        "color"
+      ],
+      "utterance": "colour by latitude",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "color_by": "lat"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "color_by": "lat"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12937.3,
+        "validate": 0.0,
+        "compile": 0.1,
+        "total": 12942.3
+      },
+      "tokens": {
+        "input": 1576,
+        "output": 54
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "e11",
+      "tags": [
+        "encoding",
+        "color"
+      ],
+      "utterance": "colour by longitude",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "color_by": "lon"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "color_by": "lon"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12191.4,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 12195.8
+      },
+      "tokens": {
+        "input": 1576,
+        "output": 54
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "e12",
+      "tags": [
+        "encoding",
+        "size"
+      ],
+      "utterance": "size by depth please",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "size_by": "depth_km"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "size_by": "depth_km"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11611.8,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 11615.8
+      },
+      "tokens": {
+        "input": 1577,
+        "output": 62
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "e13",
+      "tags": [
+        "encoding",
+        "color"
+      ],
+      "utterance": "colour by when they happened",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "color_by": "time"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "color_by": "time"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 549.4,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 553.2
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 55
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "e14",
+      "tags": [
+        "encoding",
+        "color"
+      ],
+      "utterance": "go back to colouring by depth",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "color_by": "depth_km"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "color_by": "depth_km"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12549.1,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12553.3
+      },
+      "tokens": {
+        "input": 1589,
+        "output": 77
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "e15",
+      "tags": [
+        "encoding",
+        "size"
+      ],
+      "utterance": "make bigger quakes bigger dots",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "size_by": "magnitude"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "size_by": "magnitude"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 353.5,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 357.1
+      },
+      "tokens": {
+        "input": 1579,
+        "output": 54
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "r01",
+      "tags": [
+        "rank"
+      ],
+      "utterance": "the twelve strongest",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "magnitude"
+        },
+        "limit": 12
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "magnitude",
+          "direction": "desc"
+        },
+        "limit": 12
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 14007.9,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 14012.3
+      },
+      "tokens": {
+        "input": 1576,
+        "output": 80
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "r02",
+      "tags": [
+        "rank"
+      ],
+      "utterance": "the five deepest earthquakes",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "depth_km"
+        },
+        "limit": 5
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "depth_km",
+          "direction": "desc"
+        },
+        "limit": 5
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11936.0,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 11942.1
+      },
+      "tokens": {
+        "input": 1577,
+        "output": 54
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "r03",
+      "tags": [
+        "rank"
+      ],
+      "utterance": "the 20 shallowest",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "depth_km",
+          "direction": "asc"
+        },
+        "limit": 20
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "depth_km",
+          "direction": "asc"
+        },
+        "limit": 20
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 303.1,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 309.6
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 77
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "r04",
+      "tags": [
+        "rank"
+      ],
+      "utterance": "top 50 by magnitude",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "magnitude"
+        },
+        "limit": 50
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "magnitude",
+          "direction": "desc"
+        },
+        "limit": 50
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11436.5,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 11440.7
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 49
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "r05",
+      "tags": [
+        "rank",
+        "place",
+        "multi"
+      ],
+      "utterance": "the three biggest quakes in Japan",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Japan"
+          }
+        ],
+        "sort": {
+          "field": "magnitude"
+        },
+        "limit": 3
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Japan"
+          }
+        ],
+        "sort": {
+          "field": "magnitude",
+          "direction": "desc"
+        },
+        "limit": 3
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 13712.0,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 13715.2
+      },
+      "tokens": {
+        "input": 1580,
+        "output": 104
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "r06",
+      "tags": [
+        "rank",
+        "time"
+      ],
+      "utterance": "the most recent 100 earthquakes",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "time"
+        },
+        "limit": 100
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "time",
+          "direction": "desc"
+        },
+        "limit": 100
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12443.6,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 12448.6
+      },
+      "tokens": {
+        "input": 1579,
+        "output": 132
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "r07",
+      "tags": [
+        "rank",
+        "time"
+      ],
+      "utterance": "the first ten quakes of the year",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "time",
+          "direction": "asc"
+        },
+        "limit": 10
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "time",
+          "direction": "asc"
+        },
+        "limit": 10
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12473.8,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 12477.2
+      },
+      "tokens": {
+        "input": 1581,
+        "output": 89
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "r08",
+      "tags": [
+        "rank"
+      ],
+      "utterance": "weakest 25",
+      "status": "clarify",
+      "message": "What does 'weakest 25' refer to? Do you want the 25 earthquakes with the lowest magnitude, or a magnitude threshold?",
+      "retries": 0,
+      "pred_spec": null,
+      "gold_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "magnitude",
+          "direction": "asc"
+        },
+        "limit": 25
+      },
+      "gold_clarify": false,
+      "predicted_clarify": true,
+      "timings_ms": {
+        "llm": 12458.2,
+        "total": 12460.5
+      },
+      "tokens": {
+        "input": 1577,
+        "output": 52
+      },
+      "invalid_sql": false,
+      "spec_match": false,
+      "result_match": false
+    },
+    {
+      "id": "r09",
+      "tags": [
+        "rank"
+      ],
+      "utterance": "the single strongest one",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "magnitude"
+        },
+        "limit": 1
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "magnitude",
+          "direction": "desc"
+        },
+        "limit": 1
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11970.8,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 11978.1
+      },
+      "tokens": {
+        "input": 1577,
+        "output": 57
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "r10",
+      "tags": [
+        "rank",
+        "place",
+        "multi"
+      ],
+      "utterance": "the 15 deepest in Tonga",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Tonga"
+          }
+        ],
+        "sort": {
+          "field": "depth_km"
+        },
+        "limit": 15
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Tonga"
+          }
+        ],
+        "sort": {
+          "field": "depth_km",
+          "direction": "desc"
+        },
+        "limit": 15
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12855.9,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12861.1
+      },
+      "tokens": {
+        "input": 1579,
+        "output": 106
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "t01",
+      "tags": [
+        "time"
+      ],
+      "utterance": "only show 2024",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "between",
+            "value": [
+              "2024-01-01",
+              "2024-12-31T23:59:59"
+            ]
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "between",
+            "value": [
+              "2024-01-01",
+              "2024-12-31T23:59:59"
+            ]
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11514.3,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 11517.8
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 85
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "t02",
+      "tags": [
+        "time",
+        "relative"
+      ],
+      "utterance": "the last 30 days",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "last_days",
+            "value": 30
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "last_days",
+            "value": 30
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12341.2,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12347.0
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 68
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "t03",
+      "tags": [
+        "time"
+      ],
+      "utterance": "only March",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "between",
+            "value": [
+              "2024-03-01",
+              "2024-03-31T23:59:59"
+            ]
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "between",
+            "value": [
+              "2024-03-01",
+              "2024-03-31T23:59:59"
+            ]
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 13614.2,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 13617.9
+      },
+      "tokens": {
+        "input": 1575,
+        "output": 135
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "t04",
+      "tags": [
+        "time"
+      ],
+      "utterance": "since June",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "between",
+            "value": [
+              "2024-06-01",
+              "2024-12-31T23:59:59"
+            ]
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": ">=",
+            "value": "2024-06-01"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 13834.2,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 13840.0
+      },
+      "tokens": {
+        "input": 1575,
+        "output": 112
+      },
+      "invalid_sql": false,
+      "spec_match": false,
+      "result_match": true
+    },
+    {
+      "id": "t05",
+      "tags": [
+        "time"
+      ],
+      "utterance": "before April",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "<",
+            "value": "2024-04-01"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "<",
+            "value": "2024-04-01"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 2128.6,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 2133.9
+      },
+      "tokens": {
+        "input": 1575,
+        "output": 109
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "t06",
+      "tags": [
+        "time",
+        "relative"
+      ],
+      "utterance": "the last week",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "last_days",
+            "value": 7
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "last_days",
+            "value": 7
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1130.3,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 1134.8
+      },
+      "tokens": {
+        "input": 1576,
+        "output": 146
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "t07",
+      "tags": [
+        "time"
+      ],
+      "utterance": "first half of the year",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "between",
+            "value": [
+              "2024-01-01",
+              "2024-06-30"
+            ]
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "between",
+            "value": [
+              "2024-01-01",
+              "2024-06-30T23:59:59"
+            ]
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1285.1,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 1290.0
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 103
+      },
+      "invalid_sql": false,
+      "spec_match": false,
+      "result_match": false
+    },
+    {
+      "id": "t08",
+      "tags": [
+        "time"
+      ],
+      "utterance": "in December",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "between",
+            "value": [
+              "2024-12-01",
+              "2024-12-31"
+            ]
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "between",
+            "value": [
+              "2024-12-01",
+              "2024-12-31T23:59:59"
+            ]
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1350.8,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 1354.6
+      },
+      "tokens": {
+        "input": 1575,
+        "output": 85
+      },
+      "invalid_sql": false,
+      "spec_match": false,
+      "result_match": false
+    },
+    {
+      "id": "t09",
+      "tags": [
+        "time",
+        "relative"
+      ],
+      "utterance": "the last 90 days",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "last_days",
+            "value": 90
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "last_days",
+            "value": 90
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1616.9,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 1623.2
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 75
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "t10",
+      "tags": [
+        "time"
+      ],
+      "utterance": "between May and August",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "between",
+            "value": [
+              "2024-05-01",
+              "2024-08-31T23:59:59"
+            ]
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "between",
+            "value": [
+              "2024-05-01",
+              "2024-08-31T23:59:59"
+            ]
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 9729.9,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 9735.2
+      },
+      "tokens": {
+        "input": 1577,
+        "output": 98
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c01",
+      "tags": [
+        "refine"
+      ],
+      "utterance": "now only near Japan",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          },
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Japan"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          },
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Japan"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 341.7,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 344.7
+      },
+      "tokens": {
+        "input": 1599,
+        "output": 107
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c02",
+      "tags": [
+        "refine"
+      ],
+      "utterance": "only the deep ones",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Japan"
+          },
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Japan"
+          },
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 13849.2,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 13853.1
+      },
+      "tokens": {
+        "input": 1597,
+        "output": 114
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c03",
+      "tags": [
+        "refine",
+        "replace-field"
+      ],
+      "utterance": "now shallower than 100 instead",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": "<",
+            "value": 100
+          }
+        ],
+        "color_by": "magnitude"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": "<",
+            "value": 100
+          }
+        ],
+        "color_by": "magnitude"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11477.3,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 11483.3
+      },
+      "tokens": {
+        "input": 1608,
+        "output": 88
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c04",
+      "tags": [
+        "refine"
+      ],
+      "utterance": "and in Chile",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": ">=",
+            "value": 6
+          },
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Chile"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": ">=",
+            "value": 6
+          },
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Chile"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1409.6,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 1412.9
+      },
+      "tokens": {
+        "input": 1598,
+        "output": 76
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c05",
+      "tags": [
+        "refine",
+        "replace-field"
+      ],
+      "utterance": "make it Peru instead",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Peru"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Peru"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12582.7,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 12587.2
+      },
+      "tokens": {
+        "input": 1597,
+        "output": 125
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c06",
+      "tags": [
+        "refine"
+      ],
+      "utterance": "only in Indonesia",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Indonesia"
+          }
+        ],
+        "sort": {
+          "field": "magnitude"
+        },
+        "limit": 10
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Indonesia"
+          }
+        ],
+        "sort": {
+          "field": "magnitude",
+          "direction": "desc"
+        },
+        "limit": 10
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 13598.3,
+        "validate": 0.0,
+        "compile": 0.1,
+        "total": 13601.6
+      },
+      "tokens": {
+        "input": 1592,
+        "output": 86
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c07",
+      "tags": [
+        "refine",
+        "encoding"
+      ],
+      "utterance": "colour those by magnitude",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ],
+        "color_by": "magnitude"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ],
+        "color_by": "magnitude"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 239.8,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 245.6
+      },
+      "tokens": {
+        "input": 1599,
+        "output": 78
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c08",
+      "tags": [
+        "refine",
+        "time"
+      ],
+      "utterance": "now just the last 30 days",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "mode": "replace",
+        "filters": [
+          {
+            "field": "time",
+            "op": "last_days",
+            "value": 30
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "last_days",
+            "value": 30
+          }
+        ],
+        "color_by": "magnitude"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 13330.7,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 13334.7
+      },
+      "tokens": {
+        "input": 1590,
+        "output": 64
+      },
+      "invalid_sql": false,
+      "spec_match": false,
+      "result_match": true
+    },
+    {
+      "id": "c09",
+      "tags": [
+        "refine",
+        "remove"
+      ],
+      "utterance": "forget Japan, keep the depth filter",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "mode": "replace",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1072.8,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 1077.4
+      },
+      "tokens": {
+        "input": 1614,
+        "output": 79
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c10",
+      "tags": [
+        "refine",
+        "replace"
+      ],
+      "utterance": "start over and show everything",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "mode": "replace"
+      },
+      "gold_spec": {
+        "dataset": "quakes"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12280.2,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 12283.9
+      },
+      "tokens": {
+        "input": 1618,
+        "output": 61
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c11",
+      "tags": [
+        "refine",
+        "rank"
+      ],
+      "utterance": "show the ten strongest of those",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ],
+        "sort": {
+          "field": "magnitude"
+        },
+        "limit": 10
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ],
+        "sort": {
+          "field": "magnitude",
+          "direction": "desc"
+        },
+        "limit": 10
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12434.3,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12438.9
+      },
+      "tokens": {
+        "input": 1601,
+        "output": 74
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c12",
+      "tags": [
+        "refine",
+        "time"
+      ],
+      "utterance": "only since July",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Japan"
+          },
+          {
+            "field": "time",
+            "op": ">=",
+            "value": "2024-07-01"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Japan"
+          },
+          {
+            "field": "time",
+            "op": ">=",
+            "value": "2024-07-01"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12481.4,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12485.2
+      },
+      "tokens": {
+        "input": 1596,
+        "output": 88
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c13",
+      "tags": [
+        "refine",
+        "encoding"
+      ],
+      "utterance": "size them by depth",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Tonga"
+          }
+        ],
+        "size_by": "depth_km"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Tonga"
+          }
+        ],
+        "size_by": "depth_km"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12536.9,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 12540.4
+      },
+      "tokens": {
+        "input": 1598,
+        "output": 52
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c14",
+      "tags": [
+        "refine",
+        "replace-field"
+      ],
+      "utterance": "deeper than 200 instead",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 200
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 200
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 407.2,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 411.3
+      },
+      "tokens": {
+        "input": 1603,
+        "output": 62
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c15",
+      "tags": [
+        "refine",
+        "replace-field"
+      ],
+      "utterance": "stronger ones, 6 and up",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": ">=",
+            "value": 6
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": ">=",
+            "value": 6
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 13463.8,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 13467.4
+      },
+      "tokens": {
+        "input": 1603,
+        "output": 137
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c16",
+      "tags": [
+        "refine",
+        "term"
+      ],
+      "utterance": "and only the shallow ones",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Alaska"
+          },
+          {
+            "field": "depth_km",
+            "op": "<",
+            "value": 70
+          }
+        ],
+        "color_by": "time"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Alaska"
+          },
+          {
+            "field": "depth_km",
+            "op": "<",
+            "value": 70
+          }
+        ],
+        "color_by": "time"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12370.1,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12374.7
+      },
+      "tokens": {
+        "input": 1604,
+        "output": 54
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c17",
+      "tags": [
+        "refine",
+        "rank"
+      ],
+      "utterance": "make it twenty",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "magnitude"
+        },
+        "limit": 20
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "magnitude",
+          "direction": "desc"
+        },
+        "limit": 20
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12597.1,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 12601.2
+      },
+      "tokens": {
+        "input": 1592,
+        "output": 94
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c18",
+      "tags": [
+        "refine",
+        "navigate"
+      ],
+      "utterance": "fly to Fiji",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "intent": "navigate",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ],
+        "camera_target": {
+          "lat": -17.7,
+          "lon": 178.1,
+          "label": "Fiji"
+        }
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ],
+        "intent": "navigate",
+        "camera_target": {
+          "lat": -17.7,
+          "lon": 178.1,
+          "label": "Fiji"
+        }
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1499.3,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 1503.5
+      },
+      "tokens": {
+        "input": 1598,
+        "output": 74
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c19",
+      "tags": [
+        "refine",
+        "control"
+      ],
+      "utterance": "undo that",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "intent": "undo"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "intent": "undo"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 708.9,
+        "validate": 0.0,
+        "total": 713.3
+      },
+      "tokens": {
+        "input": 1585,
+        "output": 31
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "c20",
+      "tags": [
+        "refine",
+        "control"
+      ],
+      "utterance": "reset everything",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "mode": "replace"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "intent": "reset"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 228.6,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 231.5
+      },
+      "tokens": {
+        "input": 1597,
+        "output": 74
+      },
+      "invalid_sql": false,
+      "spec_match": false,
+      "result_match": false
+    },
+    {
+      "id": "n01",
+      "tags": [
+        "noisy"
+      ],
+      "utterance": "only show quakes deeper than four hundred kilo meters",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 400
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 400
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12417.2,
+        "validate": 0.0,
+        "compile": 0.0,
+        "total": 12420.0
+      },
+      "tokens": {
+        "input": 1583,
+        "output": 57
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "n02",
+      "tags": [
+        "noisy"
+      ],
+      "utterance": "colour them by magnitute",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ],
+        "color_by": "magnitude"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 300
+          }
+        ],
+        "color_by": "magnitude"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1507.4,
+        "validate": 0.0,
+        "compile": 0.1,
+        "total": 1512.0
+      },
+      "tokens": {
+        "input": 1601,
+        "output": 72
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "n03",
+      "tags": [
+        "noisy"
+      ],
+      "utterance": "show the tense strongest",
+      "status": "clarify",
+      "message": "Did you mean the ten strongest earthquakes? If so, I can filter for the top 10 by magnitude.",
+      "retries": 0,
+      "pred_spec": null,
+      "gold_spec": {
+        "dataset": "quakes",
+        "sort": {
+          "field": "magnitude",
+          "direction": "desc"
+        },
+        "limit": 10
+      },
+      "gold_clarify": false,
+      "predicted_clarify": true,
+      "timings_ms": {
+        "llm": 13564.3,
+        "total": 13566.0
+      },
+      "tokens": {
+        "input": 1577,
+        "output": 59
+      },
+      "invalid_sql": false,
+      "spec_match": false,
+      "result_match": false
+    },
+    {
+      "id": "n04",
+      "tags": [
+        "noisy"
+      ],
+      "utterance": "earth quakes in japan",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Japan"
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "place",
+            "op": "contains",
+            "value": "Japan"
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12282.6,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 12286.6
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 53
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "n05",
+      "tags": [
+        "noisy"
+      ],
+      "utterance": "deeper then 500 km",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 500
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": ">",
+            "value": 500
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11181.3,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 11188.3
+      },
+      "tokens": {
+        "input": 1579,
+        "output": 72
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "n06",
+      "tags": [
+        "noisy"
+      ],
+      "utterance": "magnitude 6 an above",
+      "status": "clarify",
+      "message": "Do you mean magnitude 6 and above?",
+      "retries": 0,
+      "pred_spec": null,
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "magnitude",
+            "op": ">=",
+            "value": 6
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": true,
+      "timings_ms": {
+        "llm": 13182.1,
+        "total": 13184.4
+      },
+      "tokens": {
+        "input": 1579,
+        "output": 47
+      },
+      "invalid_sql": false,
+      "spec_match": false,
+      "result_match": false
+    },
+    {
+      "id": "n07",
+      "tags": [
+        "noisy",
+        "time"
+      ],
+      "utterance": "just twenty twenty four",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "between",
+            "value": [
+              "2024-01-01",
+              "2024-12-31T23:59:59"
+            ]
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "time",
+            "op": "between",
+            "value": [
+              "2024-01-01",
+              "2024-12-31T23:59:59"
+            ]
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 11687.9,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 11692.4
+      },
+      "tokens": {
+        "input": 1577,
+        "output": 113
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "n08",
+      "tags": [
+        "noisy",
+        "navigate"
+      ],
+      "utterance": "fly two new zealand",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "intent": "navigate",
+        "camera_target": {
+          "lat": -40.5,
+          "lon": 173.0,
+          "label": "New\u00a0Zealand"
+        }
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "intent": "navigate",
+        "camera_target": {
+          "lat": -41.3,
+          "lon": 174.8,
+          "label": "New Zealand"
+        }
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12409.8,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12414.4
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 107
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "n09",
+      "tags": [
+        "noisy"
+      ],
+      "utterance": "only shallow ones under seventy k m",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": "<",
+            "value": 70
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "depth_km",
+            "op": "<",
+            "value": 70
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12367.9,
+        "validate": 0.1,
+        "compile": 0.0,
+        "total": 12372.8
+      },
+      "tokens": {
+        "input": 1580,
+        "output": 58
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "n10",
+      "tags": [
+        "noisy"
+      ],
+      "utterance": "color by deaf",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "color_by": "depth_km"
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "color_by": "depth_km"
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 12522.0,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 12527.7
+      },
+      "tokens": {
+        "input": 1576,
+        "output": 64
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "a01",
+      "tags": [
+        "ambiguous"
+      ],
+      "utterance": "only the large ones",
+      "status": "clarify",
+      "message": "How big? For example, magnitude 6 and above?",
+      "retries": 0,
+      "pred_spec": null,
+      "gold_spec": null,
+      "gold_clarify": true,
+      "predicted_clarify": true,
+      "timings_ms": {
+        "llm": 361.9,
+        "total": 363.5
+      },
+      "tokens": {
+        "input": 1577,
+        "output": 34
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "a02",
+      "tags": [
+        "ambiguous"
+      ],
+      "utterance": "just the recent ones",
+      "status": "clarify",
+      "message": "How recent should the earthquakes be? For example, the last 7, 30, or 90 days?",
+      "retries": 0,
+      "pred_spec": null,
+      "gold_spec": null,
+      "gold_clarify": true,
+      "predicted_clarify": true,
+      "timings_ms": {
+        "llm": 531.3,
+        "total": 533.6
+      },
+      "tokens": {
+        "input": 1577,
+        "output": 87
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "a03",
+      "tags": [
+        "ambiguous"
+      ],
+      "utterance": "show me the interesting ones",
+      "status": "clarify",
+      "message": "What makes an earthquake 'interesting'? For example, you could filter by magnitude (e.g., 6+), depth, or location. Please specify a criterion.",
+      "retries": 0,
+      "pred_spec": null,
+      "gold_spec": null,
+      "gold_clarify": true,
+      "predicted_clarify": true,
+      "timings_ms": {
+        "llm": 12714.5,
+        "total": 12716.4
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 58
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "a04",
+      "tags": [
+        "ambiguous"
+      ],
+      "utterance": "what about near there",
+      "status": "clarify",
+      "message": "What location do you mean by \"near there\"?",
+      "retries": 0,
+      "pred_spec": null,
+      "gold_spec": null,
+      "gold_clarify": true,
+      "predicted_clarify": true,
+      "timings_ms": {
+        "llm": 215.3,
+        "total": 218.1
+      },
+      "tokens": {
+        "input": 1577,
+        "output": 43
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "a05",
+      "tags": [
+        "ambiguous",
+        "impossible"
+      ],
+      "utterance": "show me flights to London",
+      "status": "clarify",
+      "message": "This scene only has earthquakes. You can filter by time, latitude, longitude, depth, magnitude, magnitude type and place.",
+      "retries": 0,
+      "pred_spec": null,
+      "gold_spec": null,
+      "gold_clarify": true,
+      "predicted_clarify": true,
+      "timings_ms": {
+        "llm": 12571.4,
+        "total": 12573.6
+      },
+      "tokens": {
+        "input": 1578,
+        "output": 53
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    }
+  ]
+}
