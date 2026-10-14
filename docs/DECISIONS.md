@@ -98,3 +98,19 @@ These double as material for LinkedIn posts.
 - **Why:** no account needed, polite to the API, normal installs stay small.
 - **Consequences:** ~17k papers rather than a random sample of the full dump
   (each quarter returns the most recent submissions of that quarter).
+
+## D-012 Claude as the LLM, JSON via structured outputs
+- **Context:** T3.4 needed one provider; the parse step sits inside a voice
+  round trip with a ~900 ms budget, and repair needs the model's raw output.
+- **Decision:** `ClaudeLLM` calls the Anthropic SDK (`claude-opus-5-5` by
+  default, `LLM_MODEL` overrides) at effort `low`, with `output_config.format`
+  set to `transform_schema(LLMOutput)`. The reply is returned as a raw dict;
+  `validate.py` still checks it, so ranges the schema can't express (lat/lon,
+  limit) go through the normal repair loop. The system prompt (schema + rules +
+  examples) carries `cache_control`; supported models get server-side refusal
+  fallbacks (`fallbacks: "default"`), and a refusal maps to `rejected`.
+- **Why:** constrained decoding removes JSON-format failures without giving up
+  the validator; low effort keeps latency down since thinking can't be turned
+  off on Opus 5.5; caching cuts cost and latency on every repeat request.
+- **Consequences:** latency vs. accuracy per tier is measured in T4.2 (Opus 5.5,
+  Sonnet 5.5, Haiku 5.5). If Opus misses the latency budget, switch `LLM_MODEL`.

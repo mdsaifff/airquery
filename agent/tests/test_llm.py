@@ -1,10 +1,21 @@
 import asyncio
 import json
 from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
 
 import pytest
 
-from llm import LLMNotConfiguredError, LLMOutput, LLMReply, MockLLM, Prompt, make_llm
+from llm import (
+    ClaudeLLM,
+    LLMNotConfiguredError,
+    LLMOutput,
+    LLMRefusedError,
+    LLMReply,
+    MockLLM,
+    Prompt,
+    make_llm,
+)
 from prompt_builder import build_prompt, compact, load_examples, system_prompt
 from schema_registry import SchemaRegistry
 from settings import settings
@@ -74,6 +85,63 @@ def test_mock_llm_replays_scripted_replies() -> None:
 def test_unconfigured_provider_fails_clearly() -> None:
     with pytest.raises(LLMNotConfiguredError, match="LLM_PROVIDER"):
         make_llm("", "", "")
+    with pytest.raises(LLMNotConfiguredError, match="not supported"):
+        make_llm("openai", "", "")
+    assert make_llm("anthropic", "", "key").name == "claude-opus-5-5"
+
+
+class FakeMessages:
+    """Stands in for client.beta.messages: records the request, returns a canned response."""
+
+    def __init__(self, text: str, stop_reason: str = "end_turn") -> None:
+        self.text, self.stop_reason = text, stop_reason
+        self.kwargs: dict[str, Any] = {}
+
+    async def create(self, **kwargs: Any) -> SimpleNamespace:
+        self.kwargs = kwargs
+        usage = SimpleNamespace(
+            input_tokens=10,
+            cache_read_input_tokens=90,
+            cache_creation_input_tokens=0,
+            output_tokens=20,
+        )
+        content = [SimpleNamespace(type="thinking"), SimpleNamespace(type="text", text=self.text)]
+        return SimpleNamespace(
+            stop_reason=self.stop_reason, stop_details=None, content=content, usage=usage
+        )
+
+
+def claude_with(messages: FakeMessages, model: str = "claude-opus-5-5") -> ClaudeLLM:
+    client: Any = SimpleNamespace(beta=SimpleNamespace(messages=messages))
+    return ClaudeLLM(client, model)
+
+
+def test_claude_adapter_returns_raw_spec_and_tokens() -> None:
+    fake = FakeMessages('{"spec": {"dataset": "quakes", "limit": 0}, "clarify": null}')
+    reply = asyncio.run(claude_with(fake).complete(Prompt(system="sys", user="u")))
+    # Unvalidated on purpose (limit 0 is out of range): validate.py + repair handle it.
+    assert reply.spec == {"dataset": "quakes", "limit": 0}
+    assert reply.clarify is None
+    assert (reply.input_tokens, reply.output_tokens) == (100, 20)
+    kw = fake.kwargs
+    assert kw["system"][0] == {
+        "type": "text",
+        "text": "sys",
+        "cache_control": {"type": "ephemeral"},
+    }
+    assert kw["output_config"]["format"]["type"] == "json_schema"
+    assert kw["fallbacks"] == "default"
+    # Haiku has no server-side fallback.
+    asyncio.run(claude_with(fake, "claude-haiku-5-5").complete(Prompt(system="s", user="u")))
+    assert "fallbacks" not in fake.kwargs
+
+
+def test_claude_adapter_clarify_and_refusal() -> None:
+    fake = FakeMessages('{"spec": null, "clarify": "How big?"}')
+    assert asyncio.run(claude_with(fake).complete(Prompt("s", "u"))).clarify == "How big?"
+    refused = FakeMessages("", stop_reason="refusal")
+    with pytest.raises(LLMRefusedError):
+        asyncio.run(claude_with(refused).complete(Prompt("s", "u")))
 
 
 PAPERS = DatasetSchema.model_validate(
