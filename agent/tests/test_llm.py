@@ -4,6 +4,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
+import groq
 import pytest
 
 from llm import (
@@ -192,6 +193,8 @@ def test_groq_schema_requires_every_property() -> None:
     for o in objs:
         assert set(o["required"]) == set(o["properties"])
         assert o["additionalProperties"] is False
+    # Groq rejects integer|number unions as ambiguous.
+    assert '"integer"' not in json.dumps(GROQ_OUTPUT_SCHEMA["$defs"]["Filter"])
 
 
 class FakeCompletions:
@@ -225,3 +228,21 @@ def test_groq_adapter_returns_raw_spec_and_tokens() -> None:
     truncated = FakeCompletions("{", finish_reason="length")
     with pytest.raises(RuntimeError, match="max_completion_tokens"):
         asyncio.run(groq_with(truncated).complete(Prompt("s", "u")))
+
+
+def test_groq_schema_mismatch_falls_back_to_raw_generation() -> None:
+    import httpx  # the SDK's error types wrap an httpx2-compatible response
+
+    class Rejecting(FakeCompletions):
+        async def create(self, **kwargs: Any) -> SimpleNamespace:
+            req = httpx.Request("POST", "https://api.groq.com/openai/v1/chat/completions")
+            body = {
+                "error": {
+                    "code": "json_validate_failed",
+                    "failed_generation": '{"spec": {"dataset": "quakes"}, "clarify": null}',
+                }
+            }
+            raise groq.BadRequestError("400", response=httpx.Response(400, request=req), body=body)
+
+    reply = asyncio.run(groq_with(Rejecting("")).complete(Prompt("s", "u")))
+    assert reply.spec == {"dataset": "quakes"}

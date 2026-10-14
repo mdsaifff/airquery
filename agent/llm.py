@@ -80,20 +80,25 @@ DEFAULT_MODEL = "claude-opus-5-5"
 GROQ_DEFAULT_MODEL = "openai/gpt-oss-120b"
 
 
-def _all_required(node: Any) -> Any:
-    """Groq strict mode: every property listed in `required` (optional ones stay nullable)."""
+def _groq_strict(node: Any) -> Any:
+    """Groq strict mode rules: every property in `required` (optional ones stay nullable),
+    and no ambiguous integer|number unions (a JSON number covers both)."""
     if isinstance(node, dict):
-        node = {k: _all_required(v) for k, v in node.items()}
+        node = {k: _groq_strict(v) for k, v in node.items()}
         if node.get("type") == "object" and "properties" in node:
             node["required"] = list(node["properties"])
+        if "anyOf" in node:
+            types = [o.get("type") for o in node["anyOf"]]
+            if "integer" in types and "number" in types:
+                node["anyOf"] = [o for o in node["anyOf"] if o.get("type") != "integer"]
         return node
     if isinstance(node, list):
-        return [_all_required(v) for v in node]
+        return [_groq_strict(v) for v in node]
     return node
 
 
 # Explicit nulls are safe: merge.py treats a null field as "keep the previous value".
-GROQ_OUTPUT_SCHEMA = _all_required(OUTPUT_SCHEMA)
+GROQ_OUTPUT_SCHEMA = _groq_strict(OUTPUT_SCHEMA)
 
 
 @dataclass
@@ -159,7 +164,33 @@ class GroqLLM:
         return self.model
 
     async def complete(self, prompt: Prompt) -> LLMReply:
-        resp = await self.client.chat.completions.create(
+        try:
+            resp = await self._create(prompt)
+        except groq.BadRequestError as exc:
+            # Groq checks the schema after generation and 400s on a mismatch (e.g. omitted
+            # defaulted fields). The raw output is still what we want: validate.py and the
+            # repair loop judge it. Token counts aren't reported for these.
+            body = exc.body if isinstance(exc.body, dict) else {}
+            err = body.get("error", body)
+            raw = err.get("failed_generation") if isinstance(err, dict) else None
+            if not raw:
+                raise
+            out = json.loads(raw)
+            return LLMReply(spec=out.get("spec"), clarify=out.get("clarify"))
+        choice = resp.choices[0]
+        if choice.finish_reason == "length":
+            raise RuntimeError("model reply hit max_completion_tokens")
+        out = json.loads(choice.message.content or "{}")
+        u = resp.usage
+        return LLMReply(
+            spec=out.get("spec"),
+            clarify=out.get("clarify"),
+            input_tokens=u.prompt_tokens if u else 0,
+            output_tokens=u.completion_tokens if u else 0,
+        )
+
+    async def _create(self, prompt: Prompt) -> Any:
+        return await self.client.chat.completions.create(
             model=self.model,
             messages=[
                 {"role": "system", "content": prompt.system},
@@ -171,17 +202,6 @@ class GroqLLM:
             },
             reasoning_effort=self.effort,  # type: ignore[arg-type]
             max_completion_tokens=4096,
-        )
-        choice = resp.choices[0]
-        if choice.finish_reason == "length":
-            raise RuntimeError("model reply hit max_completion_tokens")
-        out = json.loads(choice.message.content or "{}")
-        u = resp.usage
-        return LLMReply(
-            spec=out.get("spec"),
-            clarify=out.get("clarify"),
-            input_tokens=u.prompt_tokens if u else 0,
-            output_tokens=u.completion_tokens if u else 0,
         )
 
 

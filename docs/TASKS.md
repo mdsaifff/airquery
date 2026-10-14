@@ -163,7 +163,7 @@ Tune `config.ts` and repeat until met.
     (must be rejected or parameterized), `between`, `in`, `contains`,
     `last_days`, sort and limit.
   - Note: also smoke-run against the real Parquet in DuckDB (every operator executes; 'deeper than 300 km' = 314 rows, same as the browser). `contains` = ILIKE with escaped wildcards; LIMIT inlined from the validated int; compiler refuses unvalidated specs.
-- [ ] **T3.4 LLM adapter**
+- [x] **T3.4 LLM adapter**
   - Do: `LLMAdapter` protocol returning a `QuerySpec` via the provider's
     structured output or tool calling; `MockLLM` for tests; prompt built from
     `DatasetSchema`, current spec and 8–12 worked examples kept in
@@ -172,7 +172,7 @@ Tune `config.ts` and repeat until met.
   - Done when: unit tests pass with `MockLLM`; a manual script hits the real
     provider with 5 utterances and prints specs.
   - Needs you: put the API key in `agent/.env`.
-  - Note: CODE DONE, real run pending (box open): default provider is Groq's free tier (`GroqLLM`, `groq` SDK, `openai/gpt-oss-120b`, strict json_schema, reasoning_effort low; D-013); Claude stays available (`ClaudeLLM`, `LLM_PROVIDER=anthropic`; D-012). Both tested with fake clients. Needs: a free Groq key in `agent/.env`, then `cd agent && uv run python scripts/try_llm.py`.
+  - Note: default provider is Groq's free tier (`GroqLLM`, `groq` SDK, `openai/gpt-oss-120b`, strict json_schema, reasoning_effort low; D-013); Claude stays available (`ClaudeLLM`, `LLM_PROVIDER=anthropic`; D-012). Both tested with fake clients. Real run (2026-10-14, gpt-oss-120b): all 5 `try_llm.py` utterances gave correct specs, 0.7-1.1 s when under the rate limit. Groq checks the schema after generation and 400s on omitted defaulted fields, so the adapter passes `failed_generation` to the validator instead. Free tier is 8k tokens/min per model (~3 queries/min at ~2.6k tokens each); beyond that the SDK waits and retries (17-20 s).
 - [x] **T3.5 LangGraph agent**
   - Do: `graph.py`: parse → validate → (repair, max 2 retries | clarify) →
     merge → compile. Clarify when the LLM signals ambiguity or repairs run out
