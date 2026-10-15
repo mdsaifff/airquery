@@ -151,3 +151,9 @@ schema · `eval/` utterance set, scoring, latency and gesture reports ·
 Hand tracking runs fully in the browser; webcam frames never leave it. Only the
 transcript text goes to the agent. Chrome's Web Speech API sends audio to Google
 for recognition (D-004); the typed box is always available instead.
+
+## Credits
+
+Earth imagery: NASA Visible Earth (public domain): Blue Marble Next Generation
+(R. Stöckli, NASA Earth Observatory), Black Marble 2016 city lights, and the
+Blue Marble cloud composite. Earthquakes: USGS. Built by `make textures`.

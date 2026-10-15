@@ -1,4 +1,4 @@
-.PHONY: dev dev-web dev-agent test lint data galaxy eval ablation latency gestures contracts build preview docker-agent
+.PHONY: dev dev-web dev-agent test lint data textures galaxy eval ablation latency gestures contracts build preview docker-agent
 
 # Fresh clone: install web deps on first use. uv syncs Python deps by itself.
 # npm rewrites node_modules/.package-lock.json on every install, so this only
@@ -31,6 +31,10 @@ lint: $(WEB_DEPS)
 
 data:
 	cd data_prep && uv run python quakes.py && uv run python coastlines.py
+
+# NASA Earth imagery (public domain) for the realistic globe, written to web/public/textures/.
+textures:
+	cd data_prep && uv run python textures.py $(ARGS)
 
 # Stretch: arXiv paper galaxy (downloads ~84 pages politely, embeds on CPU: needs a few GB of RAM).
 galaxy:
