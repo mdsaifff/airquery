@@ -52,6 +52,19 @@ describe('pickNearest', () => {
     expect(pickNearest({ ...s, x: W / 2, y: H / 2 })).toBe(1);
   });
 
+  it('with a solid globe, never picks a point hidden behind it', () => {
+    // Just over the top of the globe, on the hidden side; nothing in front.
+    // Through X-ray glass it is pickable, behind a solid crust it is not.
+    const s = setup([[0, 0.995, -0.1]]);
+    expect(pickNearest({ ...s, x: W / 2, y: 0, radiusPx: 2000 })).toBe(0);
+    expect(pickNearest({ ...s, x: W / 2, y: 0, radiusPx: 2000, occluded: true })).toBe(-1);
+  });
+
+  it('with a solid globe, still picks a point facing the camera', () => {
+    const s = setup([[0, 0.6, 0.8]]);
+    expect(pickNearest({ ...s, x: W / 2, y: 0, radiusPx: 2000, occluded: true })).toBe(0);
+  });
+
   it('ignores points behind the camera', () => {
     expect(pickNearest({ ...setup([[0, 0, 5]]), x: W / 2, y: H / 2 })).toBe(-1);
   });

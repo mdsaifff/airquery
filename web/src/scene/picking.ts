@@ -17,6 +17,13 @@ export interface PickInput {
   x: number;
   y: number;
   radiusPx: number;
+  /** A solid globe hides the far side: points facing away from the camera can't be picked. */
+  occluded?: boolean;
+}
+
+/** On a solid unit globe, a point is visible when it faces the camera (p·cam > |p|²). */
+function facesCamera(x: number, y: number, z: number, cam: [number, number, number]): boolean {
+  return x * cam[0] + y * cam[1] + z * cam[2] > x * x + y * y + z * z;
 }
 
 export function pickNearest(p: PickInput): number {
@@ -36,6 +43,7 @@ export function pickNearest(p: PickInput): number {
     const sy = (1 - (m[1] * x + m[5] * y + m[9] * z + m[13]) / w) * 0.5 * p.height;
     const d2 = (sx - p.x) ** 2 + (sy - p.y) ** 2;
     if (d2 > r2) continue;
+    if (p.occluded && !facesCamera(x, y, z, p.camPos)) continue;
     const behind = Math.hypot(x - cx, y - cy, z - cz) > p.camDist;
     const score = d2 + (behind ? r2 : 0);
     if (score < bestScore) {

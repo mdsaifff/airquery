@@ -40,8 +40,8 @@ export const EARTH_FRAG = /* glsl */ `
     col += vec3(1.0, 0.92, 0.8) * pow(max(dot(n, h), 0.0), 60.0) * water * day * 0.7;
     float fres = pow(1.0 - max(dot(n, v), 0.0), 3.0);
     col += vec3(0.25, 0.55, 1.0) * fres * (0.15 + 0.6 * day);
-    vec3 glass = vec3(0.12, 0.55, 0.85) * (0.2 + 1.2 * fres);
-    gl_FragColor = vec4(mix(glass, col, uSolid), mix(uGlassAlpha + 0.6 * fres, 1.0, uSolid));
+    vec3 glass = vec3(0.08, 0.4, 0.7) * (0.1 + 0.9 * fres);
+    gl_FragColor = vec4(mix(glass, col, uSolid), mix(uGlassAlpha + 0.35 * fres, 1.0, uSolid));
     #include <colorspace_fragment>
   }
 `;

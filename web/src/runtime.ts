@@ -22,8 +22,10 @@ import { buildCsvDataset, centroid, importCsv } from './scene/loadCsv.ts';
 import type { CsvImport } from './scene/loadCsv.ts';
 import type { CsvMapping } from './data/csvSchema.ts';
 import { SceneManager } from './scene/sceneManager.ts';
+import { HoverMarker } from './scene/hoverMarker.ts';
 import { createStarfield } from './scene/starfield.ts';
 import { sunDirection } from './scene/sun.ts';
+import { wantsXray, XrayState } from './scene/xray.ts';
 import { downloadJson, LandmarkRecorder } from './tracking/recorder.ts';
 import { captureFrames } from './tracking/captureFrames.ts';
 import { startTracking } from './tracking/trackingLoop.ts';
@@ -58,6 +60,8 @@ export interface Runtime {
   finishCsv(imp: CsvImport, mapping: CsvMapping): Promise<void>;
   /** Custom gesture training data: capture labelled webcam frames to <label>.tar. */
   captureGesture(label: string, onProgress: (done: number) => void): Promise<void>;
+  /** X-ray: crust to glass, quakes sink to their real depth (X key, legend button). */
+  toggleXray(): void;
 }
 
 export function startRuntime(els: RuntimeElements): Runtime {
@@ -72,6 +76,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
   sm.scene.add(createStarfield());
   const sunDir = new THREE.Vector3(0, 0, 1);
   let sunAt = -Infinity;
+  const xray = new XrayState();
+  const hoverMarker = new HoverMarker();
+  sm.scene.add(hoverMarker.group);
   const camera = new CameraController(config, {
     yaw: (150 * Math.PI) / 180, // start over the western Pacific
     pitch: 0.3,
@@ -113,6 +120,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
       lasso.selection = null; // a new query replaces any lasso focus
       const { shown, legend } = applyView(d.cloud, d.base, d.schema, d.idIndex, d.mask, view);
       Object.assign(hudStore, { shown, legend, glass: applied, total: d.cloud.count });
+      const pos = d.schema.position;
+      xray.follow(wantsXray(applied.spec, pos.kind === 'geo' ? (pos.depth ?? null) : null));
       latencyFrom = endedAt;
     },
     flyTo: (lat, lon) => camera.flyTo(lat, lon, performance.now()),
@@ -133,6 +142,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
       const d = await datasets.show(name);
       if (disposed) return;
       hudStore.dataset = name;
+      const pos = d.schema.position;
+      hudStore.geo = pos.kind === 'geo';
+      hudStore.depthColumn = pos.kind === 'geo' ? (pos.depth ?? null) : null;
       if (name === 'quakes') {
         hudStore.placeOptions = d.schema.columns.find((c) => c.name === 'place')?.examples ?? [];
       }
@@ -210,6 +222,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
     sm.camera.lookAt(0, 0, 0);
     sm.camera.updateMatrixWorld();
     const d = datasets.current();
+    xray.step(dt, config.xrayAnimMs);
+    hudStore.xray = xray.target === 1;
     if (d) {
       if (now - sunAt > 1000) {
         // The day/night line moves slowly: recompute once a second.
@@ -219,10 +233,14 @@ export function startRuntime(els: RuntimeElements): Runtime {
         );
       }
       d.earth?.update(sunDir, dt);
+      d.earth?.setXray(xray.eased);
+      d.cloud.setDepthMix(xray.eased);
       d.cloud.update(dt, orbit.distance, sm.pixelScale);
       const handCursor = cursor.visible ? cursor.position : null;
       const canPick = mode === 'pointing' || mode === 'idle';
-      hover.update(sm.camera, d.cloud, d.base, d.schema, handCursor, canPick);
+      const occluded = !!d.earth && xray.eased < 0.5; // the solid crust hides the far side
+      hover.update(sm.camera, d.cloud, d.base, d.schema, handCursor, canPick, occluded);
+      hoverMarker.update(d.cloud, hover.current, xray.eased, now, sm.camera);
     }
     hudStore.renderFps = sm.fps;
     hudStore.frameMs = sm.frameMs;
@@ -267,6 +285,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
       switchScene(e.code === 'ArrowLeft' ? 'left' : 'right');
     } else if (e.code === 'Escape') {
       lasso.clear();
+    } else if (e.code === 'KeyX') {
+      xray.toggle();
     } else if (e.code === 'KeyM') {
       // Frontend timings for eval/latency.py.
       downloadJson(`frontend-timings-${Date.now()}.json`, exportMetrics(navigator.userAgent));
@@ -309,5 +329,6 @@ export function startRuntime(els: RuntimeElements): Runtime {
     },
     undo: () => datasets.session().undo(),
     resetView: () => camera.reset(performance.now()),
+    toggleXray: () => xray.toggle(),
   };
 }

@@ -39,6 +39,10 @@ export const hudStore = {
   thinking: false,
   /** Mouse baseline mode (B): hands and voice off, dropdown filters on. */
   baseline: false,
+  /** X-ray mode is on (target), the scene is a globe, and its depth column (if any). */
+  xray: false,
+  geo: true,
+  depthColumn: null as string | null,
   /** Place choices for the baseline dropdown (computed examples from the dataset schema). */
   placeOptions: [] as string[],
 };

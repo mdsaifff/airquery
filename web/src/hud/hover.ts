@@ -15,6 +15,7 @@ function pickInput(
   cloud: PointCloud,
   at: { x: number; y: number },
   radiusPx: number,
+  occluded = false,
 ): PickInput {
   viewProj.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
   return {
@@ -28,6 +29,7 @@ function pickInput(
     x: at.x,
     y: at.y,
     radiusPx,
+    occluded,
   };
 }
 
@@ -85,6 +87,8 @@ export class Hover {
     schema: DatasetSchema,
     handCursor: { x: number; y: number } | null,
     canPick: boolean,
+    /** A solid globe hides the far side (X-ray off). */
+    occluded = false,
   ): void {
     const at = handCursor ?? this.mouse;
     if (at) this.pointer = at;
@@ -93,7 +97,7 @@ export class Hover {
       this.tooltip.hide();
       return;
     }
-    const i = pickNearest(pickInput(camera, globe, at, config.pickRadiusPx));
+    const i = pickNearest(pickInput(camera, globe, at, config.pickRadiusPx, occluded));
     this.current = i;
     if (i < 0) this.tooltip.hide();
     else this.tooltip.show(i, at.x, at.y, () => describePoint(schema, base, i));
