@@ -12,6 +12,8 @@ export const config = {
   minHandConfidence: 0.5,
   /** A custom Model Maker gesture model, used instead of the CDN model when present (path). */
   customModelPath: 'models/gesture_recognizer.task',
+  /** Speaking rate of spoken summaries (× normal speed). */
+  speechRate: 1.0,
   /** Frames per custom-gesture capture (count) and the gap between them (ms). */
   captureFrames: 60,
   captureIntervalMs: 120,

@@ -9,6 +9,7 @@ import { DebugPanel } from './hud/DebugPanel.tsx';
 import { GlassBox, Legend, Stats } from './hud/Hud.tsx';
 import { StudyPanel } from './hud/StudyPanel.tsx';
 import { Toasts, TranscriptBar } from './hud/TranscriptBar.tsx';
+import { VoicePanel } from './hud/VoicePanel.tsx';
 import { StudyHost } from './interaction/study.ts';
 import { startRuntime } from './runtime.ts';
 import type { Runtime } from './runtime.ts';
@@ -21,6 +22,7 @@ export function App() {
   const [studyOpen, setStudyOpen] = useState(false);
   const [tasksOpen, setTasksOpen] = useState(false);
   const [captureOpen, setCaptureOpen] = useState(false);
+  const [voiceOpen, setVoiceOpen] = useState(false);
   const [baseline, setBaseline] = useState(false);
   const [study] = useState(() => new StudyHost());
   const importCsv = useCallback((file: File) => {
@@ -55,6 +57,7 @@ export function App() {
       if (e.code === 'KeyG') setStudyOpen((s) => !s); // gesture study
       if (e.code === 'KeyT') setTasksOpen((s) => !s); // study task timer
       if (e.code === 'KeyC') setCaptureOpen((s) => !s); // custom gesture data
+      if (e.code === 'KeyV') setVoiceOpen((s) => !s); // voice picker
       if (e.code === 'KeyB') {
         // mouse baseline: hands + voice off, dropdowns on
         setBaseline((b) => !b);
@@ -92,6 +95,7 @@ export function App() {
       {tasksOpen && <TaskPanel mode={baseline ? 'mouse' : 'hands'} />}
       <CsvDrop importCsv={importCsv} finishCsv={finishCsv} />
       {captureOpen && <CapturePanel capture={capture} />}
+      {voiceOpen && <VoicePanel />}
     </>
   );
 }

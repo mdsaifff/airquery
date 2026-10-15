@@ -122,7 +122,7 @@ changes the scene. Ask the user to record a 10-second clip for the teaser.
   - Done when: controller logic is unit tested with synthetic events.
   - Needs you: rotate and zoom by hand; rate smoothness 1–5 and note anything
     that feels laggy or jumpy.
-  - Note: controller (from T1.4) now driven by gestures via state machine -> `effects.ts`; synthetic-event tests cover drag + damping, two-hand dolly, clutch, reset, fly-to. Mouse orbit unchanged. Smoothness rating pending (user).
+  - Note: controller (from T1.4) now driven by gestures via state machine -> `effects.ts`; synthetic-event tests cover drag + damping, two-hand dolly, clutch, reset, fly-to. Mouse orbit unchanged. User check 2026-10-15: hand rotate/zoom feel smooth; push-to-talk (space and victory) and undo work. Formal Gate 2 self-test still pending.
 - [x] **T2.6 Cursor, picking and feedback cues**
   - Do: screen cursor; raycast hover on points with tooltip (place,
     magnitude, depth, date); skeleton colour by state; hold ring for reset and
@@ -259,7 +259,7 @@ on the deployed site. Ask the user to record the hero take.
   - Note: CODE DONE, data pending (box open): `data_prep/papers.py` (arXiv API per quarter, MiniLM embeddings, UMAP 3D; tests with fake embed/reduce), DatasetSchema `xyz` position + `categorical` columns, PointCloud/globeDecor split, multi-dataset runtime (`datasets.ts`), swipe gesture + Arrow keys, categorical legend, paper tooltips, papers prompt examples. Verified headless with a temporary placeholder layout (deleted). The real `make galaxy` run was stopped by Claude Code for low system memory after 53/84 pages (cached); rerun when RAM allows (D-011).
 - [x] **T5.2 "What's this?"** — selection summary via the agent (`explain`
   intent, aggregates computed in DuckDB, not by the LLM) + speechSynthesis.
-  - Note: LLM only classifies `explain`; the frontend collects visible ids near the pointer (front side on globes), `POST /explain` -> `compile_explain` (schema-driven avg/min/max, mode of categorical/region) -> DuckDB -> deterministic sentence -> toast + speechSynthesis; SQL shown in the glass box. Verified headless: 'This cluster has 569 earthquakes, 216 km deep on average, up to magnitude 7.3, mostly near Vanuatu.'
+  - Note: LLM only classifies `explain`; the frontend collects visible ids near the pointer (front side on globes), `POST /explain` -> `compile_explain` (schema-driven avg/min/max, mode of categorical/region) -> DuckDB -> deterministic sentence -> toast + speechSynthesis; SQL shown in the glass box. Verified headless: 'This cluster has 569 earthquakes, 216 km deep on average, up to magnitude 7.3, mostly near Vanuatu.' Voice: picks the most natural installed voice (neural "Natural", then Chrome's Google voices) instead of the robotic Windows default; V opens a picker that remembers the choice (user feedback 2026-10-15).
 - [x] **T5.3 Air lasso** — trace a loop with the index finger to select points.
   - Note: hold 🤟 (built-in ILoveYou) and trace with the index finger; new `lassoing` state; Shift+drag is the mouse fallback. Pure point-in-polygon selection in screen space (front side only on globes); selection focuses the scene, feeds 'what's this?', Esc or a new query clears. Verified headless: lasso -> 413 selected (no rotation) -> summary of those 413 -> Esc restores. Feel check by hand pending (user).
 - [x] **T5.4 Bring your own CSV** — drop a CSV, infer `DatasetSchema`, pick

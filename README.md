@@ -92,7 +92,8 @@ by magnitude", "the ten strongest", "near Japan", "undo", ...).
 
 Study tools: **G** gesture study + false-trigger counter, **B** mouse baseline
 (dropdown filters), **T** task timer, **M** download frontend timings,
-**C** record frames for a custom gesture (`notebooks/custom_gesture.ipynb`).
+**C** record frames for a custom gesture (`notebooks/custom_gesture.ipynb`),
+**V** choose the voice that reads summaries aloud.
 Drop any CSV with latitude/longitude columns onto the page to explore it.
 `make galaxy` builds the arXiv paper galaxy (needs a few GB of RAM).
 Dev only: **D** tuning panel, **Shift+R** record a landmark fixture.
