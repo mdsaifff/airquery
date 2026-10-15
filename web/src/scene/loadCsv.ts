@@ -7,14 +7,12 @@ import { datasetName, guessMapping, inferSchema } from '../data/csvSchema.ts';
 import type { CsvMapping } from '../data/csvSchema.ts';
 import type { Db } from '../data/db.ts';
 import { indexIds } from '../data/resultMask.ts';
-import { createGlobeDecor, loadCoastlines } from './globeDecor.ts';
-import type { Polylines } from './globeDecor.ts';
+import { createEarth } from './earth/earth.ts';
 import { PointCloud } from './pointCloud.ts';
 import { positionsFor } from './positions.ts';
 import type { LoadedDataset } from './loadDataset.ts';
 
 export interface CsvImport {
-  coastlines: Polylines | null;
   name: string;
   fileName: string;
   base: Columns;
@@ -27,8 +25,7 @@ export async function importCsv(db: Db, file: File): Promise<CsvImport> {
   await db.addCsv(name, file, config.csvMaxRows);
   const base = await db.run(`SELECT * FROM ${name}`); // name checked by addCsv
   const numericColumns = [...base.numbers.keys()].filter((c) => !base.timeColumns?.has(c));
-  const coastlines = await loadCoastlines();
-  return { name, fileName: file.name, base, numericColumns, guess: guessMapping(base), coastlines };
+  return { name, fileName: file.name, base, numericColumns, guess: guessMapping(base) };
 }
 
 export function buildCsvDataset(
@@ -38,9 +35,10 @@ export function buildCsvDataset(
 ): LoadedDataset {
   const schema = inferSchema(imp.name, imp.fileName, imp.base, mapping);
   const cloud = new PointCloud(scene, positionsFor(schema, imp.base, config.depthExaggeration));
-  cloud.group.add(createGlobeDecor(imp.coastlines));
+  const earth = createEarth();
+  cloud.group.add(earth.group);
   const idIndex = indexIds(imp.base.strings.get('__id') ?? []);
-  return { schema, cloud, base: imp.base, idIndex, mask: new Uint8Array(cloud.count) };
+  return { schema, cloud, base: imp.base, idIndex, mask: new Uint8Array(cloud.count), earth };
 }
 
 /** Mean lat/lon of the rows, for flying the camera there. */

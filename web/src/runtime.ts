@@ -1,5 +1,6 @@
 // Wires the imperative parts together (tracking, scene, data, voice, agent).
 // React only mounts the DOM elements and the HUD; it never sees per-frame data.
+import * as THREE from 'three';
 import { config } from './config.ts';
 import type { QuerySpec } from './contracts/contracts.ts';
 import { askAgent, compileSpec } from './data/agentClient.ts';
@@ -21,6 +22,8 @@ import { buildCsvDataset, centroid, importCsv } from './scene/loadCsv.ts';
 import type { CsvImport } from './scene/loadCsv.ts';
 import type { CsvMapping } from './data/csvSchema.ts';
 import { SceneManager } from './scene/sceneManager.ts';
+import { createStarfield } from './scene/starfield.ts';
+import { sunDirection } from './scene/sun.ts';
 import { downloadJson, LandmarkRecorder } from './tracking/recorder.ts';
 import { captureFrames } from './tracking/captureFrames.ts';
 import { startTracking } from './tracking/trackingLoop.ts';
@@ -66,6 +69,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
   // --- scene + camera (render loop) ---
   const sm = new SceneManager(els.sceneEl);
   cleanups.push(() => sm.dispose());
+  sm.scene.add(createStarfield());
+  const sunDir = new THREE.Vector3(0, 0, 1);
+  let sunAt = -Infinity;
   const camera = new CameraController(config, {
     yaw: (150 * Math.PI) / 180, // start over the western Pacific
     pitch: 0.3,
@@ -205,6 +211,14 @@ export function startRuntime(els: RuntimeElements): Runtime {
     sm.camera.updateMatrixWorld();
     const d = datasets.current();
     if (d) {
+      if (now - sunAt > 1000) {
+        // The day/night line moves slowly: recompute once a second.
+        sunAt = now;
+        sunDir.set(
+          ...sunDirection(config.sunTimeOverride ? new Date(config.sunTimeOverride) : new Date()),
+        );
+      }
+      d.earth?.update(sunDir, dt);
       d.cloud.update(dt, orbit.distance, sm.pixelScale);
       const handCursor = cursor.visible ? cursor.position : null;
       const canPick = mode === 'pointing' || mode === 'idle';

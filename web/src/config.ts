@@ -76,6 +76,17 @@ export const config = {
   pointMaxSize: 0.045,
   /** How much far-side points fade (0..1). */
   farSideDim: 0.6,
+  /** Rendering quality: 'high' = bloom, clouds, 2k textures; 'low' = none of those, 1k textures. */
+  quality: 'high' as 'high' | 'low',
+  /** Quake markers sit at this radius when X-ray is off (Earth radius = 1). */
+  surfaceRadius: 1.004,
+  /** X-ray transition length (ms) and the crust's opacity when fully on (0..1). */
+  xrayAnimMs: 1200,
+  xrayCrustOpacity: 0.12,
+  /** Cloud layer drift (rad/s). */
+  cloudSpinRadPerSec: 0.006,
+  /** Fixed time for the day/night line (ISO string), or null for the real current time. */
+  sunTimeOverride: null as string | null,
   /** Hover picks the nearest point within this radius (px). */
   pickRadiusPx: 14,
   /** Rows kept from a dropped CSV (count); every point is tweened per frame. */

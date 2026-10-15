@@ -5,7 +5,8 @@ import type { DatasetSchema } from '../contracts/contracts.ts';
 import type { Columns } from '../data/arrow.ts';
 import type { Db } from '../data/db.ts';
 import { indexIds } from '../data/resultMask.ts';
-import { createGlobeDecor, loadCoastlines } from './globeDecor.ts';
+import { createEarth } from './earth/earth.ts';
+import type { Earth } from './earth/earth.ts';
 import { PointCloud } from './pointCloud.ts';
 import { positionsFor } from './positions.ts';
 
@@ -17,6 +18,8 @@ export interface LoadedDataset {
   idIndex: Map<string, number>;
   /** Reused visibility mask for query results. */
   mask: Uint8Array;
+  /** The realistic globe, for geo datasets. */
+  earth: Earth | null;
 }
 
 async function fetchJson<T>(path: string): Promise<T> {
@@ -38,9 +41,8 @@ export async function loadDataset(
   const base = await db.run(`SELECT * FROM ${name}`); // name checked by addDataset
   const geo = schema.position.kind === 'geo';
   const cloud = new PointCloud(scene, positionsFor(schema, base, config.depthExaggeration), geo ? config.farSideDim : config.farSideDim / 2); // prettier-ignore
-  if (geo) {
-    cloud.group.add(createGlobeDecor(await loadCoastlines()));
-  }
+  const earth = geo ? createEarth() : null;
+  if (earth) cloud.group.add(earth.group);
   const idIndex = indexIds(base.strings.get(schema.id ?? 'id') ?? []);
-  return { schema, cloud, base, idIndex, mask: new Uint8Array(cloud.count) };
+  return { schema, cloud, base, idIndex, mask: new Uint8Array(cloud.count), earth };
 }
