@@ -85,6 +85,10 @@ export const config = {
   xrayCrustOpacity: 0.12,
   /** Cloud layer drift (rad/s). */
   cloudSpinRadPerSec: 0.006,
+  /** Bloom glow: strength (×), radius (0..1) and threshold (linear luminance); 'high' quality only. */
+  bloomStrength: 0.9,
+  bloomRadius: 0.5,
+  bloomThreshold: 1.3,
   /** Fixed time for the day/night line (ISO string), or null for the real current time. */
   sunTimeOverride: null as string | null,
   /** Hover picks the nearest point within this radius (px). */

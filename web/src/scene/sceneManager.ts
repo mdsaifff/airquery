@@ -1,8 +1,10 @@
 // Renderer, camera, resize and the render loop. The loop only reads state that
 // other loops (tracking, DuckDB) have already written; it never awaits them.
 import * as THREE from 'three';
+import type { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { config } from '../config.ts';
 import { metrics } from '../hud/metrics.ts';
+import { createComposer } from './postfx.ts';
 
 export type FrameCallback = (now: number, dt: number) => void;
 
@@ -10,6 +12,8 @@ export class SceneManager {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene = new THREE.Scene();
   readonly camera: THREE.PerspectiveCamera;
+  /** Bloom post-processing at quality 'high'; null renders directly. */
+  readonly composer: EffectComposer | null;
   /** Rendered frames in the last full second. */
   fps = 0;
   /** CPU time of the last frame's callbacks + render, smoothed (ms). */
@@ -25,8 +29,18 @@ export class SceneManager {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setClearColor(0x05070d);
+    // Also as the scene background: colour-managed even when rendering into the bloom buffers.
+    this.scene.background = new THREE.Color(0x05070d);
     container.appendChild(this.renderer.domElement);
     this.camera = new THREE.PerspectiveCamera(config.cameraFovDeg, 1, 0.01, 100);
+    this.composer =
+      config.quality === 'high'
+        ? createComposer(this.renderer, this.scene, this.camera, {
+            strength: config.bloomStrength,
+            radius: config.bloomRadius,
+            threshold: config.bloomThreshold,
+          })
+        : null;
     this.resizeObserver = new ResizeObserver(() => this.resize(container));
     this.resizeObserver.observe(container);
     this.resize(container);
@@ -43,7 +57,8 @@ export class SceneManager {
       const dt = this.last ? now - this.last : 0;
       this.last = now;
       for (const cb of this.callbacks) cb(now, dt);
-      this.renderer.render(this.scene, this.camera);
+      if (this.composer) this.composer.render(dt / 1000);
+      else this.renderer.render(this.scene, this.camera);
       const ms = performance.now() - t0;
       metrics.frame.push(ms);
       this.frameMs = 0.9 * this.frameMs + 0.1 * ms;
@@ -66,6 +81,7 @@ export class SceneManager {
   dispose(): void {
     cancelAnimationFrame(this.raf);
     this.resizeObserver.disconnect();
+    this.composer?.dispose();
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }
@@ -74,6 +90,7 @@ export class SceneManager {
     const w = container.clientWidth || 1;
     const h = container.clientHeight || 1;
     this.renderer.setSize(w, h);
+    this.composer?.setSize(w, h);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
   }
