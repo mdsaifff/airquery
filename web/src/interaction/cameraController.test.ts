@@ -127,4 +127,15 @@ describe('CameraController', () => {
     const [x, y, z] = orbitPosition({ yaw: Math.PI / 2, pitch: 0, distance: 3 });
     expect([x, y, z].map((v) => +v.toFixed(6))).toEqual([3, 0, 0]);
   });
+
+  it('reset can glide over a longer duration (intro fly-in)', () => {
+    const c = make();
+    c.orbit.distance = 6;
+    c.reset(0, 2000);
+    c.update(1);
+    expect(c.update(1000).distance).toBeGreaterThan(home.distance);
+    expect(c.animating).toBe(true);
+    expect(c.update(2000).distance).toBeCloseTo(home.distance);
+    expect(c.animating).toBe(false);
+  });
 });

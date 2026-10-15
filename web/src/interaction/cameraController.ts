@@ -30,6 +30,7 @@ interface Anim {
   from: Orbit;
   to: Orbit;
   start: number;
+  duration: number;
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
@@ -121,8 +122,9 @@ export class CameraController {
     this.lastInputAt = now;
   }
 
-  reset(now: number): void {
-    this.animateTo({ ...this.home }, now);
+  /** Glide home; the intro passes a longer duration (ms). */
+  reset(now: number, durationMs = this.opts.animMs): void {
+    this.animateTo({ ...this.home }, now, durationMs);
   }
 
   flyTo(lat: number, lon: number, now: number): void {
@@ -133,6 +135,7 @@ export class CameraController {
         distance: Math.min(this.orbit.distance, this.opts.flyToDistance),
       },
       now,
+      this.opts.animMs,
     );
   }
 
@@ -145,7 +148,7 @@ export class CameraController {
     const dt = this.now === 0 ? 0 : now - this.now;
     this.now = now;
     if (this.anim) {
-      const t = clamp((now - this.anim.start) / this.opts.animMs, 0, 1);
+      const t = clamp((now - this.anim.start) / this.anim.duration, 0, 1);
       const { from, to } = this.anim;
       const e = ease(t);
       this.orbit.yaw = from.yaw + angleDelta(from.yaw, to.yaw) * e;
@@ -172,10 +175,10 @@ export class CameraController {
     return this.orbit;
   }
 
-  private animateTo(to: Orbit, now: number): void {
+  private animateTo(to: Orbit, now: number, duration: number): void {
     this.dragging = false;
     this.vel = { yaw: 0, pitch: 0 };
-    this.anim = { from: { ...this.orbit }, to, start: now };
+    this.anim = { from: { ...this.orbit }, to, start: now, duration };
     this.lastInputAt = now;
   }
 }
