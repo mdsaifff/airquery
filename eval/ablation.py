@@ -28,6 +28,8 @@ def collect(reports_dir: Path, day: str | None) -> list[dict[str, Any]]:
     for path in sorted(reports_dir.glob("*.json")):
         if path.stem.endswith("ablation") or (day and not path.stem.startswith(day)):
             continue
+        if "-sample" in path.stem:
+            continue  # --sample subsets (A/B checks), not comparable with full runs
         data = json.loads(path.read_text(encoding="utf-8"))
         meta, s = data["meta"], data["summary"]
         if meta.get("provider") in ("gold", "fake"):

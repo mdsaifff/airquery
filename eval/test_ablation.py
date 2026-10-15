@@ -20,6 +20,7 @@ def test_ablation_table_and_chart(tmp_path: Path) -> None:
     fake_report(tmp_path, "2026-11-02_big", "big", True, 0.94, 1.2)
     fake_report(tmp_path, "2026-11-02_big-norepair", "big", False, 0.9, 1.0)
     fake_report(tmp_path, "2026-11-02_small", "small", True, 0.81, 0.05)
+    fake_report(tmp_path, "2026-11-02_small-sample30", "small", True, 1.0, 0.01)
     (tmp_path / "2026-11-02_gold-oracle.json").write_text(
         json.dumps({"meta": {"provider": "gold"}, "summary": {}})
     )

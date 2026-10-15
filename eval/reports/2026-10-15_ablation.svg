@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" font-family="system-ui, sans-serif" font-size="12" role="img" aria-label="Query accuracy versus median latency (ms)">
+<style>
+.bg{fill:#fcfcfb}.ink{fill:#0b0b0b}.ink2{fill:#52514e}.grid{stroke:#e6e5e0}.s1{fill:#2a78d6}.s0{fill:#eb6834}.mark{stroke:#fcfcfb;stroke-width:2}
+@media (prefers-color-scheme: dark){.bg{fill:#1a1a19}.ink{fill:#f0efec}.ink2{fill:#c3c2b7}.grid{stroke:#33332f}.s1{fill:#3987e5}.s0{fill:#d95926}.mark{stroke:#1a1a19}}
+</style>
+<rect class="bg" width="640" height="400"/>
+<text class="ink" x="64" y="24" font-size="15" font-weight="600">Query accuracy vs median latency (ms)</text>
+<line class="grid" x1="64" x2="510" y1="344.0" y2="344.0"/>
+<text class="ink2" x="56" y="348.0" text-anchor="end">50%</text>
+<line class="grid" x1="64" x2="510" y1="288.0" y2="288.0"/>
+<text class="ink2" x="56" y="292.0" text-anchor="end">60%</text>
+<line class="grid" x1="64" x2="510" y1="232.0" y2="232.0"/>
+<text class="ink2" x="56" y="236.0" text-anchor="end">70%</text>
+<line class="grid" x1="64" x2="510" y1="176.0" y2="176.0"/>
+<text class="ink2" x="56" y="180.0" text-anchor="end">80%</text>
+<line class="grid" x1="64" x2="510" y1="120.0" y2="120.0"/>
+<text class="ink2" x="56" y="124.0" text-anchor="end">90%</text>
+<line class="grid" x1="64" x2="510" y1="64.0" y2="64.0"/>
+<text class="ink2" x="56" y="68.0" text-anchor="end">100%</text>
+<text class="ink2" x="64.0" y="362" text-anchor="middle">0</text>
+<text class="ink2" x="153.2" y="362" text-anchor="middle">2500</text>
+<text class="ink2" x="242.4" y="362" text-anchor="middle">5000</text>
+<text class="ink2" x="331.6" y="362" text-anchor="middle">7500</text>
+<text class="ink2" x="420.8" y="362" text-anchor="middle">10000</text>
+<text class="ink2" x="510.0" y="362" text-anchor="middle">12500</text>
+<text class="ink2" x="287.0" y="386" text-anchor="middle">median latency (ms)</text>
+<text class="ink2" x="16" y="204.0" transform="rotate(-90 16 204.0)" text-anchor="middle">result-set match</text>
+<g><title>openai/gpt-oss-20b · repair on · 92.0% · 12027 ms</title><circle class="mark s1" cx="493.1" cy="108.8" r="6"/><text class="ink" x="503.1" y="112.8">openai/gpt-oss-20b</text></g>
+<g><title>openai/gpt-oss-120b · repair on · 98.0% · 1579 ms</title><circle class="mark s1" cx="120.4" cy="75.2" r="6"/><text class="ink" x="130.4" y="79.2">openai/gpt-oss-120b</text></g>
+<circle class="s1" cx="70" cy="42" r="6"/>
+<text class="ink" x="82" y="46">repair on</text>
+<circle class="s0" cx="180" cy="42" r="6"/>
+<text class="ink" x="192" y="46">repair off</text>
+</svg>
