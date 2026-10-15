@@ -89,6 +89,10 @@ export const config = {
   bloomStrength: 0.9,
   bloomRadius: 0.5,
   bloomThreshold: 1.3,
+  /** Shockwave rings: minimum magnitude, max ring count, ring period (ms). */
+  shockwaveMinMag: 6.5,
+  shockwaveMax: 40,
+  shockwavePeriodMs: 3200,
   /** Fixed time for the day/night line (ISO string), or null for the real current time. */
   sunTimeOverride: null as string | null,
   /** Hover picks the nearest point within this radius (px). */

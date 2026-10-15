@@ -23,6 +23,7 @@ import type { CsvImport } from './scene/loadCsv.ts';
 import type { CsvMapping } from './data/csvSchema.ts';
 import { SceneManager } from './scene/sceneManager.ts';
 import { HoverMarker } from './scene/hoverMarker.ts';
+import { strongestVisible } from './scene/shockwaves.ts';
 import { createStarfield } from './scene/starfield.ts';
 import { sunDirection } from './scene/sun.ts';
 import { wantsXray, XrayState } from './scene/xray.ts';
@@ -69,6 +70,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
   const cleanups: (() => void)[] = [];
   /** performance.now() when the last voice/typed request ended; cleared on the next frame. */
   let latencyFrom: number | null = null;
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
   // --- scene + camera (render loop) ---
   const sm = new SceneManager(els.sceneEl);
@@ -122,6 +124,11 @@ export function startRuntime(els: RuntimeElements): Runtime {
       Object.assign(hudStore, { shown, legend, glass: applied, total: d.cloud.count });
       const pos = d.schema.position;
       xray.follow(wantsXray(applied.spec, pos.kind === 'geo' ? (pos.depth ?? null) : null));
+      const ringValues = d.schema.default_size_by ? d.base.numbers.get(d.schema.default_size_by) : undefined; // prettier-ignore
+      if (d.shockwaves && ringValues) {
+        const top = strongestVisible(ringValues, d.cloud.visible, config.shockwaveMinMag, config.shockwaveMax); // prettier-ignore
+        d.shockwaves.set(top, d.cloud.surfacePositions, d.cloud.colors, ringValues, config.shockwaveMinMag); // prettier-ignore
+      }
       latencyFrom = endedAt;
     },
     flyTo: (lat, lon) => camera.flyTo(lat, lon, performance.now()),
@@ -235,6 +242,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       d.earth?.update(sunDir, dt);
       d.earth?.setXray(xray.eased);
       d.cloud.setDepthMix(xray.eased);
+      d.shockwaves?.update(now, config.shockwavePeriodMs, reduceMotion ? 0 : 1 - xray.eased);
       d.cloud.update(dt, orbit.distance, sm.pixelScale);
       const handCursor = cursor.visible ? cursor.position : null;
       const canPick = mode === 'pointing' || mode === 'idle';

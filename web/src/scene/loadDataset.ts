@@ -9,6 +9,7 @@ import { createEarth } from './earth/earth.ts';
 import type { Earth } from './earth/earth.ts';
 import { PointCloud } from './pointCloud.ts';
 import { positionsFor, surfacePositionsFor } from './positions.ts';
+import { Shockwaves } from './shockwaves.ts';
 
 export interface LoadedDataset {
   schema: DatasetSchema;
@@ -20,6 +21,8 @@ export interface LoadedDataset {
   mask: Uint8Array;
   /** The realistic globe, for geo datasets. */
   earth: Earth | null;
+  /** Rings on the strongest points (geo data with depth and a size column). */
+  shockwaves: Shockwaves | null;
 }
 
 async function fetchJson<T>(path: string): Promise<T> {
@@ -44,6 +47,9 @@ export async function loadDataset(
   const cloud = new PointCloud(scene, positionsFor(schema, base, config.depthExaggeration), geo ? config.farSideDim : config.farSideDim / 2, surface); // prettier-ignore
   const earth = geo ? createEarth() : null;
   if (earth) cloud.group.add(earth.group);
+  const ringed = geo && schema.position.kind === 'geo' && !!schema.position.depth && !!schema.default_size_by; // prettier-ignore
+  const shockwaves = ringed ? new Shockwaves(config.shockwaveMax) : null;
+  if (shockwaves) cloud.group.add(shockwaves.mesh);
   const idIndex = indexIds(base.strings.get(schema.id ?? 'id') ?? []);
-  return { schema, cloud, base, idIndex, mask: new Uint8Array(cloud.count), earth };
+  return { schema, cloud, base, idIndex, mask: new Uint8Array(cloud.count), earth, shockwaves };
 }

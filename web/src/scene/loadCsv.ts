@@ -38,7 +38,15 @@ export function buildCsvDataset(
   const earth = createEarth();
   cloud.group.add(earth.group);
   const idIndex = indexIds(imp.base.strings.get('__id') ?? []);
-  return { schema, cloud, base: imp.base, idIndex, mask: new Uint8Array(cloud.count), earth };
+  return {
+    schema,
+    cloud,
+    base: imp.base,
+    idIndex,
+    mask: new Uint8Array(cloud.count),
+    earth,
+    shockwaves: null,
+  };
 }
 
 /** Mean lat/lon of the rows, for flying the camera there. */
