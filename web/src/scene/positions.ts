@@ -33,3 +33,18 @@ export function positionsFor(
   }
   return out;
 }
+
+/** Geo datasets with a depth column: the same points lifted to `radius` (X-ray off). Null otherwise. */
+export function surfacePositionsFor(
+  schema: DatasetSchema,
+  base: Columns,
+  radius: number,
+): Float32Array | null {
+  const p = schema.position;
+  if (p.kind !== 'geo' || !p.depth) return null;
+  const lat = numbers(base, p.lat);
+  const lon = numbers(base, p.lon);
+  const out = new Float32Array(base.numRows * 3);
+  for (let i = 0; i < base.numRows; i++) geoToXYZ(lat[i], lon[i], radius, out, i * 3);
+  return out;
+}

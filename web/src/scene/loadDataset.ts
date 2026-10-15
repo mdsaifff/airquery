@@ -8,7 +8,7 @@ import { indexIds } from '../data/resultMask.ts';
 import { createEarth } from './earth/earth.ts';
 import type { Earth } from './earth/earth.ts';
 import { PointCloud } from './pointCloud.ts';
-import { positionsFor } from './positions.ts';
+import { positionsFor, surfacePositionsFor } from './positions.ts';
 
 export interface LoadedDataset {
   schema: DatasetSchema;
@@ -40,7 +40,8 @@ export async function loadDataset(
   await db.addDataset(name);
   const base = await db.run(`SELECT * FROM ${name}`); // name checked by addDataset
   const geo = schema.position.kind === 'geo';
-  const cloud = new PointCloud(scene, positionsFor(schema, base, config.depthExaggeration), geo ? config.farSideDim : config.farSideDim / 2); // prettier-ignore
+  const surface = surfacePositionsFor(schema, base, config.surfaceRadius);
+  const cloud = new PointCloud(scene, positionsFor(schema, base, config.depthExaggeration), geo ? config.farSideDim : config.farSideDim / 2, surface); // prettier-ignore
   const earth = geo ? createEarth() : null;
   if (earth) cloud.group.add(earth.group);
   const idIndex = indexIds(base.strings.get(schema.id ?? 'id') ?? []);

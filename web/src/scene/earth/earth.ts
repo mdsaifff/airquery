@@ -34,6 +34,7 @@ function loadTextures(quality: 'high' | 'low'): Promise<Textures | null> {
       const t = await loader.loadAsync(new URL(`textures/${file}`, document.baseURI).href);
       t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
       t.anisotropy = 4;
+      t.wrapS = THREE.RepeatWrapping; // no seam at the 180° meridian
       return t;
     };
     const k = quality === 'high' ? '' : '_1k';

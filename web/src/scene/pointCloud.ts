@@ -8,8 +8,11 @@ import { createPointsMaterial } from './pointsMaterial.ts';
 
 export class PointCloud {
   readonly count: number;
-  /** World positions, xyz per point (shared with picking). */
+  /** Where points are drawn right now, xyz per point (blend of surface and depth); picking reads this. */
   readonly positions: Float32Array;
+  /** X-ray off / on positions; the same array when the dataset has no depth. */
+  readonly surfacePositions: Float32Array;
+  readonly depthPositions: Float32Array;
   /** Target visibility per point: 1 shown, 0 hidden. */
   readonly visible: Uint8Array;
   /** Everything this dataset draws (points + any decoration), for show/hide. */
@@ -18,13 +21,22 @@ export class PointCloud {
   private readonly material: THREE.ShaderMaterial;
   private readonly alpha: Float32Array;
   private animating = false;
+  private depthMix = 0;
 
-  constructor(scene: THREE.Scene, positions: Float32Array, farDim = config.farSideDim) {
+  constructor(
+    scene: THREE.Scene,
+    positions: Float32Array,
+    farDim = config.farSideDim,
+    surface: Float32Array | null = null,
+  ) {
     this.count = positions.length / 3;
-    this.positions = positions;
+    this.depthPositions = positions;
+    this.surfacePositions = surface ?? positions;
+    this.positions = surface ? new Float32Array(surface) : positions;
     this.visible = new Uint8Array(this.count).fill(1);
     this.alpha = new Float32Array(this.count).fill(1);
     this.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    this.geometry.setAttribute('aSurface', new THREE.BufferAttribute(this.surfacePositions, 3));
     this.geometry.setAttribute('aColor', new THREE.BufferAttribute(new Float32Array(this.count * 3), 3)); // prettier-ignore
     this.geometry.setAttribute('aSize', new THREE.BufferAttribute(new Float32Array(this.count), 1));
     this.geometry.setAttribute('aAlpha', new THREE.BufferAttribute(this.alpha, 1));
@@ -75,6 +87,22 @@ export class PointCloud {
     if (mask) this.visible.set(mask);
     else this.visible.fill(1);
     this.animating = true;
+  }
+
+  /** rgb per point (0..1, sRGB), as last set by setColors / setCategoryColors. */
+  get colors(): Float32Array {
+    return (this.geometry.getAttribute('aColor') as THREE.BufferAttribute).array as Float32Array;
+  }
+
+  /** 0 = surface, 1 = true depth (eased X-ray mix). Keeps CPU positions in step for picking. */
+  setDepthMix(mix: number): void {
+    this.material.uniforms.uDepthMix.value = mix;
+    if (this.surfacePositions === this.depthPositions || mix === this.depthMix) return;
+    this.depthMix = mix;
+    const s = this.surfacePositions;
+    const d = this.depthPositions;
+    const out = this.positions;
+    for (let i = 0; i < out.length; i++) out[i] = s[i] + (d[i] - s[i]) * mix;
   }
 
   update(dt: number, camDist: number, pixelScale: number): void {

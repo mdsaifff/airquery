@@ -72,8 +72,8 @@ export const config = {
   /** Radial depth exaggeration (×): r = 1 - depth/6371 * this. */
   depthExaggeration: 3,
   /** Point diameter range (scene units; Earth radius = 1). */
-  pointMinSize: 0.008,
-  pointMaxSize: 0.045,
+  pointMinSize: 0.012,
+  pointMaxSize: 0.06,
   /** How much far-side points fade (0..1). */
   farSideDim: 0.6,
   /** Rendering quality: 'high' = bloom, clouds, 2k textures; 'low' = none of those, 1k textures. */

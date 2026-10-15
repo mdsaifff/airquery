@@ -4,7 +4,7 @@ import type { DatasetSchema } from '../contracts/contracts.ts';
 import type { Columns } from '../data/arrow.ts';
 import { applyView } from './applyView.ts';
 import { PointCloud } from './pointCloud.ts';
-import { positionsFor } from './positions.ts';
+import { positionsFor, surfacePositionsFor } from './positions.ts';
 
 const papers: DatasetSchema = {
   dataset: 'papers',
@@ -62,5 +62,37 @@ describe('categorical colour', () => {
     const hex = (i: number) =>
       '#' + [0, 1, 2].map((c) => Math.round(colors[i * 3 + c] * 255).toString(16).padStart(2, '0')).join(''); // prettier-ignore
     expect([hex(0), hex(1), hex(2)]).toEqual(['#3987e5', '#6b7280', '#d95926']);
+  });
+});
+
+describe('surfacePositionsFor', () => {
+  const geo = {
+    dataset: 'q',
+    table: 'q',
+    description: '',
+    id: 'id',
+    position: { kind: 'geo' as const, lat: 'lat', lon: 'lon', depth: 'depth_km' },
+    columns: [],
+  };
+  const base = {
+    numRows: 1,
+    numbers: new Map([
+      ['lat', new Float64Array([0])],
+      ['lon', new Float64Array([90])],
+      ['depth_km', new Float64Array([300])],
+    ]),
+    strings: new Map(),
+  };
+
+  it('lifts geo points with depth to the given radius', () => {
+    const p = surfacePositionsFor(geo as never, base as never, 1.004);
+    if (!p) throw new Error('expected surface positions');
+    expect(Math.hypot(p[0], p[1], p[2])).toBeCloseTo(1.004, 6);
+    expect(p[0]).toBeCloseTo(1.004, 6); // lon 90 is +x
+  });
+
+  it('is null without a depth column or for xyz layouts', () => {
+    expect(surfacePositionsFor({ ...geo, position: { kind: 'geo', lat: 'lat', lon: 'lon' } } as never, base as never, 1)).toBeNull(); // prettier-ignore
+    expect(surfacePositionsFor({ ...geo, position: { kind: 'xyz', x: 'x', y: 'y', z: 'z' } } as never, base as never, 1)).toBeNull(); // prettier-ignore
   });
 });
