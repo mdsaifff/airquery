@@ -21,6 +21,8 @@ export const hudStore = {
   /** Points currently shown / total. */
   shown: 0,
   total: 0,
+  /** `shown`, eased toward its target each frame (the title bar's ticking count). */
+  shownDisplay: 0,
   /** Loading / error line under the stats. */
   status: 'loading data…',
   /** Shown when the camera or tracker can't start; the app falls back to mouse mode. */
@@ -45,6 +47,8 @@ export const hudStore = {
   depthColumn: null as string | null,
   /** Date shown while the opening replay runs ('' otherwise). */
   introDate: '',
+  /** One-line description of the current dataset (from its schema). */
+  subtitle: '',
   /** Place choices for the baseline dropdown (computed examples from the dataset schema). */
   placeOptions: [] as string[],
 };

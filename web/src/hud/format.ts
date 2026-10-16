@@ -47,3 +47,9 @@ export function formatLegendValue(v: number, isTime: boolean): string {
   if (isTime) return new Date(v).toISOString().slice(0, 10);
   return Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(1);
 }
+
+/** One animation step toward a target number (snaps within 0.5), for ticking counters. */
+export function approach(current: number, target: number, k: number): number {
+  const next = current + (target - current) * k;
+  return Math.abs(target - next) < 0.5 ? target : next;
+}

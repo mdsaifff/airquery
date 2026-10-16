@@ -35,7 +35,7 @@ export function GlassBox() {
 export function Stats() {
   useTick();
   return (
-    <div className="stats">
+    <div className="stats panel">
       <div>
         render <b>{hudStore.renderFps.toFixed(0)}</b> fps · tracking{' '}
         <b>{hudStore.trackingFps.toFixed(0)}</b> fps
@@ -45,14 +45,15 @@ export function Stats() {
         {metrics.voiceToRender.count > 1 &&
           ` (median ${formatMs(metrics.voiceToRender.percentile(0.5))})`}
       </div>
-      <div>
-        {hudStore.shown.toLocaleString()} / {hudStore.total.toLocaleString()} {hudStore.dataset} ·{' '}
-        {hudStore.mode}
-      </div>
       {hudStore.status && <div>{hudStore.status}</div>}
       {hudStore.cameraError && <div className="warn">{hudStore.cameraError}</div>}
     </div>
   );
+}
+
+export function CamLabel() {
+  useTick(4);
+  return <div className="cam-label">{hudStore.mode}</div>;
 }
 
 export function Legend() {

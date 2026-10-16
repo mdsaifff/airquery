@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { QuerySpec } from '../contracts/contracts.ts';
-import { compactSpec, formatLegendValue, formatMs, prettySpec, prettySql } from './format.ts';
+import {
+  approach,
+  compactSpec,
+  formatLegendValue,
+  formatMs,
+  prettySpec,
+  prettySql,
+} from './format.ts';
 
 const spec: QuerySpec = {
   version: 1,
@@ -43,5 +50,13 @@ describe('HUD formatting', () => {
     expect(formatLegendValue(653.7, false)).toBe('654');
     expect(formatLegendValue(4.5, false)).toBe('4.5');
     expect(formatLegendValue(Date.parse('2024-03-05T10:00:00Z'), true)).toBe('2024-03-05');
+  });
+});
+
+describe('approach', () => {
+  it('moves a fraction of the way and snaps when close', () => {
+    expect(approach(0, 100, 0.25)).toBe(25);
+    expect(approach(99.8, 100, 0.25)).toBe(100);
+    expect(approach(100, 0, 0.5)).toBe(50);
   });
 });

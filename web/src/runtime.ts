@@ -12,6 +12,7 @@ import { LassoSelect } from './lassoSelect.ts';
 import { CursorView, MODE_COLORS } from './hud/cursor.ts';
 import { Hover } from './hud/hover.ts';
 import { exportMetrics, metrics } from './hud/metrics.ts';
+import { approach } from './hud/format.ts';
 import { hudStore, toast } from './hud/store.ts';
 import { CameraController, orbitPosition } from './interaction/cameraController.ts';
 import { HandPipeline } from './interaction/handPipeline.ts';
@@ -169,6 +170,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       const d = await datasets.show(name);
       if (disposed) return;
       hudStore.dataset = name;
+      hudStore.subtitle = d.schema.description;
       const pos = d.schema.position;
       hudStore.geo = pos.kind === 'geo';
       hudStore.depthColumn = pos.kind === 'geo' ? (pos.depth ?? null) : null;
@@ -291,6 +293,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       hover.update(sm.camera, d.cloud, d.base, d.schema, handCursor, canPick, occluded);
       hoverMarker.update(d.cloud, hover.current, xray.eased, now, sm.camera);
     }
+    hudStore.shownDisplay = approach(hudStore.shownDisplay, hudStore.shown, 0.15);
     hudStore.renderFps = sm.fps;
     hudStore.frameMs = sm.frameMs;
   });

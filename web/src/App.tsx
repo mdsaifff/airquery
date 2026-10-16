@@ -6,8 +6,9 @@ import { BaselinePanel, TaskPanel } from './hud/BaselinePanels.tsx';
 import { CapturePanel } from './hud/CapturePanel.tsx';
 import { CsvDrop } from './hud/CsvPanel.tsx';
 import { DebugPanel } from './hud/DebugPanel.tsx';
-import { GlassBox, Legend, Stats } from './hud/Hud.tsx';
+import { CamLabel, GlassBox, Legend, Stats } from './hud/Hud.tsx';
 import { StudyPanel } from './hud/StudyPanel.tsx';
+import { TopBar } from './hud/TopBar.tsx';
 import { Toasts, TranscriptBar } from './hud/TranscriptBar.tsx';
 import { VoicePanel } from './hud/VoicePanel.tsx';
 import { StudyHost } from './interaction/study.ts';
@@ -76,7 +77,9 @@ export function App() {
         width={config.cameraWidth / 2}
         height={config.cameraHeight / 2}
       />
+      {!baseline && <CamLabel />}
       <GlassBox />
+      <TopBar onReplay={() => runtime.current?.replayIntro()} />
       <Stats />
       <div className="bottom-left">
         <Legend />
