@@ -23,6 +23,7 @@ import type { CsvImport } from './scene/loadCsv.ts';
 import type { CsvMapping } from './data/csvSchema.ts';
 import { SceneManager } from './scene/sceneManager.ts';
 import { HoverMarker } from './scene/hoverMarker.ts';
+import { IntroPlayer } from './scene/intro.ts';
 import { strongestVisible } from './scene/shockwaves.ts';
 import { createStarfield } from './scene/starfield.ts';
 import { sunDirection } from './scene/sun.ts';
@@ -63,6 +64,8 @@ export interface Runtime {
   captureGesture(label: string, onProgress: (done: number) => void): Promise<void>;
   /** X-ray: crust to glass, quakes sink to their real depth (X key, legend button). */
   toggleXray(): void;
+  /** Replay the year from the start (top bar button). */
+  replayIntro(): void;
 }
 
 export function startRuntime(els: RuntimeElements): Runtime {
@@ -81,12 +84,28 @@ export function startRuntime(els: RuntimeElements): Runtime {
   const xray = new XrayState();
   const hoverMarker = new HoverMarker();
   sm.scene.add(hoverMarker.group);
+  let intro: IntroPlayer | null = null;
+  let introPlayed = false;
+  const startIntro = () => {
+    const d = datasets.current();
+    if (!d || reduceMotion) return;
+    const timeCol = d.schema.columns.find((c) => c.type === 'timestamp')?.name;
+    intro = new IntroPlayer(timeCol ? (d.base.numbers.get(timeCol) ?? null) : null, config.introMs);
+    const now = performance.now();
+    intro.begin(now);
+    camera.orbit.distance = config.introStartDistance;
+    camera.reset(now, config.introMs);
+  };
+  const skipIntro = () => intro?.skip();
   const camera = new CameraController(config, {
     yaw: (150 * Math.PI) / 180, // start over the western Pacific
     pitch: 0.3,
     distance: config.cameraHomeDistance,
   });
   cleanups.push(attachMouse(sm.renderer.domElement, camera));
+  const onPointerDown = () => skipIntro();
+  sm.renderer.domElement.addEventListener('pointerdown', onPointerDown);
+  cleanups.push(() => sm.renderer.domElement.removeEventListener('pointerdown', onPointerDown));
 
   // --- datasets: each has its point cloud and its own query history ---
   const sessionDeps = (name: string): SessionDeps => ({
@@ -117,6 +136,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       return result;
     },
     show(view, applied, endedAt) {
+      skipIntro(); // a query (or undo) wins over the replay
       const d = datasets.get(name);
       if (!d || datasets.active !== name) return;
       lasso.selection = null; // a new query replaces any lasso focus
@@ -156,6 +176,10 @@ export function startRuntime(els: RuntimeElements): Runtime {
         hudStore.placeOptions = d.schema.columns.find((c) => c.name === 'place')?.examples ?? [];
       }
       datasets.session(name).refresh();
+      if (name === DATASETS[0] && !introPlayed) {
+        introPlayed = true;
+        startIntro();
+      }
       hudStore.status = '';
       if (announce) {
         camera.reset(performance.now());
@@ -203,6 +227,10 @@ export function startRuntime(els: RuntimeElements): Runtime {
   });
   const studyHost = els.study;
   hands.listeners.push((e) => studyHost.onEvent(e, performance.now()));
+  hands.listeners.push((e) => {
+    // A real gesture skips the replay; a hand merely showing up (cursor) or leaving does not.
+    if (e.kind !== 'cursor' && e.kind !== 'holdProgress' && e.kind !== 'handsLost') skipIntro();
+  });
   const hover = new Hover(els.sceneEl, sm.renderer.domElement);
   cleanups.push(() => hover.dispose());
   const lasso = new LassoSelect(els.sceneEl, datasets, sm.camera);
@@ -239,10 +267,23 @@ export function startRuntime(els: RuntimeElements): Runtime {
           ...sunDirection(config.sunTimeOverride ? new Date(config.sunTimeOverride) : new Date()),
         );
       }
+      if (intro) {
+        const r = intro.step(now, d.mask);
+        if (r.cutoff !== null) {
+          d.cloud.setVisibility(d.mask);
+          hudStore.shown = r.shown;
+          hudStore.introDate = new Date(r.cutoff).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' }); // prettier-ignore
+        }
+        if (r.done) {
+          intro = null;
+          hudStore.introDate = '';
+          datasets.session().refresh(); // back to the real view
+        }
+      }
       d.earth?.update(sunDir, dt);
       d.earth?.setXray(xray.eased);
       d.cloud.setDepthMix(xray.eased);
-      d.shockwaves?.update(now, config.shockwavePeriodMs, reduceMotion ? 0 : 1 - xray.eased);
+      d.shockwaves?.update(now, config.shockwavePeriodMs, reduceMotion || intro ? 0 : 1 - xray.eased); // prettier-ignore
       d.cloud.update(dt, orbit.distance, sm.pixelScale);
       const handCursor = cursor.visible ? cursor.position : null;
       const canPick = mode === 'pointing' || mode === 'idle';
@@ -279,6 +320,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
   // --- keyboard: space talk, R reset view, Z undo, arrows switch scene, M timings ---
   const onKey = (e: KeyboardEvent) => {
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.repeat) return; // prettier-ignore
+    skipIntro();
     if (e.code === 'Space') {
       e.preventDefault();
       if (hudStore.baseline) return; // no voice in the mouse baseline
@@ -338,5 +380,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
     undo: () => datasets.session().undo(),
     resetView: () => camera.reset(performance.now()),
     toggleXray: () => xray.toggle(),
+    replayIntro() {
+      if (datasets.active === DATASETS[0]) startIntro();
+    },
   };
 }

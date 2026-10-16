@@ -43,6 +43,8 @@ export const hudStore = {
   xray: false,
   geo: true,
   depthColumn: null as string | null,
+  /** Date shown while the opening replay runs ('' otherwise). */
+  introDate: '',
   /** Place choices for the baseline dropdown (computed examples from the dataset schema). */
   placeOptions: [] as string[],
 };

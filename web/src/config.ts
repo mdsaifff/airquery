@@ -93,6 +93,9 @@ export const config = {
   shockwaveMinMag: 6.5,
   shockwaveMax: 40,
   shockwavePeriodMs: 3200,
+  /** Opening replay length (ms); the camera glides in from this distance (scene units). */
+  introMs: 6000,
+  introStartDistance: 7.5,
   /** Fixed time for the day/night line (ISO string), or null for the real current time. */
   sunTimeOverride: null as string | null,
   /** Hover picks the nearest point within this radius (px). */
