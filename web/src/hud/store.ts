@@ -34,6 +34,7 @@ export const hudStore = {
   /** What is on screen: the spec, and the exact SQL + params DuckDB ran ("glass box"). */
   glass: { spec: null as QuerySpec | null, sql: null as string | null, params: [] as unknown[] },
   legend: null as Legend | null,
+  sizeLegend: null as { column: string; min: number; max: number } | null,
   /** Last voice-to-render latency (ms) and the agent's per-stage timings. */
   latencyMs: 0,
   timings: {} as Record<string, number>,

@@ -6,6 +6,7 @@ import type { DatasetSchema } from '../contracts/contracts.ts';
 import type { PointCloud } from '../scene/pointCloud.ts';
 import { pickNearest, pointsWithin } from '../scene/picking.ts';
 import type { PickInput } from '../scene/picking.ts';
+import { cardFor } from './card.ts';
 import { TooltipView } from './tooltip.ts';
 
 const viewProj = new THREE.Matrix4();
@@ -31,30 +32,6 @@ function pickInput(
     radiusPx,
     occluded,
   };
-}
-
-export function describePoint(schema: DatasetSchema, base: Columns, i: number): string {
-  if (schema.dataset === 'papers') return describePaper(base, i);
-  return describeQuake(base, i);
-}
-
-function describePaper(base: Columns, i: number): string {
-  const title = base.strings.get('title')?.[i] ?? '';
-  const year = base.numbers.get('year')?.[i];
-  const field = base.strings.get('field')?.[i] ?? '';
-  const id = base.strings.get('id')?.[i] ?? '';
-  const short = title.length > 70 ? `${title.slice(0, 67)}…` : title;
-  return `${short}
-${year ?? ''} · ${field} · arxiv.org/abs/${id}`;
-}
-
-function describeQuake(base: Columns, i: number): string {
-  const place = base.strings.get('place')?.[i] || 'Unknown place';
-  const mag = base.numbers.get('magnitude')?.[i] ?? NaN;
-  const depth = base.numbers.get('depth_km')?.[i] ?? NaN;
-  const time = base.numbers.get('time')?.[i];
-  const date = time === undefined ? '' : new Date(time).toISOString().slice(0, 10);
-  return `${place}\nM${mag.toFixed(1)} · ${depth.toFixed(0)} km deep · ${date}`;
 }
 
 export class Hover {
@@ -100,7 +77,7 @@ export class Hover {
     const i = pickNearest(pickInput(camera, globe, at, config.pickRadiusPx, occluded));
     this.current = i;
     if (i < 0) this.tooltip.hide();
-    else this.tooltip.show(i, at.x, at.y, () => describePoint(schema, base, i));
+    else this.tooltip.show(i, at.x, at.y, () => cardFor(schema, base, i));
   }
 
   /** Visible points within radiusPx of the last pointer position (front side only for globes). */

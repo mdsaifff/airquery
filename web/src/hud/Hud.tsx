@@ -1,6 +1,7 @@
 // HUD panels laid out for a 1080p screen recording: glass box top-left, stats
 // top-right, legend + transcript bottom-left, webcam bottom-right.
 import { RAMP_CSS } from '../scene/colorRamp.ts';
+import { depthBands, sizeSamples } from './legend.ts';
 import { formatLegendValue, formatMs, prettySpec, prettySql } from './format.ts';
 import { metrics } from './metrics.ts';
 import { hudStore, useTick } from './store.ts';
@@ -56,36 +57,85 @@ export function CamLabel() {
   return <div className="cam-label">{hudStore.mode}</div>;
 }
 
-export function Legend() {
+const columnLabel = (column: string, unit: string | null) => {
+  const name = column.replace(/_km$/, '').replace(/_/g, ' ');
+  return unit && unit !== column && !['UTC', 'magnitude'].includes(unit)
+    ? `${name} (${unit})`
+    : name;
+};
+
+export function HowToRead({ onToggleXray }: { onToggleXray: () => void }) {
   useTick(4);
   const l = hudStore.legend;
-  if (!l) return null;
-  if (l.kind === 'categories') {
-    return (
-      <div className="panel legend" aria-label={`Colour: ${l.column}`}>
-        <div className="label">colour: {l.column}</div>
-        <ul className="swatches">
-          {l.items.map((it) => (
-            <li key={it.label}>
-              <span className="swatch" style={{ background: it.color }} />
-              {it.label}
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
+  const s = hudStore.sizeLegend;
+  if (!l && !s && !hudStore.geo) return null;
+  const isDepth = l?.kind === 'ramp' && l.column === hudStore.depthColumn;
   return (
-    <div className="panel legend" aria-label={`Colour: ${l.column}`}>
-      <div className="label">
-        colour: {l.column}
-        {l.unit && !l.isTime && l.unit !== l.column ? ` (${l.unit})` : ''}
-      </div>
-      <div className="ramp" style={{ background: RAMP_CSS }} />
-      <div className="ends">
-        <span>{formatLegendValue(l.min, l.isTime)}</span>
-        <span>{formatLegendValue(l.max, l.isTime)}</span>
-      </div>
-    </div>
+    <section className="panel legend" aria-label="How to read this">
+      <div className="label">How to read this</div>
+      {l?.kind === 'ramp' && (
+        <div className="row-block">
+          <div className="key">Colour</div>
+          <div className="what">{columnLabel(l.column, l.unit)}</div>
+          <div className="ramp" style={{ background: RAMP_CSS }} />
+          {isDepth ? (
+            <div className="bands">
+              {depthBands(l.min, l.max).map((b) => (
+                <span key={b.label} style={{ width: `${b.pct}%` }}>
+                  {b.pct > 14 ? b.label : ''}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <div className="ends">
+              <span>{formatLegendValue(l.min, l.isTime)}</span>
+              <span>{formatLegendValue(l.max, l.isTime)}</span>
+            </div>
+          )}
+        </div>
+      )}
+      {l?.kind === 'categories' && (
+        <div className="row-block">
+          <div className="key">Colour</div>
+          <div className="what">{columnLabel(l.column, null)}</div>
+          <ul className="swatches">
+            {l.items.map((it) => (
+              <li key={it.label}>
+                <span className="swatch" style={{ background: it.color }} />
+                {it.label}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {s && (
+        <div className="row-block">
+          <div className="key">Size</div>
+          <div className="what">{columnLabel(s.column, null)}</div>
+          <div className="sizes">
+            {sizeSamples(s.column, s.min, s.max).map((x) => (
+              <span key={x.label}>
+                <i style={{ width: x.px, height: x.px }} />
+                {x.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {hudStore.geo && (
+        <>
+          <div className="row-block">
+            <div className="key">Dot</div>
+            <div className="what">
+              where it happened{hudStore.xray ? ', at its real depth' : ' (epicentre)'}
+            </div>
+          </div>
+          <button className={`xray-toggle ${hudStore.xray ? 'on' : ''}`} onClick={onToggleXray}>
+            X-ray {hudStore.xray ? 'on' : 'off'} <kbd>X</kbd>
+          </button>
+          <p className="hint">X-ray turns the crust to glass so quakes sink to their true depth.</p>
+        </>
+      )}
+    </section>
   );
 }

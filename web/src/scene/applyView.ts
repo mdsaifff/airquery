@@ -50,7 +50,11 @@ export function applyView(
   idIndex: Map<string, number>,
   mask: Uint8Array,
   view: SceneView,
-): { shown: number; legend: Legend | null } {
+): {
+  shown: number;
+  legend: Legend | null;
+  size: { column: string; min: number; max: number } | null;
+} {
   let shown = cloud.count;
   if (view.result) {
     shown = maskFromResult(view.result, schema.id ?? 'id', idIndex, mask);
@@ -62,7 +66,13 @@ export function applyView(
   const legend = colorBy ? applyColor(cloud, base, schema, colorBy) : null;
   const sizeBy = view.sizeBy ?? schema.default_size_by ?? null;
   const sizes = sizeBy ? base.numbers.get(sizeBy) : undefined;
-  if (sizeBy && sizes) cloud.setSizes(sizes, ...bounds(schema, sizeBy, sizes));
-  else cloud.setSizes(null, 0, 1);
-  return { shown, legend };
+  let size: { column: string; min: number; max: number } | null = null;
+  if (sizeBy && sizes) {
+    const [min, max] = bounds(schema, sizeBy, sizes);
+    cloud.setSizes(sizes, min, max);
+    size = { column: sizeBy, min, max };
+  } else {
+    cloud.setSizes(null, 0, 1);
+  }
+  return { shown, legend, size };
 }

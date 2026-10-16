@@ -141,8 +141,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
       const d = datasets.get(name);
       if (!d || datasets.active !== name) return;
       lasso.selection = null; // a new query replaces any lasso focus
-      const { shown, legend } = applyView(d.cloud, d.base, d.schema, d.idIndex, d.mask, view);
-      Object.assign(hudStore, { shown, legend, glass: applied, total: d.cloud.count });
+      const { shown, legend, size } = applyView(d.cloud, d.base, d.schema, d.idIndex, d.mask, view);
+      Object.assign(hudStore, { shown, legend, sizeLegend: size, glass: applied, total: d.cloud.count }); // prettier-ignore
       const pos = d.schema.position;
       xray.follow(wantsXray(applied.spec, pos.kind === 'geo' ? (pos.depth ?? null) : null));
       const ringValues = d.schema.default_size_by ? d.base.numbers.get(d.schema.default_size_by) : undefined; // prettier-ignore
