@@ -63,6 +63,7 @@ export class GestureClassifier {
   private lastHandsAt = -Infinity;
   private lastSwipeAt = -Infinity;
   private lostEmitted = true;
+  private lastPinchEndAt = -Infinity;
 
   /** params is read every frame, so debug-panel edits apply live. */
   constructor(params: GestureParams) {
@@ -107,7 +108,7 @@ export class GestureClassifier {
           ev.push({ kind: 'pinchStart', hand: h.hand, x: at.x, y: at.y });
         }
       } else if (d > p.pinchExit) {
-        this.endPinch(h.hand, s, ev);
+        this.endPinch(h.hand, s, ev, t);
       } else {
         ev.push({ kind: 'pinchMove', hand: h.hand, x: at.x, y: at.y });
       }
@@ -120,7 +121,7 @@ export class GestureClassifier {
       if (s.lastSeen === t) continue;
       s.missing++;
       s.label.update('None', p.labelStableFrames);
-      if (s.pinching && s.missing >= p.pinchStableFrames) this.endPinch(hand, s, ev);
+      if (s.pinching && s.missing >= p.pinchStableFrames) this.endPinch(hand, s, ev, t);
       if (t - s.lastSeen >= p.handsLostMs) this.hands.delete(hand);
     }
 
@@ -173,7 +174,8 @@ export class GestureClassifier {
     }
   }
 
-  private endPinch(hand: Hand, s: HandState, ev: GestureEvent[]): void {
+  private endPinch(hand: Hand, s: HandState, ev: GestureEvent[], t: number): void {
+    this.lastPinchEndAt = t;
     s.pinching = false;
     s.pinchFrames = 0;
     const at = pinchPoint(s.points);
@@ -187,7 +189,9 @@ export class GestureClassifier {
       ['Thumb_Down', 'undo'],
       [this.p.customExplainLabel, 'explain'],
     ];
+    const justReleased = t - this.lastPinchEndAt < this.p.resetAfterPinchMs;
     for (const [label, gesture] of holdLabels) {
+      if (gesture === 'reset' && justReleased) continue; // a relaxing hand, not a reset
       const s = [...this.hands.values()].find((h) => h.label.stable === label);
       if (s) {
         found = { gesture, s };

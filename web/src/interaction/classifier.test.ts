@@ -80,6 +80,12 @@ describe('GestureClassifier (synthetic hands)', () => {
     expect(run(60, () => [right({ gesture: 'Open_Palm' })])).toEqual(['fire:reset']);
   });
 
+  it('opening the hand right after a pinch does not reset the view', () => {
+    // Pinch, then the hand relaxes into an open palm held still for 2 s.
+    const seq = run(80, (i) => [right(i < 20 ? { pinch: 1 } : { gesture: 'Open_Palm' })]);
+    expect(seq.filter((x) => x.startsWith('fire'))).toEqual([]);
+  });
+
   it('open palm while moving: no reset', () => {
     expect(run(60, (i) => [right({ gesture: 'Open_Palm', cx: 0.3 + i * 0.006 })])).toEqual([]);
   });

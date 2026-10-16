@@ -107,6 +107,11 @@ export class CameraController {
     this.lastInputAt = now;
   }
 
+  /** A hand or mouse is over the scene: hold off the idle spin (it would drift under the pointer). */
+  keepStill(now: number): void {
+    this.lastInputAt = now;
+  }
+
   /** Stop dragging and any spin, without a release fling. */
   stop(now: number): void {
     this.dragging = false;

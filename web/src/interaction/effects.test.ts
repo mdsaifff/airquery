@@ -20,13 +20,14 @@ const opts: CameraOptions = {
   flyToDistance: 2,
 };
 
-function rig() {
+function rig(releaseFling = true) {
   const camera = new CameraController(opts, { yaw: 0, pitch: 0, distance: 3 });
   let state: InteractionState = initialState;
   const log: string[] = [];
   const targets = {
     camera,
     rotateGain: 1,
+    releaseFling,
     cursor: (v: boolean) => log.push(v ? 'cursor' : 'nocursor'),
     listening: (a: boolean) => log.push(a ? 'listen' : 'unlisten'),
     undo: () => log.push('undo'),
@@ -111,5 +112,18 @@ describe('camera control from synthetic gestures', () => {
     camera.update(600);
     expect(camera.orbit.pitch).toBeCloseTo((35 * Math.PI) / 180);
     expect(Math.cos(camera.orbit.yaw - (139 * Math.PI) / 180)).toBeCloseTo(1);
+  });
+});
+
+describe('hand release without fling', () => {
+  it('opening a pinch stops the globe where it is (no spin from the opening fingers)', () => {
+    const { camera, send } = rig(false);
+    send({ kind: 'cursor', x: 300, y: 300 }, 0);
+    send({ kind: 'pinchStart', hand: 'right', x: 300, y: 300 }, 16);
+    for (let i = 1; i <= 10; i++) send({ kind: 'pinchMove', hand: 'right', x: 300 + i * 12, y: 300 }, 16 + i * 16); // prettier-ignore
+    const atRelease = camera.orbit.yaw;
+    send({ kind: 'pinchEnd', hand: 'right', x: 420, y: 300 }, 192);
+    for (let t = 208; t < 1000; t += 16) camera.update(t);
+    expect(camera.orbit.yaw).toBeCloseTo(atRelease, 6);
   });
 });

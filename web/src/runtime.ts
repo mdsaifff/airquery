@@ -224,6 +224,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
   const hands = new HandPipeline({
     camera,
     rotateGain: config.handRotateGain,
+    releaseFling: config.gesture.handReleaseFling,
     cursor: (visible, x, y) => cursor.set(visible, x, y),
     listening: (active) => voice.setListening(active),
     undo: () => datasets.session().undo(),
@@ -258,6 +259,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
     const mode = hands.state.mode;
     cursor.style(mode, hands.hold?.progress ?? 0);
     hudStore.mode = mode;
+    if (cursor.visible || hover.mouseOver) camera.keepStill(now); // no idle spin under a pointer
     const orbit = camera.update(now);
     sm.camera.position.set(...orbitPosition(orbit));
     sm.camera.lookAt(0, 0, 0);

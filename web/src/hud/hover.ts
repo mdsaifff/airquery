@@ -49,6 +49,11 @@ export class Hover {
     this.mouse = null;
   };
 
+  /** The mouse is over the scene (not dragging). */
+  get mouseOver(): boolean {
+    return this.mouse !== null;
+  }
+
   constructor(parent: HTMLElement, el: HTMLElement) {
     this.tooltip = new TooltipView(parent);
     this.el = el;

@@ -122,7 +122,7 @@ changes the scene. Ask the user to record a 10-second clip for the teaser.
   - Done when: controller logic is unit tested with synthetic events.
   - Needs you: rotate and zoom by hand; rate smoothness 1–5 and note anything
     that feels laggy or jumpy.
-  - Note: controller (from T1.4) now driven by gestures via state machine -> `effects.ts`; synthetic-event tests cover drag + damping, two-hand dolly, clutch, reset, fly-to. Mouse orbit unchanged. User check 2026-10-15: hand rotate/zoom feel smooth; push-to-talk (space and victory) and undo work. Formal Gate 2 self-test still pending.
+  - Note: controller (from T1.4) now driven by gestures via state machine -> `effects.ts`; synthetic-event tests cover drag + damping, two-hand dolly, clutch, reset, fly-to. Mouse orbit unchanged. User check 2026-10-15: hand rotate/zoom feel smooth; push-to-talk (space and victory) and undo work. Formal Gate 2 self-test still pending. User feedback 2026-10-16 (fixed): releasing a pinch flung the globe (hand release now stops it; `gesture.handReleaseFling`), the relaxed open hand after a pinch triggered reset (reset hold 0.5 s -> 1.2 s, ignored for 1.5 s after a pinch; `gesture.resetAfterPinchMs`), and the idle auto-spin drifted the globe under a pointing finger (paused while a hand or the mouse is over the scene).
 - [x] **T2.6 Cursor, picking and feedback cues**
   - Do: screen cursor; raycast hover on points with tooltip (place,
     magnitude, depth, date); skeleton colour by state; hold ring for reset and

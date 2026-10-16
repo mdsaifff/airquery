@@ -138,4 +138,13 @@ describe('CameraController', () => {
     expect(c.update(2000).distance).toBeCloseTo(home.distance);
     expect(c.animating).toBe(false);
   });
+
+  it('keepStill holds off the idle spin while a hand or mouse is over the scene', () => {
+    const c = make();
+    for (let t = 0; t <= 3000; t += 16) {
+      c.keepStill(t);
+      c.update(t);
+    }
+    expect(c.orbit.yaw).toBe(home.yaw);
+  });
 });

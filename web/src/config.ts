@@ -49,8 +49,12 @@ export const config = {
     labelStableFrames: 3,
     /** Min built-in gesture score to accept a label (0..1). */
     minGestureScore: 0.6,
-    /** Open palm hold for reset (ms). */
-    resetHoldMs: 500,
+    /** Open palm hold for reset (ms): long, because an open hand is also the relaxed pose. */
+    resetHoldMs: 1200,
+    /** No open-palm reset this soon after a pinch ends: the hand relaxes into a palm (ms). */
+    resetAfterPinchMs: 1500,
+    /** Keep spinning after a hand pinch-drag is released (the mouse always does). */
+    handReleaseFling: false,
     /** Thumb down hold for undo (ms). */
     undoHoldMs: 400,
     /** No hands for this long emits handsLost (ms). */

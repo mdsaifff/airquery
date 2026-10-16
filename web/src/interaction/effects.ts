@@ -7,6 +7,8 @@ export interface EffectTargets {
   camera: CameraController;
   /** Hand gain on top of the controller's rad/px (×). */
   rotateGain: number;
+  /** false: releasing a hand drag stops the globe instead of flinging it. */
+  releaseFling?: boolean;
   cursor(visible: boolean, x?: number, y?: number): void;
   listening(active: boolean): void;
   undo(): void;
@@ -26,7 +28,8 @@ export function applyEffects(effects: readonly Effect[], t: EffectTargets, now: 
         t.camera.rotateBy(e.dx * t.rotateGain, e.dy * t.rotateGain, now);
         break;
       case 'release':
-        t.camera.endDrag(now);
+        if (t.releaseFling === false) t.camera.stop(now);
+        else t.camera.endDrag(now);
         break;
       case 'beginZoom':
       case 'stopDrag':
