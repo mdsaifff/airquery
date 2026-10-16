@@ -188,6 +188,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
         toast('info', SCENE_NAMES[name] ?? name);
       }
     } catch (err) {
+      if (disposed) return; // a torn-down runtime (React StrictMode remount) must not report
+      console.error(`dataset ${name} failed to load`, err);
       if (name === DATASETS[0]) hudStore.status = `Data failed to load: ${String(err)}`;
       else toast('error', `${SCENE_NAMES[name] ?? name} is not built yet (make galaxy).`);
     }

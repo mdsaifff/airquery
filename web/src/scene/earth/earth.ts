@@ -83,12 +83,13 @@ export function createEarth(quality: 'high' | 'low' = config.quality): Earth {
   clouds.renderOrder = -1;
   clouds.visible = false; // until the cloud texture arrives
 
+  const atmosXray = { value: 0 };
   const atmosphere = new THREE.Mesh(
     new THREE.SphereGeometry(1.06, 64, 48),
     new THREE.ShaderMaterial({
       vertexShader: ATMOS_VERT,
       fragmentShader: ATMOS_FRAG,
-      uniforms: { uSunDir: sun },
+      uniforms: { uSunDir: sun, uXray: atmosXray },
       side: THREE.BackSide,
       blending: THREE.AdditiveBlending,
       transparent: true,
@@ -125,6 +126,7 @@ export function createEarth(quality: 'high' | 'low' = config.quality): Earth {
       earthMat.transparent = glass; // glass: drawn before the points, no depth writes
       earthMat.depthWrite = !glass;
       cloudMat.uniforms.uOpacity.value = CLOUD_OPACITY * (1 - mix);
+      atmosXray.value = mix;
       gridMat.opacity = 0.35 * mix;
       grid.visible = glass;
     },

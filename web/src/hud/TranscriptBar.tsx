@@ -8,7 +8,13 @@ export function TranscriptBar({ onSubmit }: { onSubmit: (text: string) => void }
   const { listening, transcript, transcriptFinal } = hudStore;
   return (
     <div className={`transcript ${listening ? 'is-listening' : ''}`}>
-      <span className="mic" aria-label={listening ? 'listening' : 'microphone idle'} />
+      <span className="wave" role="img" aria-label={listening ? 'listening' : 'microphone idle'}>
+        <i />
+        <i />
+        <i />
+        <i />
+        <i />
+      </span>
       <span className={`said ${transcriptFinal ? 'final' : ''}`}>
         {listening && !transcript ? 'listening…' : transcript || 'hold ✌ or space to talk'}
       </span>

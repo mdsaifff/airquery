@@ -11,6 +11,7 @@ import { StudyPanel } from './hud/StudyPanel.tsx';
 import { TopBar } from './hud/TopBar.tsx';
 import { Toasts, TranscriptBar } from './hud/TranscriptBar.tsx';
 import { VoicePanel } from './hud/VoicePanel.tsx';
+import { Welcome } from './hud/Welcome.tsx';
 import { StudyHost } from './interaction/study.ts';
 import { startRuntime } from './runtime.ts';
 import type { Runtime } from './runtime.ts';
@@ -99,6 +100,7 @@ export function App() {
       <CsvDrop importCsv={importCsv} finishCsv={finishCsv} />
       {captureOpen && <CapturePanel capture={capture} />}
       {voiceOpen && <VoicePanel />}
+      <Welcome />
     </>
   );
 }

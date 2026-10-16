@@ -1,33 +1,52 @@
 // HUD panels laid out for a 1080p screen recording: glass box top-left, stats
 // top-right, legend + transcript bottom-left, webcam bottom-right.
+import { useState } from 'react';
 import { RAMP_CSS } from '../scene/colorRamp.ts';
+import { highlightSpec, highlightSql } from './highlight.ts';
+import type { Token } from './highlight.ts';
 import { depthBands, sizeSamples } from './legend.ts';
 import { formatLegendValue, formatMs, prettySpec, prettySql } from './format.ts';
 import { metrics } from './metrics.ts';
 import { hudStore, useTick } from './store.ts';
 
+function Code({ tokens, className }: { tokens: Token[]; className?: string }) {
+  return (
+    <pre className={className}>
+      {tokens.map((t, i) => (
+        <span key={i} className={`tk-${t.kind}`}>
+          {t.text}
+        </span>
+      ))}
+    </pre>
+  );
+}
+
 export function GlassBox() {
   useTick(4);
+  const [open, setOpen] = useState(true);
   const { spec, sql, params } = hudStore.glass;
   const t = hudStore.timings;
   return (
-    <section className="panel glass" aria-label="Query glass box">
-      <h2>
-        AirQuery <span className="sub">what ran</span>
-        {hudStore.thinking && <span className="thinking"> · thinking…</span>}
-      </h2>
-      <div className="label">spec</div>
-      <pre>{prettySpec(spec)}</pre>
-      <div className="label">sql</div>
-      <pre className="sql">{sql ? prettySql(sql) : `SELECT * FROM ${hudStore.dataset}`}</pre>
-      {params.length > 0 && <pre className="params">params {JSON.stringify(params)}</pre>}
-      {t.total !== undefined && (
-        <div className="timings">
-          {t.llm === undefined
-            ? `cached reply · agent ${formatMs(t.total)}`
-            : `llm ${formatMs(t.llm)} · validate ${formatMs(t.validate ?? 0)} · compile ${formatMs(t.compile ?? 0)}`}
-          {` · duckdb ${formatMs(hudStore.queryMs)}`}
-        </div>
+    <section className="panel glass" aria-label="What ran">
+      <button className="glass-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+        <span className="label">What ran</span>
+        {hudStore.thinking && <span className="thinking">thinking…</span>}
+        <span className="chev">{open ? '▾' : '▸'}</span>
+      </button>
+      {open && (
+        <>
+          <Code tokens={highlightSpec(prettySpec(spec))} />
+          <Code tokens={highlightSql(sql ? prettySql(sql) : `SELECT * FROM ${hudStore.dataset}`)} />
+          {params.length > 0 && <pre className="params">params {JSON.stringify(params)}</pre>}
+          {t.total !== undefined && (
+            <div className="timings">
+              {t.llm === undefined
+                ? `cached reply · agent ${formatMs(t.total)}`
+                : `llm ${formatMs(t.llm)} · validate ${formatMs(t.validate ?? 0)} · compile ${formatMs(t.compile ?? 0)}`}
+              {` · duckdb ${formatMs(hudStore.queryMs)}`}
+            </div>
+          )}
+        </>
       )}
     </section>
   );

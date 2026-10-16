@@ -73,6 +73,7 @@ export const ATMOS_VERT = /* glsl */ `
 
 export const ATMOS_FRAG = /* glsl */ `
   uniform vec3 uSunDir;
+  uniform float uXray;
   varying vec3 vNormalV;
   varying vec3 vNormalW;
   void main() {
@@ -80,7 +81,8 @@ export const ATMOS_FRAG = /* glsl */ `
     float rim = pow(clamp(0.55 - vNormalV.z, 0.0, 1.0), 5.0);
     float edge = smoothstep(-1.0, -0.2, vNormalV.z); // dim the centre (seen through X-ray glass)
     float day = 0.3 + 0.7 * smoothstep(-0.4, 0.5, dot(normalize(vNormalW), uSunDir));
-    gl_FragColor = vec4(vec3(0.3, 0.62, 1.0) * rim * edge * day * 1.8, 1.0);
+    // In X-ray the shell's far side shows through the glass: keep only a faint rim.
+    gl_FragColor = vec4(vec3(0.3, 0.62, 1.0) * rim * edge * day * 1.8 * (1.0 - 0.85 * uXray), 1.0);
     #include <colorspace_fragment>
   }
 `;
