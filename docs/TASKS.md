@@ -268,3 +268,7 @@ on the deployed site. Ask the user to record the hero take.
 - [ ] **T5.5 Custom gesture** — MediaPipe Model Maker notebook (Colab or
   Kaggle), export `.task`, load as custom classifier.
   - Note: CODE DONE, training pending (box open): `notebooks/custom_gesture.ipynb` (Colab: upload <label>.tar files, optional MediaPipe 'none' samples, Model Maker train/eval, export .task). In-app: C records labelled raw webcam frames into <label>.tar (tested ustar writer); the tracker loads `web/public/models/gesture_recognizer.task` when present (panel shows stock/custom); holding the custom label (`config.gesture.customExplainLabel`, default Rock) fires 'what's this?'. Model Maker replaces the stock classifier, so the notebook retrains the existing labels too. Needs: record frames, run the notebook, drop in the .task, re-run the gesture study.
+- [x] **T5.6 Visual redesign** — realistic Earth, X-ray depth mode, glowing
+  markers, shockwave rings, opening replay, mission-control HUD, info cards,
+  "how to read this" legend, welcome overlay.
+  - Note: spec `docs/superpowers/specs/2026-10-15-visual-redesign-design.md`, plan `docs/superpowers/plans/2026-10-15-visual-redesign.md` (D-014). Verified with headless screenshots (software GL). Fixed on the way: hover picked quakes hidden behind the globe; a StrictMode remount could leave a false "Data failed to load". Real fps on the demo laptop with tracking on: pending (user).

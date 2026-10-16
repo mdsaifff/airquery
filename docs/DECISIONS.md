@@ -136,3 +136,16 @@ These double as material for LinkedIn posts.
 - **Consequences:** free-tier limits (8k tokens/min and 1k requests/day per
   model, likely ~200k tokens/day) cap eval runs: use `--sample` for A/B checks. The model-tier ablation compares
   gpt-oss-20b vs 120b (and Claude tiers if a key turns up).
+
+## D-014 Realistic globe with X-ray depth instead of a see-through sphere
+- **Context:** the see-through sphere showed quakes at depth but looked like a
+  wireframe; a solid, realistic Earth hides deep quakes.
+- **Decision:** solid NASA-textured Earth (day/night by the real sun, clouds,
+  atmosphere, bloom) with quakes on the surface; an X-ray mode turns the crust
+  to glass and animates quakes down to their true depth (X, legend button, or
+  automatically when the view is about depth). Hover ignores quakes hidden
+  behind the solid planet.
+- **Why:** looks like a real planet in the demo video while keeping the 3D
+  depth story one keypress away; no new npm dependencies.
+- **Consequences:** ~1.2 MB of committed textures (`make textures`); bloom
+  costs GPU time, so `quality: 'low'` drops bloom, clouds and 2k textures.
