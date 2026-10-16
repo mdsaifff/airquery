@@ -125,7 +125,7 @@ export const config = {
   distanceMax: 8,
   /** Max camera latitude (rad). */
   pitchLimit: 1.45,
-  /** Idle globe spin (rad/s) and idle time before it starts (ms). */
+  /** Idle globe spin (rad/s) and idle time before it starts (ms); home view only (start, reset). */
   autoSpinRadPerSec: 0.06,
   autoSpinIdleMs: 4000,
   /** Reset / fly-to animation length (ms). */

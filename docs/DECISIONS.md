@@ -149,3 +149,11 @@ These double as material for LinkedIn posts.
   depth story one keypress away; no new npm dependencies.
 - **Consequences:** ~1.2 MB of committed textures (`make textures`); bloom
   costs GPU time, so `quality: 'low'` drops bloom, clouds and 2k textures.
+
+## D-015 No AI tours; the globe spins only in the home view
+- **Context:** AI-narrated tours were built (branch `ai-tours`) and tried; the user did not
+  like them. The idle globe spin restarted after every pause, which was distracting.
+- **Decision:** tours are not merged (work kept on `ai-tours` for reference). The idle spin
+  runs at startup and after a reset; rotating, zooming or flying to a place turns it off until
+  the next reset.
+- **Why:** fewer moving parts in the demo; the globe holds still while someone is exploring.

@@ -51,6 +51,8 @@ export class CameraController {
   private frozen = false;
   private lastMoveAt = 0;
   private lastInputAt = -Infinity;
+  /** The idle spin runs only in the home view: moving the camera turns it off until a reset. */
+  private spinAllowed = true;
   private anim: Anim | null = null;
   private now = 0;
 
@@ -63,6 +65,7 @@ export class CameraController {
   beginDrag(now: number): void {
     this.anim = null;
     this.dragging = true;
+    this.spinAllowed = false;
     this.vel = { yaw: 0, pitch: 0 };
     this.lastMoveAt = now;
     this.lastInputAt = now;
@@ -86,6 +89,7 @@ export class CameraController {
     this.vel.pitch = 0.5 * this.vel.pitch + 0.5 * (dPitch / dt);
     this.lastMoveAt = now;
     this.lastInputAt = now;
+    this.spinAllowed = false;
   }
 
   /** Release: the spin keeps going and decays (damping). */
@@ -105,6 +109,7 @@ export class CameraController {
       this.opts.distanceMax,
     );
     this.lastInputAt = now;
+    this.spinAllowed = false;
   }
 
   /** A hand or mouse is over the scene: hold off the idle spin (it would drift under the pointer). */
@@ -129,10 +134,12 @@ export class CameraController {
 
   /** Glide home; the intro passes a longer duration (ms). */
   reset(now: number, durationMs = this.opts.animMs): void {
+    this.spinAllowed = true;
     this.animateTo({ ...this.home }, now, durationMs);
   }
 
   flyTo(lat: number, lon: number, now: number): void {
+    this.spinAllowed = false;
     this.animateTo(
       {
         yaw: lon * RAD,
@@ -173,7 +180,7 @@ export class CameraController {
       const decay = 0.5 ** (dt / this.opts.dampingHalfLifeMs);
       this.vel.yaw *= decay;
       this.vel.pitch *= decay;
-      if (now - this.lastInputAt > this.opts.autoSpinIdleMs) {
+      if (this.spinAllowed && now - this.lastInputAt > this.opts.autoSpinIdleMs) {
         this.orbit.yaw += (this.opts.autoSpinRadPerSec * dt) / 1000;
       }
     }

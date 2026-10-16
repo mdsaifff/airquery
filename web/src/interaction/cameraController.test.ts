@@ -109,18 +109,38 @@ describe('CameraController', () => {
     expect(c.orbit.distance).toBe(2);
   });
 
-  it('spins slowly from the start, pauses after input, resumes when idle', () => {
+  it('spins slowly in the home view, pauses while a pointer hovers, resumes when idle', () => {
     const c = make();
     c.update(1);
     c.update(1001);
     expect(c.orbit.yaw).toBeCloseTo(0.1);
-    c.dollyBy(1, 1001); // any input
+    c.keepStill(1001); // a hand or mouse over the scene
     c.update(1501);
     expect(c.orbit.yaw).toBeCloseTo(0.1);
     c.update(2001); // idle for exactly autoSpinIdleMs: not yet
     expect(c.orbit.yaw).toBeCloseTo(0.1);
     c.update(3001);
     expect(c.orbit.yaw).toBeCloseTo(0.2);
+  });
+
+  it('stops spinning once the user moves the camera, until the view is reset', () => {
+    for (const move of [
+      (c: CameraController) => c.dollyBy(1.2, 1001),
+      (c: CameraController) => (c.beginDrag(1001), c.rotateBy(5, 0, 1001), c.endDrag(1001)),
+      (c: CameraController) => c.flyTo(10, 20, 1001),
+    ]) {
+      const c = make();
+      c.update(1);
+      move(c);
+      c.update(2001); // let any fly-to finish
+      const settled = c.orbit.yaw;
+      c.update(60_000); // a minute idle
+      expect(c.orbit.yaw).toBeCloseTo(settled);
+      c.reset(60_000);
+      const atHome = c.update(60_500).yaw; // reset animation done (animMs 500)
+      c.update(62_500); // idle again in the home view
+      expect(c.orbit.yaw).toBeGreaterThan(atHome);
+    }
   });
 
   it('places the camera on the sphere of radius distance', () => {
