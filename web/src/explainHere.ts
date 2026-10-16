@@ -17,15 +17,18 @@ export interface ExplainContext {
   db: Promise<Db>;
   /** A lasso selection wins over "points near the pointer". */
   selection: () => number[] | null;
+  /** The solid crust hides the far side (X-ray off). */
+  occluded: () => boolean;
 }
 
 /** "What's this?": ids near the pointer -> agent compiles aggregates -> DuckDB -> sentence. */
 export async function explainHere(ctx: ExplainContext, name: string): Promise<void> {
-  const { datasets, hover, camera, db, selection } = ctx;
+  const { datasets, hover, camera, db, selection, occluded } = ctx;
   const d = datasets.get(name);
   if (!d) return;
   const geo = d.schema.position.kind === 'geo';
-  const picked = selection() ?? hover.nearby(camera, d.cloud, config.explainRadiusPx, geo);
+  const picked =
+    selection() ?? hover.nearby(camera, d.cloud, config.explainRadiusPx, geo, occluded());
   const ids = d.base.strings.get(d.schema.id ?? 'id') ?? [];
   if (picked.length === 0) return toast('info', 'Point at some points first, then ask again.');
   try {

@@ -1,5 +1,6 @@
 // Pure: a dataset's rows -> scene positions, from its DatasetSchema position spec.
 import type { DatasetSchema } from '../contracts/contracts.ts';
+import { config } from '../config.ts';
 import { numbers, range } from '../data/arrow.ts';
 import type { Columns } from '../data/arrow.ts';
 import { geoToXYZ, radiusAtDepth } from './geo.ts';
@@ -21,7 +22,8 @@ export function positionsFor(
     const height = p.height ? numbers(base, p.height) : null;
     const [hLo, hHi] = height ? range(height) : [0, 1];
     for (let i = 0; i < base.numRows; i++) {
-      let r = depth ? radiusAtDepth(depth[i], depthExaggeration) : 1;
+      // Without depth, sit just above the crust so the solid globe doesn't clip the dots.
+      let r = depth ? radiusAtDepth(depth[i], depthExaggeration) : config.surfaceRadius;
       if (height) r += ((height[i] - hLo) / (hHi - hLo || 1) || 0) * HEIGHT_SCALE;
       geoToXYZ(lat[i], lon[i], r, out, i * 3);
     }

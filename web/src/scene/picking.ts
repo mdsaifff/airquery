@@ -71,6 +71,7 @@ export function pointsWithin(p: PickInput, skipBehind: boolean): number[] {
     const sy = (1 - (m[1] * x + m[5] * y + m[9] * z + m[13]) / w) * 0.5 * p.height;
     if ((sx - p.x) ** 2 + (sy - p.y) ** 2 > r2) continue;
     if (skipBehind && Math.hypot(x - cx, y - cy, z - cz) > p.camDist) continue;
+    if (p.occluded && !facesCamera(x, y, z, p.camPos)) continue;
     out.push(i);
   }
   return out;
@@ -108,6 +109,7 @@ export function pointsInPolygon(
     const w = m[3] * x + m[7] * y + m[11] * z + m[15];
     if (w <= 0) continue;
     if (skipBehind && Math.hypot(x - cx, y - cy, z - cz) > p.camDist) continue;
+    if (p.occluded && !facesCamera(x, y, z, p.camPos)) continue;
     const sx = ((m[0] * x + m[4] * y + m[8] * z + m[12]) / w + 1) * 0.5 * p.width;
     const sy = (1 - (m[1] * x + m[5] * y + m[9] * z + m[13]) / w) * 0.5 * p.height;
     if (pointInPolygon(sx, sy, poly)) out.push(i);

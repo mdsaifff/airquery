@@ -86,10 +86,12 @@ export class Hover {
     cloud: PointCloud,
     radiusPx: number,
     skipBehind: boolean,
+    /** A solid globe hides the far side (X-ray off). */
+    occluded = false,
   ): number[] {
     // prettier-ignore
     if (!this.pointer) return [];
-    return pointsWithin(pickInput(camera, cloud, this.pointer, radiusPx), skipBehind);
+    return pointsWithin(pickInput(camera, cloud, this.pointer, radiusPx, occluded), skipBehind);
   }
 
   dispose(): void {

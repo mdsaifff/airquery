@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
-import { pickNearest, pointsWithin } from './picking.ts';
+import { pickNearest, pointsInPolygon, pointsWithin } from './picking.ts';
 import type { PickInput } from './picking.ts';
 
 const W = 800;
@@ -79,5 +79,32 @@ describe('pickNearest', () => {
     s.radiusPx = 30;
     expect(pointsWithin({ ...s, x: W / 2, y: H / 2 }, true)).toEqual([0, 1]);
     expect(pointsWithin({ ...s, x: W / 2, y: H / 2 }, false)).toEqual([0, 1, 2]);
+  });
+});
+
+describe('solid globe occlusion for lasso and explain', () => {
+  // One point facing the camera, one 76° from the view axis: past the horizon (72°) so hidden
+  // by a solid globe, yet inside the old "behind" cutoff (81°) so it used to be selected.
+  const pts: [number, number, number][] = [
+    [0, 0.6, 0.8],
+    [0, 0.97, 0.242],
+  ];
+  const big = [
+    { x: 0, y: 0 },
+    { x: W, y: 0 },
+    { x: W, y: H },
+    { x: 0, y: H },
+  ];
+
+  it('pointsWithin skips points hidden behind a solid globe', () => {
+    const s = setup(pts);
+    expect(pointsWithin({ ...s, x: W / 2, y: 0, radiusPx: 2000 }, true)).toEqual([0, 1]);
+    expect(pointsWithin({ ...s, x: W / 2, y: 0, radiusPx: 2000, occluded: true }, true)).toEqual([0]); // prettier-ignore
+  });
+
+  it('pointsInPolygon skips points hidden behind a solid globe', () => {
+    const s = setup(pts);
+    expect(pointsInPolygon(s, big, true)).toEqual([0, 1]);
+    expect(pointsInPolygon({ ...s, occluded: true }, big, true)).toEqual([0]);
   });
 });

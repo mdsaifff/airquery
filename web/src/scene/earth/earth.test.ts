@@ -41,3 +41,14 @@ describe('createEarth', () => {
     expect(meshes.length).toBe(3); // crust, clouds, atmosphere
   });
 });
+
+describe('X-ray occlusion', () => {
+  it('keeps hiding the far side until the crust is mostly glass', () => {
+    const earth = createEarth('low');
+    const crust = earth.group.children[0] as THREE.Mesh<THREE.SphereGeometry, THREE.ShaderMaterial>;
+    earth.setXray(0.3);
+    expect(crust.material.depthWrite).toBe(true);
+    earth.setXray(0.7);
+    expect(crust.material.depthWrite).toBe(false);
+  });
+});

@@ -232,3 +232,22 @@ describe('voice to scene (mocked agent)', () => {
     expect(r.runs).toEqual([]);
   });
 });
+
+describe('refresh', () => {
+  it('re-shows the current view without a voice end time (no fake latency sample)', () => {
+    const ended: (number | null)[] = [];
+    const session = new QuerySession({
+      dataset: 'quakes',
+      ask: () => Promise.reject(new Error('unused')),
+      compile: () => Promise.reject(new Error('unused')),
+      run: () => Promise.reject(new Error('unused')),
+      show: (_view, _applied, endedAt) => ended.push(endedAt),
+      flyTo: () => {},
+      explain: () => {},
+      resetView: () => {},
+      notify: () => {},
+    });
+    session.refresh();
+    expect(ended).toEqual([null]);
+  });
+});

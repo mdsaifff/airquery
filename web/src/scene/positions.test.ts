@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
+import { config } from '../config.ts';
 import type { DatasetSchema } from '../contracts/contracts.ts';
 import type { Columns } from '../data/arrow.ts';
 import { applyView } from './applyView.ts';
@@ -94,5 +95,21 @@ describe('surfacePositionsFor', () => {
   it('is null without a depth column or for xyz layouts', () => {
     expect(surfacePositionsFor({ ...geo, position: { kind: 'geo', lat: 'lat', lon: 'lon' } } as never, base as never, 1)).toBeNull(); // prettier-ignore
     expect(surfacePositionsFor({ ...geo, position: { kind: 'xyz', x: 'x', y: 'y', z: 'z' } } as never, base as never, 1)).toBeNull(); // prettier-ignore
+  });
+});
+
+describe('positionsFor without a depth column', () => {
+  it('lifts geo points to the surface radius so the solid crust does not clip them', () => {
+    const csv = {
+      dataset: 'user_x',
+      table: 'user_x',
+      description: '',
+      id: '__id',
+      position: { kind: 'geo' as const, lat: 'lat', lon: 'lon' },
+      columns: [],
+    };
+    const base = { numRows: 1, numbers: new Map([['lat', new Float64Array([10])], ['lon', new Float64Array([20])]]), strings: new Map() }; // prettier-ignore
+    const p = positionsFor(csv as never, base as never, 3);
+    expect(Math.hypot(p[0], p[1], p[2])).toBeCloseTo(config.surfaceRadius, 6);
   });
 });

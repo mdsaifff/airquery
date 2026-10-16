@@ -123,8 +123,8 @@ export function createEarth(quality: 'high' | 'low' = config.quality): Earth {
     setXray(mix) {
       const glass = mix > 0.001;
       earthMat.uniforms.uSolid.value = 1 - mix;
-      earthMat.transparent = glass; // glass: drawn before the points, no depth writes
-      earthMat.depthWrite = !glass;
+      earthMat.transparent = glass; // glass: blended, drawn before the points
+      earthMat.depthWrite = mix < 0.5; // keep hiding the far side until the crust is mostly glass
       cloudMat.uniforms.uOpacity.value = CLOUD_OPACITY * (1 - mix);
       atmosXray.value = mix;
       gridMat.opacity = 0.35 * mix;

@@ -32,7 +32,8 @@ export interface SessionDeps {
   compile(req: CompileRequest): Promise<QueryResponse>;
   run(sql: string, params: Param[]): Promise<Columns>;
   /** Push a view to the scene; endedAt starts the voice-to-render clock. */
-  show(view: SceneView, applied: Applied, endedAt: number): void;
+  /** endedAt: when the voice/typed request ended, or null for a plain re-show (no latency sample). */
+  show(view: SceneView, applied: Applied, endedAt: number | null): void;
   flyTo(lat: number, lon: number): void;
   /** "What's this?": summarize what is under the pointer (or the lasso selection). */
   explain(): void;
@@ -133,7 +134,7 @@ export class QuerySession {
 
   /** Re-push what is on screen (e.g. after switching back to this dataset). */
   refresh(): void {
-    this.show(this.top, performance.now());
+    this.show(this.top, null);
   }
 
   /** Pop the last query (Thumb_Down, Z, or "undo"). */
@@ -152,7 +153,7 @@ export class QuerySession {
     this.show(EMPTY, endedAt);
   }
 
-  private show(e: Entry, endedAt: number): void {
+  private show(e: Entry, endedAt: number | null): void {
     const view = { result: e.result, colorBy: e.spec?.color_by ?? null, sizeBy: e.spec?.size_by ?? null }; // prettier-ignore
     this.deps.show(view, { spec: e.spec, sql: e.sql, params: e.params }, endedAt);
   }

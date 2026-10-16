@@ -20,7 +20,16 @@ export class LassoSelect {
   private readonly datasets: Datasets;
   private readonly camera: THREE.PerspectiveCamera;
 
-  constructor(parent: HTMLElement, datasets: Datasets, camera: THREE.PerspectiveCamera) {
+  /** The solid crust hides the far side (X-ray off): those points can't be lassoed. */
+  private readonly occluded: () => boolean;
+
+  constructor(
+    parent: HTMLElement,
+    datasets: Datasets,
+    camera: THREE.PerspectiveCamera,
+    occluded: () => boolean = () => false,
+  ) {
+    this.occluded = occluded;
     this.datasets = datasets;
     this.camera = camera;
     this.svg = document.createElementNS(SVG_NS, 'svg');
@@ -87,6 +96,7 @@ export class LassoSelect {
         camPos: [this.camera.position.x, this.camera.position.y, this.camera.position.z],
         width: window.innerWidth,
         height: window.innerHeight,
+        occluded: this.occluded(),
       },
       poly,
       d.schema.position.kind === 'geo',

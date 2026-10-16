@@ -21,9 +21,12 @@ const vertexShader = /* glsl */ `
   void main() {
     vec3 p = mix(aSurface, position, uDepthMix);
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
-    gl_Position = projectionMatrix * mv;
     float pop = easeOutBack(clamp(aAlpha, 0.0, 1.0));
     gl_PointSize = min(72.0, aSize * pop * uPixelScale / -mv.z);
+    // Pull the sprite toward the camera by its radius (same screen spot) so the
+    // solid crust doesn't clip the half of the dot that faces the globe's centre.
+    mv.xyz -= normalize(mv.xyz) * 0.5 * aSize * pop;
+    gl_Position = projectionMatrix * mv;
     float far = clamp(-mv.z - uCamDist + 0.5, 0.0, 1.0);
     vColor = aColor;
     vAlpha = aAlpha * (1.0 - uFarDim * far);

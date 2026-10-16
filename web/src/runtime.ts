@@ -83,6 +83,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
   const sunDir = new THREE.Vector3(0, 0, 1);
   let sunAt = -Infinity;
   const xray = new XrayState();
+  /** The solid crust hides the far side (X-ray mostly off). */
+  const crustSolid = () => !!datasets.current()?.earth && xray.eased < 0.5;
   const hoverMarker = new HoverMarker();
   sm.scene.add(hoverMarker.group);
   let intro: IntroPlayer | null = null;
@@ -150,13 +152,13 @@ export function startRuntime(els: RuntimeElements): Runtime {
         const top = strongestVisible(ringValues, d.cloud.visible, config.shockwaveMinMag, config.shockwaveMax); // prettier-ignore
         d.shockwaves.set(top, d.cloud.surfacePositions, d.cloud.colors, ringValues, config.shockwaveMinMag); // prettier-ignore
       }
-      latencyFrom = endedAt;
+      if (endedAt !== null) latencyFrom = endedAt; // refreshes are not voice requests
     },
     flyTo: (lat, lon) => camera.flyTo(lat, lon, performance.now()),
     resetView: () => camera.reset(performance.now()),
     notify: toast,
     explain: () => {
-      const ctx = { datasets, hover, camera: sm.camera, db, selection: () => lasso.selection };
+      const ctx = { datasets, hover, camera: sm.camera, db, selection: () => lasso.selection, occluded: crustSolid }; // prettier-ignore
       void explainHere(ctx, name);
     },
   });
@@ -237,7 +239,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
   });
   const hover = new Hover(els.sceneEl, sm.renderer.domElement);
   cleanups.push(() => hover.dispose());
-  const lasso = new LassoSelect(els.sceneEl, datasets, sm.camera);
+  const lasso = new LassoSelect(els.sceneEl, datasets, sm.camera, crustSolid);
   cleanups.push(lasso.attachMouse(sm.renderer.domElement), () => lasso.dispose());
   if (import.meta.env.DEV) {
     // Dev-only handle for headless checks and console poking.
@@ -291,8 +293,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       d.cloud.update(dt, orbit.distance, sm.pixelScale);
       const handCursor = cursor.visible ? cursor.position : null;
       const canPick = mode === 'pointing' || mode === 'idle';
-      const occluded = !!d.earth && xray.eased < 0.5; // the solid crust hides the far side
-      hover.update(sm.camera, d.cloud, d.base, d.schema, handCursor, canPick, occluded);
+      hover.update(sm.camera, d.cloud, d.base, d.schema, handCursor, canPick, crustSolid());
       hoverMarker.update(d.cloud, hover.current, xray.eased, now, sm.camera);
     }
     hudStore.shownDisplay = approach(hudStore.shownDisplay, hudStore.shown, 0.15);
