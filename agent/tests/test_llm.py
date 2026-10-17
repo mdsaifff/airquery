@@ -222,7 +222,15 @@ def test_the_pointer_reaches_the_prompt(quakes_schema) -> None:
 
 def test_the_rules_teach_timeline_view_and_here(quakes_schema) -> None:
     system = build_prompt(quakes_schema, "x", None).system
-    for needle in ('"timeline"', '"view"', "go to <month", "around here", "Point at a place"):
+    for needle in (
+        '"timeline"',
+        '"view"',
+        "go to <month",
+        "around here",
+        "Point at a place",
+        "without a number",
+        "narrows",
+    ):
         assert needle in system, needle
 
 

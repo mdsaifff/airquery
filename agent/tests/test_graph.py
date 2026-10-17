@@ -134,3 +134,31 @@ def test_switch_produces_no_sql(quakes_schema: DatasetSchema) -> None:
     )
     assert state["status"] == "ok" and state["sql"] is None
     assert state["spec"].switch_to == "papers"
+
+
+def test_a_timeline_on_data_without_dates_answers_at_once(quakes_schema: DatasetSchema) -> None:
+    no_dates = quakes_schema.model_copy(
+        update={"columns": [c for c in quakes_schema.columns if c.type != "timestamp"]}
+    )
+    play = {"dataset": "quakes", "intent": "timeline", "timeline": {"action": "play"}}
+    state, mock = run(no_dates, [LLMReply(spec=play)] * 3)
+    assert len(mock.calls) == 1  # no repairs: asking again cannot add dates
+    assert state["status"] == "clarify"
+    assert state["message"] == "This data has no dates, so there is no timeline to play."
+
+
+def test_a_spec_without_dataset_gets_the_current_one(quakes_schema: DatasetSchema) -> None:
+    # Seen live: "switch to the earthquakes" from the stars came back without "dataset"
+    play = {"intent": "timeline", "timeline": {"action": "play"}}
+    state, mock = run(quakes_schema, [LLMReply(spec=play)])
+    assert len(mock.calls) == 1 and state["status"] == "ok"
+    assert state["spec"].dataset == "quakes"
+
+
+def test_a_sort_keeps_the_limit_it_refines(quakes_schema: DatasetSchema) -> None:
+    # "the ten strongest", then "now by depth": the merged spec still has its limit
+    prev = QuerySpec(dataset="quakes", sort={"field": "magnitude"}, limit=10)
+    by_depth = {"dataset": "quakes", "sort": {"field": "depth_km"}}
+    state, mock = run(quakes_schema, [LLMReply(spec=by_depth)], prev)
+    assert len(mock.calls) == 1 and state["status"] == "ok"
+    assert state["sql"].endswith('ORDER BY "depth_km" DESC NULLS LAST LIMIT 10')

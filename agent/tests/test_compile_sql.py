@@ -35,7 +35,11 @@ def test_between_and_in(quakes_schema: DatasetSchema) -> None:
         spec(filters=[f("magnitude", "between", [5, 6.5]), f("mag_type", "in", ["mb", "mww"])]),
         quakes_schema,
     )
-    assert q.sql == SELECT + ' WHERE "magnitude" BETWEEN ? AND ? AND "mag_type" IN (?, ?)'
+    assert (
+        q.sql
+        == SELECT
+        + ' WHERE "magnitude" BETWEEN ? AND ? AND lower("mag_type") IN (lower(?), lower(?))'
+    )
     assert q.params == [5, 6.5, "mb", "mww"]
 
 
@@ -45,6 +49,14 @@ def test_timestamps_are_cast(quakes_schema: DatasetSchema) -> None:
     )
     assert q.sql == SELECT + ' WHERE "time" BETWEEN CAST(? AS TIMESTAMP) AND CAST(? AS TIMESTAMP)'
     assert q.params == ["2024-01-01", "2024-02-01"]
+
+
+def test_text_equality_ignores_case(quakes_schema: DatasetSchema) -> None:
+    # "show hurricane Milton" -> storm = "Milton", stored as "MILTON": must still match
+    for op, sql in (("=", 'lower("mag_type") = lower(?)'), ("!=", 'lower("mag_type") != lower(?)')):
+        q = compile_spec(spec(filters=[f("mag_type", op, "MWW")]), quakes_schema)
+        assert q.sql == SELECT + " WHERE " + sql
+        assert q.params == ["MWW"]
 
 
 def test_contains_is_case_insensitive_and_escapes_wildcards(quakes_schema: DatasetSchema) -> None:
@@ -64,8 +76,8 @@ def test_last_days_counts_back_from_the_newest_row(quakes_schema: DatasetSchema)
 def test_sort_and_limit(quakes_schema: DatasetSchema) -> None:
     q = compile_spec(spec(sort={"field": "magnitude"}, limit=10), quakes_schema)
     assert q.sql == SELECT + ' ORDER BY "magnitude" DESC NULLS LAST LIMIT 10'
-    q = compile_spec(spec(sort={"field": "time", "direction": "asc"}), quakes_schema)
-    assert q.sql.endswith('ORDER BY "time" ASC NULLS LAST')
+    q = compile_spec(spec(sort={"field": "time", "direction": "asc"}, limit=50), quakes_schema)
+    assert q.sql.endswith('ORDER BY "time" ASC NULLS LAST LIMIT 50')
 
 
 @pytest.mark.parametrize(

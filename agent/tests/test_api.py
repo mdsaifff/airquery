@@ -267,3 +267,15 @@ def test_scenes_are_part_of_the_cache_key(quakes_schema, log_path) -> None:
     r = c.post("/query", json={**body, "scenes": scenes}).json()
     assert len(mock.calls) == 2  # a new scene list is a new question
     assert r["status"] == "ok" and r["spec"]["switch_to"] == "papers" and r["sql"] is None
+
+
+def test_a_daily_provider_cap_does_not_promise_a_minute(quakes_schema, log_path) -> None:
+    # Seen live: Groq's free tier also caps tokens per day; "in a minute" was untrue then
+    def spent(_prompt):
+        raise RateLimitError("429 ... on tokens per day (TPD): Limit 200000, Used 199648")
+
+    reg = SchemaRegistry({"quakes": quakes_schema})
+    c = TestClient(create_app(llm=MockLLM(fn=spent), registry=reg, log_path=log_path))
+    body = ask(c, "deeper than 300").json()
+    assert body["status"] == "clarify" and "minute" not in body["message"]
+    assert "today" in body["message"]

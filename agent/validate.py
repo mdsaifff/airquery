@@ -99,6 +99,9 @@ def validate_spec(
         errors.append(f"size_by must be one of {sorted(numeric)}; got {spec.size_by!r}")
     if spec.sort is not None and schema.column(spec.sort.field) is None:
         errors.append(f"unknown sort field {spec.sort.field!r}")
+    if spec.sort is not None and spec.limit is None:
+        # A bare sort reorders points nobody sees in order: nothing changes on screen.
+        errors.append("a sort needs a limit (e.g. limit 50 for 'the deepest ones')")
     if spec.intent == "navigate" and spec.camera_target is None:
         errors.append("intent navigate needs a camera_target with lat, lon and label")
     return errors + _check_timeline_view(spec, schema) + _check_switch(spec, schema, scenes)

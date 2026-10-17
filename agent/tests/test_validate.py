@@ -159,3 +159,10 @@ def test_switch_needs_another_listed_scene(quakes_schema) -> None:
     assert validate_spec(missing, quakes_schema, scenes) != []
     stray = spec(intent="query", switch_to="papers")
     assert any("only for intent switch" in e for e in validate_spec(stray, quakes_schema, scenes))
+
+
+def test_a_sort_needs_a_limit(quakes_schema) -> None:
+    # "show me the deepest ones" came back as a bare sort: nothing changes on screen
+    bare = spec(sort={"field": "depth_km", "direction": "desc"})
+    assert any("needs a limit" in e for e in validate_spec(bare, quakes_schema))
+    assert validate_spec(spec(sort={"field": "depth_km"}, limit=50), quakes_schema) == []

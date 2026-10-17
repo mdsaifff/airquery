@@ -46,9 +46,13 @@ def _where(f: Filter, col: Column, schema: DatasetSchema, params: list[Scalar]) 
         assert isinstance(f.value, list)
         params.extend(f.value)
         return f"{c} BETWEEN {ph} AND {ph}"
+    # Text matches ignore case: a spoken "Milton" must find the stored "MILTON".
+    text = col.type == "text"
     if f.op == "in":
         assert isinstance(f.value, list)
         params.extend(f.value)
+        if text:
+            return f"lower({c}) IN ({', '.join([f'lower({ph})'] * len(f.value))})"
         return f"{c} IN ({', '.join([ph] * len(f.value))})"
     if f.op == "contains":
         params.append(f"%{_escape_like(str(f.value))}%")
@@ -59,6 +63,8 @@ def _where(f: Filter, col: Column, schema: DatasetSchema, params: list[Scalar]) 
         # Relative to the newest row, not to today: the dataset is a fixed snapshot.
         table = _ident(schema.table, schema)
         return f"{c} >= (SELECT max({c}) FROM {table}) - to_days(CAST(? AS INTEGER))"
+    if text and f.op in ("=", "!="):
+        return f"lower({c}) {f.op} lower({ph})"
     return f"{c} {f.op} {ph}"
 
 

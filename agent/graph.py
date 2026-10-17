@@ -19,11 +19,16 @@ from validate import validate_spec
 
 MAX_RETRIES = 2
 BUSY = "The AI is busy right now; ask again in a minute."
+# The free tier also caps tokens per day; then "a minute" is not true.
+SPENT = "The AI has used up today's free allowance; try again in a few hours."
 
 Status = Literal["ok", "clarify", "rejected"]
 
 # Errors that mean "this dataset can't do that" rather than "say it differently".
 IMPOSSIBLE_MARKERS = ("unknown field", "does not fit", "color_by", "size_by", "unknown sort")
+# Errors no repair can fix: answer straight away instead of asking the LLM again.
+NO_DATES = "no time column"
+NO_DATES_REPLY = "This data has no dates, so there is no timeline to play."
 
 
 class AgentState(TypedDict, total=False):
@@ -82,7 +87,7 @@ def build_graph(llm: LLMAdapter, max_retries: int = MAX_RETRIES):
             if "RateLimit" in type(exc).__name__:  # the provider's own per-minute limit
                 return {
                     "status": "clarify",
-                    "message": BUSY,
+                    "message": SPENT if "per day" in str(exc) else BUSY,
                     "timings_ms": _add_timing(state, "llm", _ms(t0)),
                 }
             return {
@@ -107,9 +112,17 @@ def build_graph(llm: LLMAdapter, max_retries: int = MAX_RETRIES):
     def validate(state: AgentState) -> AgentState:
         t0 = time.perf_counter()
         try:
-            spec = QuerySpec.model_validate(state["candidate_spec"])
+            candidate = state["candidate_spec"] or {}
+            # The dataset is always the current one; models sometimes leave it out
+            # (a "switch" names its target in switch_to), so fill it in rather than repair.
+            if isinstance(candidate, dict) and not candidate.get("dataset"):
+                candidate = {**candidate, "dataset": state["schema"].dataset}
+            spec = QuerySpec.model_validate(candidate)
             scenes = [s.name for s in state.get("scenes") or []]
-            errors = validate_spec(spec, state["schema"], scenes)
+            # Check what will run: a refine keeps earlier parts (a limit, say) the
+            # candidate leaves out. The previous spec is valid, so errors are the new parts'.
+            merged = merge(state.get("prev_spec"), spec)
+            errors = validate_spec(merged, state["schema"], scenes)
         except ValidationError as err:
             spec, errors = None, _pydantic_errors(err)
         return {
@@ -124,6 +137,8 @@ def build_graph(llm: LLMAdapter, max_retries: int = MAX_RETRIES):
     def give_up(state: AgentState) -> AgentState:
         errors = state.get("errors") or []
         first = errors[0] if errors else "invalid query"
+        if any(NO_DATES in e for e in errors):
+            return {"status": "clarify", "message": NO_DATES_REPLY}
         if any(m in e for e in errors for m in IMPOSSIBLE_MARKERS):
             return {
                 "status": "rejected",
@@ -155,8 +170,11 @@ def build_graph(llm: LLMAdapter, max_retries: int = MAX_RETRIES):
         return "end" if state.get("status") else "validate"
 
     def after_validate(state: AgentState) -> str:
-        if not state.get("errors"):
+        errors = state.get("errors") or []
+        if not errors:
             return "merge"
+        if any(NO_DATES in e for e in errors):
+            return "give_up"
         return "repair" if state.get("retries", 0) < max_retries else "give_up"
 
     g = StateGraph(AgentState)
