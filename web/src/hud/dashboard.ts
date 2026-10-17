@@ -106,9 +106,11 @@ export function byMonth(times: ArrayLike<number>, mask: Uint8Array): Bar[] | nul
   })); // prettier-ignore
 }
 
+/** "41 km ESE of X, Chile" -> "Chile"; "Japan region" -> "Japan" (a click filters with
+ *  contains, which matches both, so the bar has to count both). */
 export function region(place: string): string {
   const k = place.lastIndexOf(',');
-  return (k >= 0 ? place.slice(k + 1) : place).trim();
+  return (k >= 0 ? place.slice(k + 1) : place).trim().replace(/\s+region$/i, '');
 }
 
 export function topRegions(places: readonly string[], mask: Uint8Array, n = 10): Bar[] {

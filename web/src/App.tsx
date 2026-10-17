@@ -105,6 +105,7 @@ export function App() {
           onToggle={() => runtime.current?.playground.toggleTime()}
           onSeek={(f) => runtime.current?.playground.seekFraction(f)}
           onSpeed={(s) => runtime.current?.playground.setSpeed(s)}
+          onStop={() => runtime.current?.playground.stopTime()}
         />
         {!baseline && (
           <Chips

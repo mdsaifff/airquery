@@ -14,8 +14,10 @@ export function Seismogram({
   onToggle,
   onSeek,
   onSpeed,
+  onStop,
 }: {
   onToggle: () => void;
+  onStop: () => void;
   onSeek: (fraction: number) => void;
   onSpeed: (daysPerSec: number) => void;
 }) {
@@ -93,6 +95,11 @@ export function Seismogram({
               {SPEED_LABELS[s] ?? `${s}d/s`}
             </button>
           ))}
+          {pb.active && (
+            <button onClick={onStop} aria-label="Leave the replay" title="Leave the replay (Esc)">
+              ✕
+            </button>
+          )}
           <span className="hint">L to play · click the strip to jump</span>
         </div>
       )}

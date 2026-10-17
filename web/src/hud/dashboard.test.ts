@@ -44,6 +44,7 @@ describe('dashboard maths', () => {
   it('regions are the text after the last comma; top regions are ranked', () => {
     expect(region('41 km ESE of San Pedro de Atacama, Chile')).toBe('Chile');
     expect(region('south of the Fiji Islands')).toBe('south of the Fiji Islands');
+    expect(region('Japan region')).toBe('Japan'); // merges with 'Japan', as the click's contains-filter does
     const places = ['a, Japan', 'b, Japan', 'c, Chile', 'null', 'd, Japan'];
     const mask = Uint8Array.from([1, 1, 1, 1, 0]);
     expect(topRegions(places, mask, 5).map((b) => [b.label, b.count])).toEqual([

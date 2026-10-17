@@ -29,6 +29,8 @@ export class Playground {
   readonly time = new TimeMachine();
   private readonly host: PlaygroundHost;
   private ripples: number[] = [];
+  /** The dataset on screen, so a scene switch or Esc can switch its replay off. */
+  private current: LoadedDataset | null = null;
 
   constructor(host: PlaygroundHost) {
     this.host = host;
@@ -36,6 +38,11 @@ export class Playground {
 
   /** A dataset came on screen: its time range (for the time machine) and its chips. */
   async onDataset(name: string, d: LoadedDataset): Promise<void> {
+    if (this.current && this.time.active) {
+      this.time.stop(this.current.cloud); // the old scene's glow and cutoff go too
+      this.clearPlayhead();
+    }
+    this.current = d;
     const timeCol = d.schema.columns.find((c) => c.type === 'timestamp')?.name;
     const times = timeCol ? (d.base.numbers.get(timeCol) ?? null) : null;
     this.time.attach(times);
@@ -84,7 +91,22 @@ export class Playground {
 
   seekFraction(f: number): void {
     this.host.skipIntro();
+    if (f >= 0.995) return this.stopTime(); // the end of the strip = "now": leave the replay
     this.time.seekFraction(f);
+  }
+
+  /** Leave the time machine (✕, Esc, or the end of the strip): the full selection again. */
+  stopTime(): void {
+    if (!this.time.active || !this.current) return;
+    this.time.stop(this.current.cloud);
+    this.clearPlayhead();
+    this.host.datasets.session().refresh(); // the selection, its count and strongest rings
+  }
+
+  private clearPlayhead(): void {
+    this.ripples = [];
+    hudStore.introCutoff = null;
+    hudStore.introDate = '';
   }
 
   setSpeed(daysPerSec: number): void {
@@ -125,8 +147,9 @@ export class Playground {
     return true;
   }
 
-  /** L plays / pauses the time machine. */
+  /** L plays / pauses the time machine; Esc leaves it (and still clears the lasso). */
   onKey(code: string): boolean {
+    if (code === 'Escape') this.stopTime();
     if (code !== 'KeyL' || !this.time.available) return false;
     this.toggleTime();
     return true;
@@ -136,12 +159,15 @@ export class Playground {
   onFrame(dt: number, d: LoadedDataset): void {
     const { time } = this;
     const r = time.step(dt, d.cloud);
-    hudStore.playback = { available: time.available, playing: time.playing, speed: time.speed };
+    hudStore.playback = {
+      available: time.available,
+      active: time.active,
+      playing: time.playing,
+      speed: time.speed,
+    };
     if (!r) return;
     if (r.ended) {
-      this.ripples = [];
-      hudStore.introCutoff = null;
-      hudStore.introDate = '';
+      this.clearPlayhead();
       this.host.datasets.session().refresh(); // the selection, its count and strongest rings
       return;
     }

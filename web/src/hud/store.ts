@@ -61,8 +61,8 @@ export const hudStore = {
   } | null,
   /** Charts for what is on screen (recomputed per view change), or null before data. */
   dashboard: null as Dashboard | null,
-  /** Time machine controls: shown when the dataset has times; playing; days of data per second. */
-  playback: { available: false, playing: false, speed: 30 },
+  /** Time machine: has times; a replay cutoff applies; playing; days of data per second. */
+  playback: { available: false, active: false, playing: false, speed: 30 },
   /** First-visit loading: 0 data engine, 1 earthquake data, 2 globe textures, 3 ready; or an error. */
   loading: { step: 0, error: '' },
   /** Hand tracking was switched on (the camera only starts on request). */
