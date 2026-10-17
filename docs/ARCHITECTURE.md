@@ -192,7 +192,7 @@ type GestureEvent =
   | { kind: 'circleHold'; hand: Hand; x: number; y: number }    // a pinch held still: circle centre
   | { kind: 'handsLost' };
 type HoldGesture = 'reset' | 'explain' | 'listen' | 'circle'; // explain: custom Model Maker gesture (stretch)
-// talk: one hand pointing while the other is raised open, or a pointing finger held still (D-021)
+// talk: one hand pointing while the other is raised open (D-021)
 ```
 
 ## Interaction state machine

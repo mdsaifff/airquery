@@ -19,7 +19,6 @@ const SLIDERS: Slider[] = [
   { label: 'pinch frames', obj: config.gesture, key: 'pinchStableFrames', min: 1, max: 10, step: 1 },
   { label: 'label hold frames', obj: config.gesture, key: 'labelStableFrames', min: 1, max: 15, step: 1 },
   { label: 'reset hold (ms)', obj: config.gesture, key: 'resetHoldMs', min: 100, max: 2000, step: 50 },
-  { label: 'hold-still-to-talk (ms)', obj: config.gesture, key: 'dwellTalkMs', min: 400, max: 3000, step: 100 },
   { label: 'pinch-hold circle (ms)', obj: config.gesture, key: 'circleHoldMs', min: 200, max: 2000, step: 50 },
 ]; // prettier-ignore
 

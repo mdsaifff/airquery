@@ -2,8 +2,8 @@
 
 export type Hand = 'left' | 'right';
 /** explain: the custom gesture trained with MediaPipe Model Maker (stretch, T5.5).
- *  listen: a pointing finger held still; circle: a pinch held still (both show a ring). */
-export type HoldGesture = 'reset' | 'explain' | 'listen' | 'circle';
+ *  circle: a pinch held still (shows a ring). */
+export type HoldGesture = 'reset' | 'explain' | 'circle';
 
 export type GestureEvent =
   | { kind: 'cursor'; x: number; y: number } // screen px

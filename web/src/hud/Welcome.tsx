@@ -73,7 +73,7 @@ export function Welcome() {
               ✋
             </span>
             <b>Raise your other hand</b> and speak
-            <small>or hold your finger still, hold Space, or type</small>
+            <small>or hold Space, or type</small>
           </li>
         </ul>
         <button className="primary" onClick={close} autoFocus>

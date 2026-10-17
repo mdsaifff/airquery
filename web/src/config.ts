@@ -57,13 +57,6 @@ export const config = {
     handReleaseFling: false,
     /** Pointing pose: index reach above pinchMinIndexReach and the middle fingertip within this (hand-scale units). */
     pointMiddleMaxReach: 1.2,
-    /** Hold a pointing finger still this long to start listening (ms)... */
-    dwellTalkMs: 2500,
-    /** ...within this drift; listening stops past dwellReleaseDrift (hand-scale units). */
-    dwellMaxDrift: 0.25,
-    dwellReleaseDrift: 0.6,
-    /** Listening started by holding still stops after this long anyway (ms). */
-    dwellMaxListenMs: 8000,
     /** A pinch held still this long starts a circle selection (ms), within this drift (hand-scale units). */
     circleHoldMs: 600,
     circleMaxDrift: 0.3,

@@ -23,7 +23,7 @@ export class VoiceController {
     this.submit = submit;
   }
 
-  /** Driven by the state machine's start/stopListening effects (other hand raised, finger held still, or spacebar). */
+  /** Driven by the state machine's start/stopListening effects (other hand raised, or spacebar). */
   setListening(active: boolean): void {
     if (active === this.active) return;
     this.active = active;

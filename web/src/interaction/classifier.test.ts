@@ -128,10 +128,8 @@ describe('GestureClassifier (synthetic hands)', () => {
     ]);
   });
 
-  it('hold a pointing finger still: listening starts after ~2.5 s; moving away stops it', () => {
-    const still = (frames: number) => (i: number) => [right({ pose: 'point', cx: i < frames ? 0.4 : 0.4 + (i - frames) * 0.01 })]; // prettier-ignore
-    expect(run(90, still(70))).toEqual([]); // 2.3 s still: not yet (reading a quake card is safe)
-    expect(run(110, still(90))).toEqual(['talk:on', 'talk:off']); // 3 s still: listening
+  it('holding a pointing finger still never opens the microphone (talk = raise the other hand)', () => {
+    expect(run(150, () => [right({ pose: 'point', cx: 0.4 })])).toEqual([]); // 5 s still
   });
 
   it('pinch held still: one circle at the pinch point; a moving pinch rotates, no circle', () => {

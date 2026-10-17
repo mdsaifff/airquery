@@ -1,7 +1,7 @@
 // Selections: the hand circle (pinch and hold still, then out to the radius) and
 // the mouse lasso (Shift+drag). Selects the visible points inside, focuses the scene
-// on them until cleared (Esc, start over or a new query). "What's this?" then
-// summarizes the selection.
+// on them until cleared (Esc, start over or a new query), and says what is inside
+// straight away (no need to ask "what's this?").
 import * as THREE from 'three';
 import { config } from './config.ts';
 import type { Datasets } from './datasets.ts';
@@ -25,14 +25,18 @@ export class LassoSelect {
 
   /** The solid crust hides the far side (X-ray off): those points can't be lassoed. */
   private readonly occluded: () => boolean;
+  /** Called once a selection is made: the runtime says what is inside. */
+  private readonly onSelect: () => void;
 
   constructor(
     parent: HTMLElement,
     datasets: Datasets,
     camera: THREE.PerspectiveCamera,
     occluded: () => boolean = () => false,
+    onSelect: () => void = () => undefined,
   ) {
     this.occluded = occluded;
+    this.onSelect = onSelect;
     this.datasets = datasets;
     this.camera = camera;
     this.svg = document.createElementNS(SVG_NS, 'svg');
@@ -130,6 +134,7 @@ export class LassoSelect {
     for (const i of picked) mask[i] = 1;
     d.cloud.setVisibility(mask);
     hudStore.shown = picked.length;
-    toast('info', `${picked.length} selected. Say "what's this?" · Esc clears.`);
+    toast('info', `${picked.length} selected · Esc clears`);
+    this.onSelect();
   }
 }

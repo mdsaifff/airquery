@@ -287,11 +287,11 @@ on the deployed site. Ask the user to record the hero take.
     picked through the button, picker back to quakes, typed "switch to the cities" and back,
     unknown scene leaves the view alone. 4 new eval items (s01-s04) need a real-model run:
     `make eval ARGS="--ids s01,s02,s03,s04"`. Needs you: saying "switch to ..." on the mic.
-- [x] **T5.11 Gesture rework** — talk by raising the other hand (or holding the pointing
-  finger still), "here" stays on the pointing fingertip; one open palm starts over; pinch and
-  hold still to draw a selection circle; ✌, 👎 and 🤟 retired; undo is spoken.
-  - Note: D-021. Pure, tested: classifier (pointing pose, two-hand talk, dwell, still-pinch
+- [x] **T5.11 Gesture rework** — talk by raising the other hand, "here" stays on the
+  pointing fingertip; one open palm starts over; pinch and hold still to draw a selection
+  circle, whose contents are said straight away; ✌, 👎 and 🤟 retired; undo is spoken.
+  - Note: D-021. Pure, tested: classifier (pointing pose, two-hand talk, still-pinch
     circle, one-hand-only reset), state machine (`circling`, `startOver`), effects,
     `circlePolygon`, gesture study (undo → circle). Needs you: feel on the webcam
-    (`dwellTalkMs` 2500 after first use: 1200 fired while reading a quake card; `circleHoldMs`
-    600; both in the D debug panel). Shared AI budget raised to 5 questions/min.
+    (`circleHoldMs` 600, in the D debug panel). Hold-still-to-talk was tried (1.2 s, then
+    2.5 s) and removed: it fired while reading quakes. Shared AI budget raised to 5/min.

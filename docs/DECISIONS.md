@@ -233,15 +233,16 @@ These double as material for LinkedIn posts.
 - **Context:** on the webcam, switching the pointing hand to ✌ to talk moved the fingertip, so
   "here" landed off target; the 🤟 lasso was hard to hold while tracing; 👎 undo was unreliable
   and rarely useful once commands are spoken.
-- **Decision:** talk = keep pointing with one hand and raise the other, open (or hold the pointing
-  finger still ~2.5 s; Space on the keyboard); "here" is the pointing fingertip at that moment.
+- **Decision:** talk = keep pointing with one hand and raise the other, open (Space on the
+  keyboard); "here" is the pointing fingertip at that moment. A hold-still-to-talk variant was
+  tried and removed: holding still is also how you read a quake or aim.
   One open palm held 1.2 s starts over (camera home, filters cleared, replay stopped); with two
   hands up an open palm means talk, never start over. Undo is spoken ("undo", "go back") or Z.
   Area selection = pinch and hold still ~0.6 s, then move out to size a circle, release to
-  select (Shift+drag lasso stays for the mouse). ✌, 👎 and 🤟 do nothing now.
+  select, and the globe says what is inside straight away (Shift+drag lasso does the same with
+  the mouse). ✌, 👎 and 🤟 do nothing now.
 - **Why:** the pointing hand never changes shape, so "here" stays exact; pinch is the most
   reliable thing the tracker sees; one fewer pose to learn.
-- **Consequences:** a pinch held still before rotating becomes a circle (tune `circleHoldMs`);
-  holding a finger still to read a quake can open the microphone (tune `dwellTalkMs`; nothing
-  happens if nothing is said). The gesture study swaps "undo" for "circle".
+- **Consequences:** a pinch held still before rotating becomes a circle (tune `circleHoldMs`).
+  The gesture study swaps "undo" for "circle".
 

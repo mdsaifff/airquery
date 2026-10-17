@@ -1,7 +1,7 @@
 // Pure gesture classifier: smoothed hand frames in, GestureEvents out.
 // Combines MediaPipe's built-in labels (debounced) with a pinch rule
-// (hysteresis + hold frames), hold timers for reset / explain, hold-still-to-talk
-// and pinch-hold-to-circle.
+// (hysteresis + hold frames), hold timers for reset / explain, two-hand talk and
+// pinch-hold-to-circle.
 import type { config } from '../config.ts';
 import type { HandsFrame, Vec2 } from '../tracking/geometry.ts';
 import {
@@ -72,8 +72,6 @@ export class GestureClassifier {
   private readonly hands = new Map<Hand, HandState>();
   private clutch = false;
   private talk = false;
-  /** Hold-still-to-talk: where the pointing finger rests, since when, and whether it listens. */
-  private dwell: { origin: Vec2; start: number; listening: boolean; done: boolean } | null = null;
   private hold: Hold | null = null;
   private zoomDist: number | null = null;
   private lastHandsAt = -Infinity;
@@ -104,7 +102,6 @@ export class GestureClassifier {
       const at = pinching ? pinchPoint(primary.points) : primary.points[INDEX_TIP];
       ev.push({ kind: 'cursor', x: at.x, y: at.y });
     }
-    this.updateDwell(frame.hands.length === 1 ? primary : undefined, t, ev);
 
     for (const h of frame.hands) {
       let s = this.hands.get(h.hand);
@@ -201,51 +198,16 @@ export class GestureClassifier {
     return [...this.hands.values()].filter((s) => s.missing < this.p.pinchStableFrames);
   }
 
-  /** Talk: one hand pointing while the other is raised open; or a pointing finger held still. */
+  /** Talk: one hand pointing while the other is raised open ("here" = the pointing fingertip). */
   private updateTalk(ev: GestureEvent[]): void {
     const live = this.liveHands();
     const open = live.filter((s) => s.label.stable === 'Open_Palm');
     const pointer = live.find((s) => !s.pinching && s.label.stable !== 'Open_Palm' && isPointing(s.points, this.p)); // prettier-ignore
     const raised = live.length === 2 && open.length === 1 && pointer !== undefined;
-    const talk = raised || (this.dwell?.listening ?? false);
-    if (talk === this.talk) return;
-    this.talk = talk;
-    const at = raised && pointer ? pointer.points[INDEX_TIP] : this.dwell?.origin;
-    ev.push(talk && at ? { kind: 'talk', active: true, x: at.x, y: at.y } : { kind: 'talk', active: talk }); // prettier-ignore
-  }
-
-  /** A pointing finger held still (one hand, not pinching) opens the microphone. */
-  private updateDwell(
-    hand: { points: Vec2[]; hand: Hand } | undefined,
-    t: number,
-    ev: GestureEvent[],
-  ): void {
-    const { p } = this;
-    const s = hand ? this.hands.get(hand.hand) : undefined;
-    const pointing = hand && !s?.pinching && isPointing(hand.points, p);
-    const d = this.dwell;
-    if (!hand || !pointing) {
-      if (d && !d.listening && !d.done)
-        ev.push({ kind: 'holdProgress', gesture: 'listen', progress: 0 });
-      this.dwell = null;
-      return;
-    }
-    const tip = hand.points[INDEX_TIP];
-    const drift = d ? dist(tip, d.origin) / handScale(hand.points) : Infinity;
-    if (!d || drift > (d.listening ? p.dwellReleaseDrift : p.dwellMaxDrift)) {
-      if (d && !d.listening && !d.done)
-        ev.push({ kind: 'holdProgress', gesture: 'listen', progress: 0 });
-      this.dwell = { origin: tip, start: t, listening: false, done: false };
-      return;
-    }
-    if (d.done) return; // already listened here: move to listen again
-    if (d.listening) {
-      if (t - d.start > p.dwellTalkMs + p.dwellMaxListenMs) [d.listening, d.done] = [false, true];
-      return;
-    }
-    const progress = Math.min(1, (t - d.start) / p.dwellTalkMs);
-    ev.push({ kind: 'holdProgress', gesture: 'listen', progress });
-    if (progress >= 1) d.listening = true;
+    if (raised === this.talk) return;
+    this.talk = raised;
+    const at = pointer?.points[INDEX_TIP];
+    ev.push(raised && at ? { kind: 'talk', active: true, x: at.x, y: at.y } : { kind: 'talk', active: raised }); // prettier-ignore
   }
 
   /** A pinch held still (before it starts rotating) becomes the centre of a circle selection. */

@@ -347,7 +347,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
   });
   const hover = new Hover(els.sceneEl, sm.renderer.domElement);
   cleanups.push(() => hover.dispose());
-  const lasso = new LassoSelect(els.sceneEl, datasets, sm.camera, crustSolid);
+  // A selection (hand circle or Shift+drag) is summarized out loud straight away.
+  const lasso = new LassoSelect(els.sceneEl, datasets, sm.camera, crustSolid, () => datasets.session().explainNow()); // prettier-ignore
   cleanups.push(lasso.attachMouse(sm.renderer.domElement), () => lasso.dispose());
   if (import.meta.env.DEV) {
     // Dev-only handle for headless checks and console poking.
