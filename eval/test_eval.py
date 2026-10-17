@@ -14,14 +14,14 @@ ITEMS = load_items()
 
 
 def test_the_set_has_the_documented_mix() -> None:
-    assert len(ITEMS) == 111
-    assert len({i["id"] for i in ITEMS}) == 111
-    assert len({(i["utterance"], str(i["prev_spec"])) for i in ITEMS}) == 111
+    assert len(ITEMS) == 115
+    assert len({i["id"] for i in ITEMS}) == 115
+    assert len({(i["utterance"], str(i["prev_spec"])) for i in ITEMS}) == 115
     mix = Counter(i["tags"][0] for i in ITEMS)
     assert mix == {
         "filter": 30, "encoding": 15, "rank": 10, "time": 10,
         "refine": 20, "noisy": 10, "ambiguous": 5,
-        "timeline": 5, "view": 3, "pointer": 3,
+        "timeline": 5, "view": 3, "pointer": 3, "switch": 4,
     }  # fmt: skip
 
 
@@ -32,8 +32,10 @@ def test_every_gold_and_prev_spec_validates_and_compiles() -> None:
         for key in ("gold_spec", "prev_spec"):
             if item[key]:
                 spec = QuerySpec.model_validate(item[key])
-                assert validate_spec(spec, schema) == [], (item["id"], key)
-                compile_spec(spec, schema)
+                scenes = [s["name"] for s in item.get("scenes", [])]
+                assert validate_spec(spec, schema, scenes) == [], (item["id"], key)
+                if spec.intent != "switch":  # the graph never compiles a switch
+                    compile_spec(spec, schema)
 
 
 def test_gold_oracle_scores_perfectly() -> None:

@@ -279,3 +279,11 @@ on the deployed site. Ask the user to record the hero take.
   and speak ("what happened here?", "only around here", "fly here"); spoken + subtitled
   replies; display-only dashboard.
   - Note: spec `docs/superpowers/specs/2026-10-17-voice-first-design.md`, plan `docs/superpowers/plans/2026-10-17-voice-first.md` (D-019). Headless checks with the fake agent (play/pause/stop, X-ray, stats, here over Chile, no-pointer clarify, mute keeps subtitles). Real model (gpt-oss-120b): new timeline/view/pointer items plus fly-to items 13/13. Needs you: pointing then speaking on the webcam; voice and reply length.
+- [x] **T5.10 Pick a dataset** — a scene picker in the masthead, an "Open a CSV" button
+  next to it (drag-and-drop still works), and voice: "switch to the paper galaxy".
+  - Note: Phase C of the any-dataset plan (D-020). `QuerySpec` gains intent `switch` +
+    `switch_to`; the request carries `scenes` (name + title, current one included), which go
+    in the user message, not the cached system prompt. Headless with the fake agent: CSV
+    picked through the button, picker back to quakes, typed "switch to the cities" and back,
+    unknown scene leaves the view alone. 4 new eval items (s01-s04) need a real-model run:
+    `make eval ARGS="--ids s01,s02,s03,s04"`. Needs you: saying "switch to ..." on the mic.

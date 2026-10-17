@@ -30,6 +30,11 @@ export class Datasets {
     this.depsFor = depsFor;
   }
 
+  /** Scene names in swipe order. */
+  get order(): readonly string[] {
+    return this.names;
+  }
+
   get(name: string): LoadedDataset | undefined {
     return this.loaded.get(name);
   }

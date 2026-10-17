@@ -149,6 +149,7 @@ def create_app(
             prev_json += req.dataset_schema.model_dump_json()
         if req.pointer:  # "here" at another place is another question
             prev_json += req.pointer.model_dump_json()
+        prev_json += "".join(s.model_dump_json() for s in req.scenes)  # where "switch" may go
         key = (req.dataset, " ".join(req.utterance.lower().split()), prev_json)
         if key in cache:
             cache.move_to_end(key)
@@ -161,7 +162,7 @@ def create_app(
             return respond(req, resp, 429, errors=["llm budget"])
 
         state: AgentState = await run_agent(
-            graph, schema, req.utterance, req.current_spec, req.pointer
+            graph, schema, req.utterance, req.current_spec, req.pointer, req.scenes
         )
         resp = QueryResponse(
             status=state.get("status") or "rejected",

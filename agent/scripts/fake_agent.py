@@ -62,10 +62,23 @@ def voice_first(text: str, user: str, ds: dict) -> LLMReply | None:
     return LLMReply(spec={**ds, "mode": "replace", "filters": box})
 
 
+def switch(text: str, user: str, ds: dict) -> LLMReply | None:
+    """ "switch to / open / show me the <scene>": a scene from the "Other scenes" line."""
+    scenes = re.search(r"Other scenes: (.+)", user)
+    if not scenes or not re.search(r"\b(switch|open|show me the|take me to)\b", text):
+        return None
+    for name, title in re.findall(r'(\w+) \("([^"]*)"\)', scenes[1]):
+        words = {name.removeprefix("user_"), *re.split(r"\W+", title.lower())}
+        if any(w in text for w in words if len(w) > 3):
+            return LLMReply(spec={**ds, "intent": "switch", "switch_to": name})
+    return None
+
+
 def understand(prompt: Prompt) -> LLMReply:
     text = prompt.user.split("Request:", 1)[1].lower()
-    ds = {"dataset": "quakes"}
-    if reply := voice_first(text, prompt.user, ds):
+    current = re.search(r"^`(\w+)`:", prompt.system, re.M)  # the schema line names the scene
+    ds = {"dataset": current[1] if current else "quakes"}
+    if reply := voice_first(text, prompt.user, ds) or switch(text, prompt.user, ds):
         return reply
     if m := re.search(rf"(?:deeper|more) than {NUMBER}", text):
         return LLMReply(

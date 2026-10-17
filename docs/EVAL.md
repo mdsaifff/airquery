@@ -20,12 +20,13 @@ including where gestures lose.
   2 minutes of talking.
 
 ## 3. Query accuracy
-- Set: `eval/utterances.jsonl`, 111 items:
-  `{"id", "utterance", "prev_spec", "gold_spec", "tags"}` (+ optional `"pointer"`).
+- Set: `eval/utterances.jsonl`, 115 items:
+  `{"id", "utterance", "prev_spec", "gold_spec", "tags"}` (+ optional `"pointer"`, `"scenes"`).
   Mix: 30 filters, 15 encodings, 10 ranks, 10 time, 20 refine chains,
   10 noisy transcripts (speech errors, typos), 5 ambiguous (gold = clarify),
   and (D-019) 5 timeline (one is "go to Chile": a place stays navigate), 3 view and
-  3 pointer ("here") items. Timeline and view
+  3 pointer ("here") items; (D-020) 4 switch items (one unknown scene = clarify, one
+  "go to Japan" that must stay navigate). Timeline, view and switch
   items are scored on the intent and its fields (they run no SQL); compare
   per-category numbers with reports made before 2026-10-17, not totals.
 - Metrics: spec exact match (after normalizing filter order); result-set

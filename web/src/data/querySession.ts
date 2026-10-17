@@ -7,6 +7,7 @@ import type {
   QueryRequest,
   QueryResponse,
   QuerySpec,
+  Scene,
   Timeline,
   ViewChange,
 } from '../contracts/contracts.ts';
@@ -48,6 +49,10 @@ export interface SessionDeps {
   timeline(t: Timeline): void;
   /** Display switches (X-ray, stats, share, mute). */
   view(v: ViewChange): void;
+  /** Every scene the user can switch to, this one included (sent so "switch to ..." can name them). */
+  scenes(): Scene[];
+  /** "Switch to the paper galaxy": show another scene. */
+  switchTo(name: string): void;
 }
 
 interface Entry extends Applied {
@@ -89,6 +94,7 @@ export class QuerySession {
       current_spec: this.current,
       dataset_schema: deps.datasetSchema ?? null,
       pointer,
+      scenes: deps.scenes(),
     };
     await this.handle(() => deps.ask(req), endedAt, pointer);
   }
@@ -130,6 +136,7 @@ export class QuerySession {
     if (spec.intent === 'explain') return deps.explain(pointer);
     if (spec.intent === 'timeline') return spec.timeline ? deps.timeline(spec.timeline) : undefined;
     if (spec.intent === 'view') return spec.view ? deps.view(spec.view) : undefined;
+    if (spec.intent === 'switch') return spec.switch_to ? deps.switchTo(spec.switch_to) : undefined;
     if (spec.intent === 'navigate') {
       if (spec.camera_target) {
         deps.flyTo(spec.camera_target.lat, spec.camera_target.lon);

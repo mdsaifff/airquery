@@ -1,12 +1,19 @@
 // Top-left masthead: wordmark, a large ticking count of what is shown, the
-// dataset description (or the replay date), and the Replay / Share links.
+// dataset description (or the replay date), the scene picker and the Replay / Share links.
+import { CSV_INPUT_ID } from './CsvPanel.tsx';
 import { hudStore, useTick } from './store.ts';
 
 const NOUNS: Record<string, string> = { quakes: 'earthquakes', papers: 'papers' };
 
-export function TopBar({ onReplay, onShare }: { onReplay: () => void; onShare: () => void }) {
+interface Props {
+  onReplay: () => void;
+  onShare: () => void;
+  onPickScene: (name: string) => void;
+}
+
+export function TopBar({ onReplay, onShare, onPickScene }: Props) {
   useTick(30);
-  const { total, dataset, introDate, subtitle } = hudStore;
+  const { total, dataset, introDate, subtitle, scenes } = hudStore;
   const filtered = total > 0 && hudStore.shown < total && !introDate;
   return (
     <header className="masthead">
@@ -22,6 +29,21 @@ export function TopBar({ onReplay, onShare }: { onReplay: () => void; onShare: (
         </span>
       </div>
       <p className="sub">{introDate ? `Replaying the year: ${introDate}` : subtitle}</p>
+      <div className="scene-row">
+        <label className="scene-pick">
+          <span>Scene</span>
+          <select value={dataset} onChange={(e) => onPickScene(e.target.value)}>
+            {scenes.map((s) => (
+              <option key={s.name} value={s.name}>
+                {s.title}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="text-btn" htmlFor={CSV_INPUT_ID}>
+          Open a CSV
+        </label>
+      </div>
       <div className="masthead-links">
         {dataset === 'quakes' && (
           <button className="text-btn" onClick={onReplay}>

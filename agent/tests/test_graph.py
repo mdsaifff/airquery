@@ -2,7 +2,7 @@ import asyncio
 
 from graph import build_graph, run_agent
 from llm import LLMReply, MockLLM
-from spec import DatasetSchema, QuerySpec
+from spec import DatasetSchema, QuerySpec, Scene
 
 DEEP = {"dataset": "quakes", "filters": [{"field": "depth_km", "op": ">", "value": 300}]}
 BAD_FIELD = {"dataset": "quakes", "filters": [{"field": "depth", "op": ">", "value": 300}]}
@@ -117,3 +117,20 @@ def test_timeline_and_view_produce_no_sql(quakes_schema: DatasetSchema) -> None:
         state, _ = run(quakes_schema, [LLMReply(spec=out)])
         assert state["status"] == "ok" and state["sql"] is None
         assert state["spec"].intent == out["intent"]
+
+
+def test_switch_produces_no_sql(quakes_schema: DatasetSchema) -> None:
+    out = {"dataset": "quakes", "intent": "switch", "switch_to": "papers"}
+    mock = MockLLM([LLMReply(spec=out)])
+    graph = build_graph(mock)
+    state = asyncio.run(
+        run_agent(
+            graph,
+            quakes_schema,
+            "show the papers",
+            None,
+            scenes=[Scene(name="papers", title="galaxy")],
+        )
+    )
+    assert state["status"] == "ok" and state["sql"] is None
+    assert state["spec"].switch_to == "papers"

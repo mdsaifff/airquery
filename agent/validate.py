@@ -4,6 +4,7 @@ Returns human-readable errors; they are fed back to the LLM in the repair step,
 so each one names the field and says what would be valid.
 """
 
+from collections.abc import Collection
 from datetime import date, datetime
 
 from schema_registry import allowed_ops
@@ -80,7 +81,10 @@ def _check_filter(f: Filter, schema: DatasetSchema) -> list[str]:
     return [err] if err else []
 
 
-def validate_spec(spec: QuerySpec, schema: DatasetSchema) -> list[str]:
+def validate_spec(
+    spec: QuerySpec, schema: DatasetSchema, scenes: Collection[str] = ()
+) -> list[str]:
+    """scenes: every scene the browser can show (for intent switch), current one included."""
     errors: list[str] = []
     if spec.dataset != schema.dataset:
         errors.append(f"dataset must be {schema.dataset!r}; got {spec.dataset!r}")
@@ -97,7 +101,18 @@ def validate_spec(spec: QuerySpec, schema: DatasetSchema) -> list[str]:
         errors.append(f"unknown sort field {spec.sort.field!r}")
     if spec.intent == "navigate" and spec.camera_target is None:
         errors.append("intent navigate needs a camera_target with lat, lon and label")
-    return errors + _check_timeline_view(spec, schema)
+    return errors + _check_timeline_view(spec, schema) + _check_switch(spec, schema, scenes)
+
+
+def _check_switch(spec: QuerySpec, schema: DatasetSchema, scenes: Collection[str]) -> list[str]:
+    if spec.intent != "switch":
+        return [] if spec.switch_to is None else ["switch_to is only for intent switch"]
+    others = sorted(s for s in scenes if s != schema.dataset)
+    if not others:
+        return ["there is no other scene to switch to"]
+    if spec.switch_to not in others:
+        return [f"switch_to must be one of {others}; got {spec.switch_to!r}"]
+    return []
 
 
 def _check_timeline_view(spec: QuerySpec, schema: DatasetSchema) -> list[str]:

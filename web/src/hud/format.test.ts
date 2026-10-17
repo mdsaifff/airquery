@@ -22,6 +22,7 @@ const spec: QuerySpec = {
   camera_target: null,
   timeline: null,
   view: null,
+  switch_to: null,
 };
 
 describe('HUD formatting', () => {

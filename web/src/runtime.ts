@@ -89,6 +89,8 @@ export interface Runtime {
   playYear(): void;
   /** Copy a link that reopens this view. */
   share(): void;
+  /** The scene picker: show another dataset. */
+  showScene(name: string): void;
 }
 
 export function startRuntime(els: RuntimeElements): Runtime {
@@ -193,6 +195,12 @@ export function startRuntime(els: RuntimeElements): Runtime {
     },
     pointer: () => voiceFirst.pointer(screenNow(), isGeo()),
     timeline: (t) => voiceFirst.say(playground.applyTimeline(t)),
+    scenes: () => hudStore.scenes,
+    switchTo(to) {
+      if (to === datasets.active) return;
+      voiceFirst.say(`Here's the ${SCENE_NAMES[to] ?? to}.`);
+      void showDataset(to, true);
+    },
     view: (v) => {
       playground.applyViewChange(v);
       if (v.mute !== null) replier.setMuted(v.mute);
@@ -221,6 +229,10 @@ export function startRuntime(els: RuntimeElements): Runtime {
   );
   const datasets = new Datasets(DATASETS, sm.scene, db, sessionDeps);
   const playground = new Playground({ datasets, skipIntro, camera, xray });
+  const publishScenes = () => {
+    hudStore.scenes = datasets.order.map((n) => ({ name: n, title: SCENE_NAMES[n] ?? n }));
+  };
+  publishScenes();
   cleanups.push(() => datasets.dispose());
 
   async function showDataset(name: string, announce: boolean): Promise<void> {
@@ -265,9 +277,15 @@ export function startRuntime(els: RuntimeElements): Runtime {
   for (const name of DATASETS.slice(1)) {
     void fetch(new URL(`data/${name}.schema.json`, document.baseURI)).then(
       (r) => {
-        if (!r.ok || !(r.headers.get('content-type') ?? '').includes('json')) datasets.remove(name);
+        if (!r.ok || !(r.headers.get('content-type') ?? '').includes('json')) {
+          datasets.remove(name);
+          publishScenes();
+        }
       },
-      () => datasets.remove(name),
+      () => {
+        datasets.remove(name);
+        publishScenes();
+      },
     );
   }
   const switchScene = (dir: 'left' | 'right') => {
@@ -472,6 +490,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
     },
     async finishCsv(imp, mapping) {
       datasets.addCustom(imp.name, buildCsvDataset(sm.scene, imp, mapping));
+      SCENE_NAMES[imp.name] = imp.fileName.slice(0, 80); // Scene.title max length
+      publishScenes();
       await showDataset(imp.name, false);
       const c = centroid(imp.base, mapping);
       camera.flyTo(c.lat, c.lon, performance.now());
@@ -483,5 +503,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
     toggleMute: () => replier.setMuted(!replier.muted),
     playYear: () => playground.playYear(),
     share: () => playground.share(),
+    showScene: (name) => {
+      if (name !== datasets.active) void showDataset(name, true);
+    },
   };
 }

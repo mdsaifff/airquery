@@ -31,12 +31,13 @@ def real_quakes() -> DatasetSchema:
 
 def test_worked_examples_are_valid_against_the_real_schema(real_quakes: DatasetSchema) -> None:
     examples = load_examples("quakes")
-    assert 8 <= len(examples) <= 12
+    assert 8 <= len(examples) <= 13
     for ex in examples:
         out = LLMOutput.model_validate(ex["output"])
         assert (out.spec is None) != (out.clarify is None), ex["utterance"]
         if out.spec:
-            assert validate_spec(out.spec, real_quakes) == [], ex["utterance"]
+            scenes = [sc["name"] for sc in ex.get("scenes", [])]
+            assert validate_spec(out.spec, real_quakes, scenes) == [], ex["utterance"]
         if ex["current_spec"]:
             assert validate_spec(QuerySpec.model_validate(ex["current_spec"]), real_quakes) == []
 
@@ -168,7 +169,7 @@ PAPERS = DatasetSchema.model_validate(
 
 def test_papers_examples_are_valid() -> None:
     examples = load_examples("papers")
-    assert 8 <= len(examples) <= 12
+    assert 8 <= len(examples) <= 13
     for ex in examples:
         out = LLMOutput.model_validate(ex["output"])
         assert (out.spec is None) != (out.clarify is None), ex["utterance"]
@@ -223,3 +224,17 @@ def test_the_rules_teach_timeline_view_and_here(quakes_schema) -> None:
     system = build_prompt(quakes_schema, "x", None).system
     for needle in ('"timeline"', '"view"', "go to <month", "around here", "Point at a place"):
         assert needle in system, needle
+
+
+def test_other_scenes_reach_the_prompt(quakes_schema) -> None:
+    from spec import Scene
+
+    scenes = [
+        Scene(name="quakes", title="earthquake globe"),
+        Scene(name="papers", title="ML paper galaxy"),
+    ]
+    p = build_prompt(quakes_schema, "show the papers", None, scenes=scenes)
+    assert 'Other scenes: papers ("ML paper galaxy")' in p.user
+    assert "quakes (" not in p.user  # the current scene is not "other"
+    assert "Other scenes" not in build_prompt(quakes_schema, "x", None, scenes=scenes[:1]).user
+    assert '"switch"' in p.system

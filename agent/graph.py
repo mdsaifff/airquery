@@ -14,7 +14,7 @@ from compile_sql import compile_spec
 from llm import LLMAdapter
 from merge import merge
 from prompt_builder import build_prompt
-from spec import DatasetSchema, Pointer, QuerySpec, Scalar
+from spec import DatasetSchema, Pointer, QuerySpec, Scalar, Scene
 from validate import validate_spec
 
 MAX_RETRIES = 2
@@ -31,6 +31,7 @@ class AgentState(TypedDict, total=False):
     utterance: str
     prev_spec: QuerySpec | None
     pointer: Pointer | None  # where the user pointed ("here"), if anywhere
+    scenes: list[Scene]  # what the browser can switch to (current scene included)
     candidate_spec: dict[str, Any] | None  # raw LLM proposal, unvalidated
     spec: QuerySpec | None  # validated (then merged) spec
     errors: list[str]
@@ -70,6 +71,7 @@ def build_graph(llm: LLMAdapter, max_retries: int = MAX_RETRIES):
             state["utterance"],
             state.get("prev_spec"),
             pointer=state.get("pointer"),
+            scenes=state.get("scenes") or [],
             previous=state.get("candidate_spec") if repairing else None,
             errors=state.get("errors") if repairing else None,
         )
@@ -106,7 +108,8 @@ def build_graph(llm: LLMAdapter, max_retries: int = MAX_RETRIES):
         t0 = time.perf_counter()
         try:
             spec = QuerySpec.model_validate(state["candidate_spec"])
-            errors = validate_spec(spec, state["schema"])
+            scenes = [s.name for s in state.get("scenes") or []]
+            errors = validate_spec(spec, state["schema"], scenes)
         except ValidationError as err:
             spec, errors = None, _pydantic_errors(err)
         return {
@@ -138,7 +141,7 @@ def build_graph(llm: LLMAdapter, max_retries: int = MAX_RETRIES):
         spec = state["spec"]
         assert spec is not None
         t0 = time.perf_counter()
-        if spec.intent in ("undo", "reset", "timeline", "view"):  # handled in the browser
+        if spec.intent in ("undo", "reset", "timeline", "view", "switch"):  # handled in the browser
             return {"status": "ok", "sql": None, "params": []}
         query = compile_spec(spec, state["schema"])  # re-validates: defense in depth
         return {
@@ -181,6 +184,7 @@ async def run_agent(
     utterance: str,
     prev_spec: QuerySpec | None,
     pointer: Pointer | None = None,
+    scenes: list[Scene] | None = None,
 ) -> AgentState:
     """Run the graph once. A previous spec that fails validation is rejected up front."""
     t0 = time.perf_counter()
@@ -198,6 +202,7 @@ async def run_agent(
             "utterance": utterance,
             "prev_spec": prev_spec,
             "pointer": pointer,
+            "scenes": scenes or [],
             "errors": [],
             "retries": 0,
             "params": [],

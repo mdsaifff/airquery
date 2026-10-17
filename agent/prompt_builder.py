@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from llm import Prompt
-from spec import DatasetSchema, Pointer, QuerySpec
+from spec import DatasetSchema, Pointer, QuerySpec, Scene
 
 PROMPTS_DIR = Path(__file__).parent / "prompts"
 
@@ -54,6 +54,12 @@ def pointing(p: Pointer) -> str:
     return f'\nThe user is pointing at lat {p.lat:.1f}, lon {p.lon:.1f} ("here").'
 
 
+def other_scenes(dataset: str, scenes: list[Scene]) -> str:
+    """The "Other scenes" line: what "switch to ..." may name. Empty when there is nowhere to go."""
+    others = [f"{s.name} ({json.dumps(s.title)})" for s in scenes if s.name != dataset]
+    return f"\nOther scenes: {', '.join(others)}" if others else ""
+
+
 def _render_examples(dataset: str) -> str:
     blocks = []
     for ex in load_examples(dataset):
@@ -62,6 +68,7 @@ def _render_examples(dataset: str) -> str:
         spec_json = answer["spec"] or "null"
         clarify_json = json.dumps(answer["clarify"])
         here = pointing(Pointer.model_validate(ex["pointer"])) if ex.get("pointer") else ""
+        here += other_scenes(dataset, [Scene.model_validate(s) for s in ex.get("scenes", [])])
         blocks.append(
             f"Current spec: {compact(ex['current_spec'])}{here}\n"
             f'Request: "{ex["utterance"]}"\n'
@@ -87,10 +94,12 @@ def build_prompt(
     current_spec: QuerySpec | None,
     *,
     pointer: Pointer | None = None,
+    scenes: list[Scene] | None = None,
     previous: dict[str, Any] | None = None,
     errors: list[str] | None = None,
 ) -> Prompt:
     here = pointing(pointer) if pointer else ""
+    here += other_scenes(schema.dataset, scenes or [])
     user = f"Current spec: {compact(current_spec)}{here}\nRequest: {json.dumps(utterance)}"
     if errors:
         bullet_list = "\n".join(f"- {e}" for e in errors)

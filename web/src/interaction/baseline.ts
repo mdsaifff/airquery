@@ -76,6 +76,7 @@ export function buildSpec(form: BaselineForm, dataset = 'quakes'): QuerySpec {
     camera_target: null,
     timeline: null,
     view: null,
+    switch_to: null,
   };
 }
 

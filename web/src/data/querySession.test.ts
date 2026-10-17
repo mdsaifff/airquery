@@ -49,6 +49,7 @@ const spec = (over: Partial<QuerySpec>): QuerySpec => ({
   camera_target: null,
   timeline: null,
   view: null,
+  switch_to: null,
   ...over,
 });
 
@@ -68,6 +69,11 @@ function agentReplies(...bodies: unknown[]) {
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;
 }
+
+const SCENES = [
+  { name: 'quakes', title: 'earthquake globe' },
+  { name: 'papers', title: 'ML paper galaxy' },
+];
 
 function rig() {
   const globe = new PointCloud(new THREE.Scene(), positionsFor(SCHEMA, BASE, 3));
@@ -96,6 +102,8 @@ function rig() {
     pointer: () => pointer,
     timeline: (t) => notes.push(`timeline:${t.action}`),
     view: (v) => notes.push(`view:${JSON.stringify(v)}`),
+    scenes: () => SCENES,
+    switchTo: (name) => notes.push(`switch:${name}`),
   });
   const colors = () => Array.from(globe['geometry'].getAttribute('aColor').array as Float32Array); // prettier-ignore
   const alpha = () => Array.from(globe['geometry'].getAttribute('aAlpha').array as Float32Array); // prettier-ignore
@@ -115,7 +123,7 @@ describe('voice to scene (mocked agent)', () => {
     await r.session.submit('only deeper than 300 km', 0);
     expect(fetchMock).toHaveBeenCalledOnce();
     const sent = JSON.parse((fetchMock.mock.calls[0] as unknown as [string, { body: string }])[1].body); // prettier-ignore
-    expect(sent).toEqual({ dataset: 'quakes', utterance: 'only deeper than 300 km', current_spec: null, dataset_schema: null, pointer: null }); // prettier-ignore
+    expect(sent).toEqual({ dataset: 'quakes', utterance: 'only deeper than 300 km', current_spec: null, dataset_schema: null, pointer: null, scenes: SCENES }); // prettier-ignore
     expect(r.runs).toEqual([`${DEEP_SQL} [300]`]);
     expect([...r.globe.visible]).toEqual([0, 1, 0, 1]);
     r.globe.update(10_000, 3, 1000); // let the fade finish
@@ -256,6 +264,8 @@ describe('refresh', () => {
       pointer: () => null,
       timeline: () => {},
       view: () => {},
+      scenes: () => [],
+      switchTo: () => {},
     });
     session.refresh();
     expect(ended).toEqual([null]);
@@ -274,6 +284,15 @@ describe('refresh', () => {
     expect(r.notes).toEqual(['timeline:play', `view:${JSON.stringify(view)}`]);
     expect(r.session.current).toBeNull(); // nothing pushed onto the history
     expect(r.runs).toEqual([]); // no SQL ran
+  });
+
+  it('routes a scene switch without touching the history', async () => {
+    const r = rig();
+    agentReplies({ ...okResponse(spec({ intent: 'switch', switch_to: 'papers' }), '', []), sql: null }); // prettier-ignore
+    await r.session.submit('switch to the paper galaxy', 0);
+    expect(r.notes).toEqual(['switch:papers']);
+    expect(r.session.current).toBeNull();
+    expect(r.runs).toEqual([]);
   });
 
   it('typed commands use the pointer at submit time', async () => {

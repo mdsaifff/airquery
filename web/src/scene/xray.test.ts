@@ -15,6 +15,7 @@ const spec = (over: Partial<QuerySpec>): QuerySpec => ({
   camera_target: null,
   timeline: null,
   view: null,
+  switch_to: null,
   ...over,
 });
 

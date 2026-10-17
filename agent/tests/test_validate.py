@@ -141,3 +141,21 @@ def test_view_specs_are_checked(quakes_schema) -> None:
     assert any("at least one of" in e for e in validate_spec(empty, quakes_schema))
     stray = spec(intent="query", view={"xray": True})
     assert any("only for intent view" in e for e in validate_spec(stray, quakes_schema))
+
+
+def test_switch_needs_another_listed_scene(quakes_schema) -> None:
+    scenes = ["quakes", "papers"]
+    ok = spec(intent="switch", switch_to="papers")
+    assert validate_spec(ok, quakes_schema, scenes) == []
+    unknown = spec(intent="switch", switch_to="stars")
+    assert any(
+        "switch_to must be one of ['papers']" in e
+        for e in validate_spec(unknown, quakes_schema, scenes)
+    )
+    same = spec(intent="switch", switch_to="quakes")
+    assert validate_spec(same, quakes_schema, scenes) != []
+    assert any("no other scene" in e for e in validate_spec(ok, quakes_schema))
+    missing = spec(intent="switch")
+    assert validate_spec(missing, quakes_schema, scenes) != []
+    stray = spec(intent="query", switch_to="papers")
+    assert any("only for intent switch" in e for e in validate_spec(stray, quakes_schema, scenes))

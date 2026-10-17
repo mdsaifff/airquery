@@ -31,7 +31,7 @@ from graph import MAX_RETRIES, build_graph, run_agent  # noqa: E402
 from llm import GroqLLM, LLMAdapter, LLMReply, MockLLM, Prompt, make_llm  # noqa: E402
 from schema_registry import SchemaRegistry  # noqa: E402
 from settings import settings  # noqa: E402
-from spec import DatasetSchema, Pointer, QuerySpec  # noqa: E402
+from spec import DatasetSchema, Pointer, QuerySpec, Scene  # noqa: E402
 
 from scoring import clarify_scores, navigate_ok, normalize, percentile, spec_match  # noqa: E402
 
@@ -111,9 +111,9 @@ def score_item(item: dict, state: dict, schema: DatasetSchema, db: Db) -> dict[s
     row["spec_match"] = spec_match(pred, gold)
     if pred is None:
         row["result_match"] = False
-    elif gold.intent in ("undo", "reset", "timeline", "view"):  # no SQL: compare the intent
+    elif gold.intent in ("undo", "reset", "timeline", "view", "switch"):  # no SQL: the intent
         same = pred.intent == gold.intent
-        if gold.intent in ("timeline", "view"):
+        if gold.intent in ("timeline", "view", "switch"):
             same = same and normalize(pred) == normalize(gold)
         row["result_match"] = same
     else:
@@ -212,7 +212,8 @@ async def evaluate(items: list[dict], llm: LLMAdapter, repair: bool) -> list[dic
     for item in items:
         prev = QuerySpec.model_validate(item["prev_spec"]) if item["prev_spec"] else None
         pointer = Pointer.model_validate(item["pointer"]) if item.get("pointer") else None
-        state = await run_agent(graph, schema, item["utterance"], prev, pointer)
+        scenes = [Scene.model_validate(s) for s in item.get("scenes", [])]
+        state = await run_agent(graph, schema, item["utterance"], prev, pointer, scenes)
         rows.append(score_item(item, dict(state), schema, db))
     return rows
 

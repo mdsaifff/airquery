@@ -72,10 +72,19 @@ class Pointer(Contract):
     lon: float = Field(ge=-180, le=180)
 
 
+class Scene(Contract):
+    """A scene the browser can show (built-in or a user's CSV), for "switch to ..." requests."""
+
+    name: str = Field(max_length=64)
+    title: str = Field(max_length=80)
+
+
 class QuerySpec(Contract):
     version: Literal[1] = 1
     dataset: str
-    intent: Literal["query", "navigate", "undo", "reset", "explain", "timeline", "view"] = "query"
+    intent: Literal[
+        "query", "navigate", "undo", "reset", "explain", "timeline", "view", "switch"
+    ] = "query"
     mode: Literal["refine", "replace"] = "refine"
     filters: list[Filter] = []
     color_by: str | None = None
@@ -85,6 +94,7 @@ class QuerySpec(Contract):
     camera_target: CameraTarget | None = None
     timeline: Timeline | None = None
     view: ViewChange | None = None
+    switch_to: str | None = None  # intent switch: the scene to show
 
 
 # --- HTTP API ---------------------------------------------------------------
@@ -96,6 +106,8 @@ class QueryRequest(Contract):
     current_spec: QuerySpec | None = None
     # The globe point under the hand or mouse when the user spoke ("here"), if any.
     pointer: Pointer | None = None
+    # Every scene the browser can show right now (for "switch to ..."), current one included.
+    scenes: list[Scene] = Field(default=[], max_length=32)  # >20: a plain Scene[] in TS
     # Only for user-dropped CSVs (dataset "user_*"): the schema inferred in the browser.
     dataset_schema: "DatasetSchema | None" = None
 

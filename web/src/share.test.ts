@@ -18,6 +18,7 @@ const state: ShareState = {
     camera_target: null,
     timeline: null,
     view: null,
+    switch_to: null,
   },
   orbit: { yaw: 2.6, pitch: 0.3, distance: 3.2 },
   xray: true,
@@ -29,6 +30,11 @@ describe('share links', () => {
     const hash = encodeShare(state);
     expect(hash).toMatch(/^#v=[A-Za-z0-9_-]+$/);
     expect(decodeShare(hash)).toEqual(state);
+  });
+
+  it('still opens links made before scene switching (no switch_to)', () => {
+    const older = { ...state, spec: { ...state.spec, switch_to: undefined } }; // dropped by JSON
+    expect(decodeShare(encodeShare(older as unknown as ShareState))).toEqual(state);
   });
 
   it('rejects garbage, wrong version and oversized hashes', () => {

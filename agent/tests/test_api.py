@@ -251,3 +251,17 @@ def test_the_pointer_is_part_of_the_cache_key(quakes_schema, log_path) -> None:
     c.post("/query", json={**body, "pointer": {"lat": -33, "lon": -70}})
     assert len(mock.calls) == 2  # a different place is a different question
     assert "lat -33.0" in mock.calls[1].user
+
+
+def test_scenes_are_part_of_the_cache_key(quakes_schema, log_path) -> None:
+    replies = [
+        LLMReply(clarify="no such scene"),
+        LLMReply(spec={"dataset": "quakes", "intent": "switch", "switch_to": "papers"}),
+    ]
+    c, mock = client(quakes_schema, log_path, replies)
+    body = {"dataset": "quakes", "utterance": "show the papers"}
+    assert c.post("/query", json=body).json()["status"] == "clarify"
+    scenes = [{"name": "quakes", "title": "globe"}, {"name": "papers", "title": "galaxy"}]
+    r = c.post("/query", json={**body, "scenes": scenes}).json()
+    assert len(mock.calls) == 2  # a new scene list is a new question
+    assert r["status"] == "ok" and r["spec"]["switch_to"] == "papers" and r["sql"] is None

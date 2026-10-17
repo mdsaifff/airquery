@@ -427,6 +427,15 @@
           ],
           "default": null
         },
+        "scenes": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Scene"
+          },
+          "maxItems": 32,
+          "title": "Scenes",
+          "type": "array"
+        },
         "dataset_schema": {
           "anyOf": [
             {
@@ -444,6 +453,7 @@
         "utterance",
         "current_spec",
         "pointer",
+        "scenes",
         "dataset_schema"
       ],
       "title": "QueryRequest",
@@ -560,7 +570,8 @@
             "reset",
             "explain",
             "timeline",
-            "view"
+            "view",
+            "switch"
           ],
           "title": "Intent",
           "type": "string"
@@ -663,6 +674,18 @@
             }
           ],
           "default": null
+        },
+        "switch_to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Switch To"
         }
       },
       "required": [
@@ -677,9 +700,31 @@
         "limit",
         "camera_target",
         "timeline",
-        "view"
+        "view",
+        "switch_to"
       ],
       "title": "QuerySpec",
+      "type": "object"
+    },
+    "Scene": {
+      "description": "A scene the browser can show (built-in or a user's CSV), for \"switch to ...\" requests.",
+      "properties": {
+        "name": {
+          "maxLength": 64,
+          "title": "Name",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 80,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "title"
+      ],
+      "title": "Scene",
       "type": "object"
     },
     "Sort": {

@@ -89,6 +89,7 @@ export function App() {
         <TopBar
           onReplay={() => runtime.current?.playYear()}
           onShare={() => runtime.current?.share()}
+          onPickScene={(name) => runtime.current?.showScene(name)}
         />
         <GlassBox />
       </aside>

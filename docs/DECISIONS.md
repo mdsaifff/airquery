@@ -213,3 +213,18 @@ These double as material for LinkedIn posts.
   antimeridian; the pointed lat/lon is now sent to the agent (still no frames or audio). On
   gpt-oss-120b the 11 new eval items plus the existing fly-to items score 13/13 (2026-10-17).
 
+## D-020 Switching datasets goes through the agent; the scene list rides on the request
+- **Context:** the first step toward "any dataset": people need to see which datasets exist and
+  move between them without the hidden swipe gesture, including datasets they upload.
+- **Decision:** a masthead `<select>` lists every scene (built-in + uploaded CSVs) with an
+  "Open a CSV" file button beside it. Voice uses a new `switch` intent with `switch_to`,
+  validated against `QueryRequest.scenes`, which the browser sends because uploads exist
+  only there. The list goes in the user message ("Other scenes: …"), so the per-dataset
+  system prompt stays cacheable. No SQL is compiled for a switch.
+- **Why:** a regex in the browser would be cheaper but would miss "take me to the paper
+  galaxy"-style phrasings and couldn't be measured; the agent path is the one the eval scores.
+- **Consequences:** one more worked example (cap 13); `scenes` is capped at 32 (above 20 so
+  the generated TS stays `Scene[]`, not a tuple union); share links from before this change
+  still decode (`switch_to` defaults to null). "Papers about diffusion" on the globe switches
+  scenes but drops the filter: the user asks again. Re-asking on the new scene is a follow-up.
+

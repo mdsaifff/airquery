@@ -53,7 +53,7 @@ Measured on the demo laptop (Chrome, plugged in). Method: `docs/EVAL.md`.
 | Rendering | 60 fps | pending: HUD readout during a 2-min session |
 | Hand tracking | ≥ 25 fps | pending: HUD readout |
 | Voice → render latency (median) | < 1.5 s | pending: `make latency` (press **M** in the app for frontend timings) |
-| Query accuracy, result-set match (111 utterances) | ≥ 90 % | pending: `make eval` |
+| Query accuracy, result-set match (115 utterances) | ≥ 90 % | pending: `make eval` |
 | Gesture accuracy per gesture (5 people × 7 gestures × 20 tries) | ≥ 95 % | pending: study panel (**G**) + `make gestures` |
 | False triggers while talking | < 1 per 5 min | pending: study panel counter |
 | Invalid SQL reaching DuckDB | 0 | 0 by construction (every spec is validated, then compiled from a whitelist); checked by `make eval` |

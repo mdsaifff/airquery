@@ -2,7 +2,7 @@
 // components poll it (useTick) instead of holding per-frame data in state.
 import { useEffect, useState } from 'react';
 
-import type { QuerySpec } from '../contracts/contracts.ts';
+import type { QuerySpec, Scene } from '../contracts/contracts.ts';
 import type { Dashboard } from './dashboard.ts';
 import type { Mode } from '../interaction/stateMachine.ts';
 import type { Legend } from '../scene/applyView.ts';
@@ -11,6 +11,8 @@ export const hudStore = {
   mode: 'idle' as Mode,
   /** Which scene is on screen (dataset name). */
   dataset: 'quakes',
+  /** Every scene the user can switch to, in swipe order (the picker and "switch to ..."). */
+  scenes: [] as Scene[],
   /** Push-to-talk is held (hand Victory or spacebar). */
   listening: false,
   trackingFps: 0,

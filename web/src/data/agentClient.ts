@@ -20,7 +20,7 @@ const Filter = z.object({
 export const QuerySpecSchema = z.object({
   version: z.literal(1),
   dataset: z.string(),
-  intent: z.enum(['query', 'navigate', 'undo', 'reset', 'explain', 'timeline', 'view']),
+  intent: z.enum(['query', 'navigate', 'undo', 'reset', 'explain', 'timeline', 'view', 'switch']),
   mode: z.enum(['refine', 'replace']),
   filters: z.array(Filter),
   color_by: z.string().nullable(),
@@ -49,6 +49,7 @@ export const QuerySpecSchema = z.object({
       mute: z.boolean().nullable(),
     })
     .nullable(),
+  switch_to: z.string().nullable().default(null), // older share links have none
 });
 
 export const QueryResponseSchema = z.object({

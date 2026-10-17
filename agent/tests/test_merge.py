@@ -83,3 +83,8 @@ def test_timeline_and_view_pass_through_untouched() -> None:
     assert merge(PREV, t) == t
     v = spec(intent="view", view={"xray": True})
     assert merge(PREV, v) == v
+
+
+def test_switch_passes_through_untouched() -> None:
+    s = spec(intent="switch", switch_to="papers")
+    assert merge(PREV, s) == s

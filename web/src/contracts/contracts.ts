@@ -44,7 +44,7 @@ export interface CompileRequest {
 export interface QuerySpec {
   version: 1;
   dataset: string;
-  intent: 'query' | 'navigate' | 'undo' | 'reset' | 'explain' | 'timeline' | 'view';
+  intent: 'query' | 'navigate' | 'undo' | 'reset' | 'explain' | 'timeline' | 'view' | 'switch';
   mode: 'refine' | 'replace';
   filters: Filter[];
   color_by: string | null;
@@ -54,6 +54,7 @@ export interface QuerySpec {
   camera_target: CameraTarget | null;
   timeline: Timeline | null;
   view: ViewChange | null;
+  switch_to: string | null;
 }
 /**
  * This interface was referenced by `AirQueryContracts`'s JSON-Schema
@@ -170,7 +171,21 @@ export interface QueryRequest {
   utterance: string;
   current_spec: QuerySpec | null;
   pointer: Pointer | null;
+  /**
+   * @maxItems 32
+   */
+  scenes: Scene[];
   dataset_schema: DatasetSchema | null;
+}
+/**
+ * A scene the browser can show (built-in or a user's CSV), for "switch to ..." requests.
+ *
+ * This interface was referenced by `AirQueryContracts`'s JSON-Schema
+ * via the `definition` "Scene".
+ */
+export interface Scene {
+  name: string;
+  title: string;
 }
 /**
  * This interface was referenced by `AirQueryContracts`'s JSON-Schema

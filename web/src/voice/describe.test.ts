@@ -5,7 +5,7 @@ import { describeView, spokenNotice, timelineSentence, viewSentence } from './de
 
 const blank: QuerySpec = {
   version: 1, dataset: 'quakes', intent: 'query', mode: 'replace', filters: [],
-  color_by: null, size_by: null, sort: null, limit: null, camera_target: null, timeline: null, view: null,
+  color_by: null, size_by: null, sort: null, limit: null, camera_target: null, timeline: null, view: null, switch_to: null,
 }; // prettier-ignore
 const dash: Dashboard = {
   count: 314,
