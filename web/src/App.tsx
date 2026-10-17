@@ -6,7 +6,6 @@ import { BaselinePanel, TaskPanel } from './hud/BaselinePanels.tsx';
 import { CapturePanel } from './hud/CapturePanel.tsx';
 import { CsvDrop } from './hud/CsvPanel.tsx';
 import { DebugPanel } from './hud/DebugPanel.tsx';
-import { Chips } from './hud/Chips.tsx';
 import { Dashboard } from './hud/Dashboard.tsx';
 import { Loading } from './hud/Loading.tsx';
 import { CamLabel, GlassBox, HowToRead, Stats } from './hud/Hud.tsx';
@@ -30,11 +29,6 @@ export function App() {
   const [captureOpen, setCaptureOpen] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [baseline, setBaseline] = useState(false);
-  const [handsOn, setHandsOn] = useState(false);
-  const enableHands = useCallback(() => {
-    runtime.current?.enableHands();
-    setHandsOn(true);
-  }, []);
   const [study] = useState(() => new StudyHost());
   const importCsv = useCallback((file: File) => {
     if (!runtime.current) return Promise.reject(new Error('still starting'));
@@ -69,7 +63,6 @@ export function App() {
       if (e.code === 'KeyT') setTasksOpen((s) => !s); // study task timer
       if (e.code === 'KeyC') setCaptureOpen((s) => !s); // custom gesture data
       if (e.code === 'KeyV') setVoiceOpen((s) => !s); // voice picker
-      if (e.code === 'KeyH') enableHands(); // hand tracking is opt-in
       if (e.code === 'KeyB') {
         // mouse baseline: hands + voice off, dropdowns on
         setBaseline((b) => !b);
@@ -77,18 +70,18 @@ export function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [enableHands]);
+  }, []);
 
   return (
     <>
       <div ref={sceneRef} className="scene" />
       <canvas
         ref={camRef}
-        className={baseline || !handsOn ? 'cam hidden' : 'cam'}
+        className={baseline ? 'cam hidden' : 'cam'}
         width={config.cameraWidth / 2}
         height={config.cameraHeight / 2}
       />
-      {!baseline && handsOn && <CamLabel />}
+      {!baseline && <CamLabel />}
       <div className="vignette" aria-hidden="true" />
       <aside className="rail">
         <TopBar
@@ -107,18 +100,7 @@ export function App() {
           onSpeed={(s) => runtime.current?.playground.setSpeed(s)}
           onStop={() => runtime.current?.playground.stopTime()}
         />
-        {!baseline && (
-          <Chips
-            onPick={(c) => runtime.current?.playground.pickChip(c)}
-            onSurprise={() => runtime.current?.playground.surpriseMe()}
-          />
-        )}
         {!baseline && <TranscriptBar onSubmit={(text) => runtime.current?.typed(text)} />}
-        {!baseline && !handsOn && (
-          <button className="hands-btn" onClick={enableHands}>
-            ✋ Use hands
-          </button>
-        )}
       </div>
       <Toasts />
       {debug && <DebugPanel />}

@@ -51,8 +51,7 @@ export function Welcome() {
         <h1>Every dot is an earthquake.</h1>
         <p className="lede">
           {n > 0 ? `${n.toLocaleString()} of them` : 'All of them'}, magnitude 4.5 and up, recorded
-          around the world in 2024. Drag the globe, click a suggestion, ask a question, or press ✋
-          Use hands to steer with your hands.
+          around the world in 2024. Steer the globe with your hands and ask questions out loud.
         </p>
         <ul className="steps">
           <li>

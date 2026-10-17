@@ -1,8 +1,6 @@
-// Playground release wiring: suggestion chips, the dashboard, the time machine and
+// Playground release wiring: the dashboard, the time machine and
 // share links. runtime.ts only calls these hooks; the logic lives in pure modules.
 import { config } from './config.ts';
-import { chipSpec, loadChips, surprise } from './data/chips.ts';
-import type { Chip } from './data/chips.ts';
 import { refine } from './data/refine.ts';
 import type { Datasets } from './datasets.ts';
 import { computeDashboard, filterFor } from './hud/dashboard.ts';
@@ -36,8 +34,8 @@ export class Playground {
     this.host = host;
   }
 
-  /** A dataset came on screen: its time range (for the time machine) and its chips. */
-  async onDataset(name: string, d: LoadedDataset): Promise<void> {
+  /** A dataset came on screen: its time range (for the time machine). */
+  onDataset(d: LoadedDataset): void {
     if (this.current && this.time.active) {
       this.time.stop(this.current.cloud); // the old scene's glow and cutoff go too
       this.clearPlayhead();
@@ -48,28 +46,12 @@ export class Playground {
     this.time.attach(times);
     this.ripples = [];
     if (times) d.cloud.setTimes(times, timeRange(times)[0]);
-    hudStore.chips = [];
-    const chips = await loadChips(name);
-    if (this.host.datasets.active === name) hudStore.chips = chips;
   }
 
   /** A view was applied (query, undo, refresh): recompute the dashboard, re-mask the replay. */
   onView(d: LoadedDataset): void {
     hudStore.dashboard = computeDashboard(d.schema, d.base, d.cloud.visible);
     this.time.onView(d.cloud.visible);
-  }
-
-  pickChip(chip: Chip): void {
-    const { datasets } = this.host;
-    void datasets.session().applySpec(chipSpec(chip, datasets.active));
-  }
-
-  surpriseMe(): void {
-    const { datasets } = this.host;
-    if (hudStore.chips.length === 0) return;
-    const chip = surprise(hudStore.chips, datasets.active, datasets.session().current);
-    toast('info', `🎲 ${chip.label}`);
-    this.pickChip(chip);
   }
 
   pickBar(chart: Chart, bar: Bar): void {

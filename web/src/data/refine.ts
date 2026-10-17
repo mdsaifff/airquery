@@ -1,4 +1,4 @@
-// Pure: the spec for a UI action (chip, chart click) built from what is on screen.
+// Pure: the spec for a UI action (a chart click) built from what is on screen.
 // The agent still validates and compiles it (POST /compile); no SQL is made here.
 import type { QuerySpec } from '../contracts/contracts.ts';
 

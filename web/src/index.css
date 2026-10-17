@@ -239,8 +239,8 @@ button {
 /* --- what ran (glass box) --- */
 .glass {
   padding: 10px 14px 12px;
-  /* long queries (chips + chart clicks) scroll instead of running into the legend */
-  max-height: max(110px, calc(100vh - 770px));
+  /* long queries (chart clicks) scroll instead of running into the legend */
+  max-height: max(110px, calc(100vh - 725px));
   overflow-y: auto;
   scrollbar-width: thin;
   background: var(--surface);
@@ -1035,32 +1035,6 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
-/* --- suggestion chips --- */
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.chip {
-  padding: 6px 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: rgb(1 2 5 / 40%);
-  color: var(--fg);
-  font: 13px var(--sans);
-  cursor: pointer;
-  transition:
-    border-color 0.2s,
-    background 0.2s;
-}
-.chip:hover {
-  border-color: var(--fg);
-  background: rgb(237 234 228 / 8%);
-}
-.chip.surprise {
-  color: var(--muted);
-}
-
 .seismo-controls {
   display: flex;
   align-items: center;
@@ -1126,8 +1100,7 @@ button {
 .loading .err {
   color: var(--bad);
 }
-.loading button,
-.hands-btn {
+.loading button {
   padding: 6px 14px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
@@ -1136,10 +1109,6 @@ button {
   font: 13px var(--sans);
   cursor: pointer;
 }
-.hands-btn {
-  align-self: flex-start;
-}
-
 .scene canvas {
   touch-action: none;
 }
@@ -1176,21 +1145,12 @@ button {
     pointer-events: auto;
   }
   .dash:not(.closed) {
-    z-index: 8; /* above the strip, chips and talk bar */
+    z-index: 8; /* above the strip and talk bar */
     box-sizing: border-box;
     padding: 12px 14px;
     background: var(--surface-solid);
     border: 1px solid var(--line);
     border-radius: var(--radius);
-  }
-  .chips {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-    max-width: 100%;
-  }
-  .chip {
-    flex: none;
   }
   .seismo-controls .hint {
     display: none;

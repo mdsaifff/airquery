@@ -186,3 +186,15 @@ These double as material for LinkedIn posts.
   camera prompt for visitors; one place still writes SQL.
 - **Consequences:** the time machine reuses the seismogram strip (D-016) as its timeline;
   the dashboard's three depth bands match the legend rather than the spec's five.
+
+## D-018 Gestures first: camera on at startup, no suggestion chips
+- **Context:** after trying the playground release, the user felt the one-click chips and the
+  opt-in camera pulled the app toward a click-through data dashboard and away from its point:
+  steering with hands and asking out loud.
+- **Decision:** the camera and hand tracking start with the app again (mouse mode if the
+  camera is denied); the suggestion chips and "Surprise me" are removed. The dashboard, time
+  machine and share links stay.
+- **Why:** the first thing a visitor meets should be their own hands on the globe.
+- **Consequences:** reverses part of D-017; visitors get a camera prompt on arrival. When the
+  AI is rate-limited the reply is "ask again in a minute" (there is no chip to fall back on).
+

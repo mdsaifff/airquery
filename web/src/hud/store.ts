@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 
 import type { QuerySpec } from '../contracts/contracts.ts';
-import type { Chip } from '../data/chips.ts';
 import type { Dashboard } from './dashboard.ts';
 import type { Mode } from '../interaction/stateMachine.ts';
 import type { Legend } from '../scene/applyView.ts';
@@ -65,10 +64,6 @@ export const hudStore = {
   playback: { available: false, active: false, playing: false, speed: 30 },
   /** First-visit loading: 0 data engine, 1 earthquake data, 2 globe textures, 3 ready; or an error. */
   loading: { step: 0, error: '' },
-  /** Hand tracking was switched on (the camera only starts on request). */
-  handsOn: false,
-  /** Suggestion chips for the current dataset (empty: no chips file). */
-  chips: [] as Chip[],
   /** One-line description of the current dataset (from its schema). */
   subtitle: '',
   /** Place choices for the baseline dropdown (computed examples from the dataset schema). */

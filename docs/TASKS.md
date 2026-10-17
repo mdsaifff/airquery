@@ -272,6 +272,6 @@ on the deployed site. Ask the user to record the hero take.
   markers, shockwave rings, opening replay, mission-control HUD, info cards,
   "how to read this" legend, welcome overlay.
   - Note: spec `docs/superpowers/specs/2026-10-15-visual-redesign-design.md`, plan `docs/superpowers/plans/2026-10-15-visual-redesign.md` (D-014). Verified with headless screenshots (software GL). Fixed on the way: hover picked quakes hidden behind the globe; a StrictMode remount could leave a false "Data failed to load". Real fps on the demo laptop with tracking on: pending (user).
-- [x] **T5.8 Playground release** — dashboard, time machine, chips, share links, loading
-  screen, opt-in hands, AI limits, touch.
+- [x] **T5.8 Playground release** — dashboard, time machine, share links, loading screen,
+  AI limits, touch. (Suggestion chips and opt-in hands were built, then dropped: D-018.)
   - Note: spec `docs/superpowers/specs/2026-10-16-playground-design.md` (amended for the D-016 cinematic redesign), plan `docs/superpowers/plans/2026-10-17-playground.md` (D-017). Headless checks done (1080p and 360 px phone): loading → welcome, chips/bars/undo, time machine play/pause/seek, share link round trip, opt-in hands, pinch zoom. Needs you: real phone check (touch, layout), real laptop check (playback smoothness, hands opt-in), deploy (README checklist).

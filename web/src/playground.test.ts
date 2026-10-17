@@ -45,7 +45,7 @@ function started() {
   } as unknown as PlaygroundHost;
   const p = new Playground(host);
   const a = dataset();
-  void p.onDataset('quakes', a.d);
+  p.onDataset(a.d);
   p.onView(a.d);
   p.playYear();
   p.onFrame(1000, a.d); // a month into 190 days at the default speed
@@ -57,7 +57,7 @@ describe('Playground time machine', () => {
   it('switching scene mid-replay turns the old replay off', () => {
     const { p, a } = started();
     expect(hudStore.introCutoff).not.toBeNull();
-    void p.onDataset('user_x', dataset().d);
+    p.onDataset(dataset().d);
     expect(a.cloud.playheads.at(-1)).toBeNull(); // the old cloud's glow is off
     expect(hudStore.introCutoff).toBeNull();
     expect(hudStore.introDate).toBe('');

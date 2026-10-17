@@ -52,7 +52,7 @@ export interface RuntimeElements {
 }
 
 export interface Runtime {
-  /** Chips, dashboard clicks, time machine, share links. */
+  /** Dashboard clicks, time machine, share links. */
   playground: Playground;
   dispose(): void;
   /** Mouse baseline: ignore hands and voice; specs come from dropdowns. */
@@ -73,8 +73,6 @@ export interface Runtime {
   playYear(): void;
   /** Copy a link that reopens this view. */
   share(): void;
-  /** Start the webcam and hand tracking (opt-in). */
-  enableHands(): void;
 }
 
 export function startRuntime(els: RuntimeElements): Runtime {
@@ -202,7 +200,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       if (name === 'quakes') {
         hudStore.placeOptions = d.schema.columns.find((c) => c.name === 'place')?.examples ?? [];
       }
-      void playground.onDataset(name, d);
+      playground.onDataset(d);
       datasets.session(name).refresh();
       if (name === DATASETS[0] && !introPlayed) {
         introPlayed = true;
@@ -353,12 +351,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
   // --- hand tracking (its own loop) ---
   const recorder = new LandmarkRecorder();
   let video: HTMLVideoElement | null = null;
-  // The camera (and the hand model download) start only when asked: "Use hands" or H.
-  let stopTracking: (() => void) | null = null;
-  const enableHands = () => {
-    if (stopTracking) return;
-    hudStore.handsOn = true;
-    stopTracking = startTracking(els.camCanvas, {
+  // Gestures are the point of the app: the camera starts with it (mouse mode if denied).
+  cleanups.push(
+    startTracking(els.camCanvas, {
       onVideo(v) {
         video = v;
       },
@@ -372,9 +367,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
       onError(message) {
         hudStore.cameraError = message;
       },
-    });
-  };
-  cleanups.push(() => stopTracking?.());
+    }),
+  );
 
   // --- keyboard: space talk, R reset view, Z undo, arrows switch scene, M timings ---
   const onKey = (e: KeyboardEvent) => {
@@ -443,6 +437,5 @@ export function startRuntime(els: RuntimeElements): Runtime {
     toggleXray: () => xray.toggle(),
     playYear: () => playground.playYear(),
     share: () => playground.share(),
-    enableHands,
   };
 }
