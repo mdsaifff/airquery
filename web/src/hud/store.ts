@@ -64,6 +64,10 @@ export const hudStore = {
   playback: { available: false, active: false, playing: false, speed: 30 },
   /** First-visit loading: 0 data engine, 1 earthquake data, 2 globe textures, 3 ready; or an error. */
   loading: { step: 0, error: '' },
+  /** The globe's last spoken reply, shown as a subtitle until `until` (performance.now ms). */
+  reply: { text: '', until: 0 },
+  /** Spoken replies are off (subtitles stay). */
+  muted: false,
   /** One-line description of the current dataset (from its schema). */
   subtitle: '',
   /** Place choices for the baseline dropdown (computed examples from the dataset schema). */

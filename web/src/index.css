@@ -1398,7 +1398,39 @@ button {
 }
 
 /* Narrow screens: stack the bottom row above the webcam. */
+.subtitle {
+  position: fixed;
+  left: 58%;
+  bottom: 215px;
+  translate: -50% 0;
+  max-width: min(640px, 80vw);
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgb(1 2 5 / 55%);
+  color: var(--fg);
+  font: 19px/1.4 var(--sans);
+  text-align: center;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 80%);
+  z-index: 6;
+  animation: fade 0.3s ease-out both;
+}
+.mute-btn {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: none;
+  font-size: 15px;
+  cursor: pointer;
+}
+
 @media (max-width: 760px) {
+  .subtitle {
+    left: 50%;
+    bottom: 230px;
+    font-size: 16px;
+  }
   .masthead {
     text-shadow: 0 1px 14px rgb(1 2 5 / 95%);
   }
