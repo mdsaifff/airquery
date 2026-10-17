@@ -22,10 +22,25 @@ def log_path(tmp_path: Path) -> Path:
     return tmp_path / "queries.jsonl"
 
 
-def client(quakes_schema: DatasetSchema, log_path: Path, replies=(), rate=100, llm=True):
+def client(
+    quakes_schema: DatasetSchema,
+    log_path: Path,
+    replies=(),
+    rate=100,
+    llm=True,
+    compile_rate=100,
+    llm_budget=100,
+):
     mock = MockLLM(list(replies)) if llm else None
     reg = SchemaRegistry({"quakes": quakes_schema})
-    app = create_app(llm=mock, registry=reg, log_path=log_path, rate_limit_per_min=rate)
+    app = create_app(
+        llm=mock,
+        registry=reg,
+        log_path=log_path,
+        rate_limit_per_min=rate,
+        compile_rate_limit_per_min=compile_rate,
+        llm_calls_per_min=llm_budget,
+    )
     return TestClient(app), mock
 
 
@@ -91,8 +106,26 @@ def test_rate_limit_per_ip(quakes_schema, log_path) -> None:
     assert ask(c, "a").status_code == 200  # cached, still counts
     r = ask(c, "a")
     assert r.status_code == 429
-    assert r.json()["status"] == "rejected"
+    assert r.json()["status"] == "clarify" and "suggestion chip" in r.json()["message"]
     assert log_lines(log_path)[-1]["errors"] == ["rate limited"]
+
+
+def test_the_global_llm_budget_is_shared_and_cache_hits_are_free(quakes_schema, log_path) -> None:
+    c, _ = client(quakes_schema, log_path, [LLMReply(clarify="?")] * 3, llm_budget=1)
+    assert ask(c, "a").status_code == 200  # one LLM call
+    assert ask(c, "a").status_code == 200  # cache hit: no LLM call, budget untouched
+    r = ask(c, "b")  # needs the LLM: budget spent
+    assert r.status_code == 429 and r.json()["status"] == "clarify"
+    assert log_lines(log_path)[-1]["errors"] == ["llm budget"]
+
+
+def test_compile_has_its_own_limit(quakes_schema, log_path) -> None:
+    c, _ = client(quakes_schema, log_path, rate=1, compile_rate=2)
+    body = {"dataset": "quakes", "spec": DEEP}
+    assert c.post("/compile", json=body).status_code == 200
+    assert c.post("/compile", json=body).status_code == 200  # /query's limit of 1 doesn't apply
+    r = c.post("/compile", json=body)
+    assert r.status_code == 429 and r.json()["status"] == "clarify"
 
 
 def test_bad_requests_are_rejected_and_logged(quakes_schema, log_path) -> None:

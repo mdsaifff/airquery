@@ -16,7 +16,12 @@ class Settings(BaseSettings):
     schema_dir: Path = AGENT_DIR / "../web/public/data"
     # Comma-separated list of allowed browser origins (CORS).
     web_origin: str = "http://localhost:5173,http://localhost:4173"
-    rate_limit_per_min: int = 30
+    # AI questions (POST /query) per visitor IP per minute.
+    rate_limit_per_min: int = 6
+    # Chips, chart clicks and share links (POST /compile, no LLM) per visitor IP per minute.
+    compile_rate_limit_per_min: int = 60
+    # LLM calls per minute across all visitors: keeps a free-tier key under its limit.
+    llm_calls_per_min: int = 20
 
     @property
     def web_origins(self) -> list[str]:

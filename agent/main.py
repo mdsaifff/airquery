@@ -23,6 +23,9 @@ CACHE_SIZE = 256
 DEFAULT_LOG = AGENT_DIR / "logs" / "queries.jsonl"
 
 
+BUSY = "The AI is busy right now. Try a suggestion chip, or ask again in a minute."
+
+
 class RateLimiter:
     """Sliding one-minute window per client IP.
 
@@ -64,6 +67,8 @@ def create_app(
     registry: SchemaRegistry | None = None,
     log_path: Path = DEFAULT_LOG,
     rate_limit_per_min: int | None = None,
+    compile_rate_limit_per_min: int | None = None,
+    llm_calls_per_min: int | None = None,
 ) -> FastAPI:
     llm_error = ""
     if llm is None:
@@ -74,6 +79,8 @@ def create_app(
     registry = registry or SchemaRegistry.load(settings.schema_dir)
     graph = build_graph(llm) if llm else None
     limiter = RateLimiter(rate_limit_per_min or settings.rate_limit_per_min)
+    compile_limiter = RateLimiter(compile_rate_limit_per_min or settings.compile_rate_limit_per_min)
+    llm_budget = RateLimiter(llm_calls_per_min or settings.llm_calls_per_min)
     cache: OrderedDict[tuple[str, str, str], QueryResponse] = OrderedDict()
     log = QueryLog(log_path)
 
@@ -126,7 +133,7 @@ def create_app(
         t0 = time.perf_counter()
         ip = request.client.host if request.client else "unknown"
         if not limiter.allow(ip, time.monotonic()):
-            resp = QueryResponse(status="rejected", message="Too many requests; wait a moment.")
+            resp = QueryResponse(status="clarify", message=BUSY)
             return respond(req, resp, 429, errors=["rate limited"])
         try:
             schema = resolve(req.dataset, req.dataset_schema)
@@ -147,6 +154,9 @@ def create_app(
                 update={"timings_ms": {"total": round((time.perf_counter() - t0) * 1000, 1)}}
             )
             return respond(req, hit, cache_hit=True)
+        if not llm_budget.allow("everyone", time.monotonic()):
+            resp = QueryResponse(status="clarify", message=BUSY)
+            return respond(req, resp, 429, errors=["llm budget"])
 
         state: AgentState = await run_agent(graph, schema, req.utterance, req.current_spec)
         resp = QueryResponse(
@@ -168,8 +178,8 @@ def create_app(
     def compile_endpoint(req: CompileRequest, request: Request) -> JSONResponse:
         """Mouse baseline: the UI built the spec, the agent still validates and compiles it."""
         ip = request.client.host if request.client else "unknown"
-        if not limiter.allow(ip, time.monotonic()):
-            resp = QueryResponse(status="rejected", message="Too many requests; wait a moment.")
+        if not compile_limiter.allow(ip, time.monotonic()):
+            resp = QueryResponse(status="clarify", message=BUSY)
             return JSONResponse(resp.model_dump(mode="json"), status_code=429)
         try:
             query = compile_spec(req.spec, registry.get(req.dataset))

@@ -58,4 +58,12 @@ def understand(prompt: Prompt) -> LLMReply:
 
 
 if __name__ == "__main__":
-    uvicorn.run(create_app(llm=MockLLM(fn=understand, name="fake")), port=8000)
+    uvicorn.run(
+        create_app(
+            llm=MockLLM(fn=understand, name="fake"),
+            rate_limit_per_min=1000,
+            compile_rate_limit_per_min=1000,
+            llm_calls_per_min=1000,
+        ),
+        port=8000,
+    )
