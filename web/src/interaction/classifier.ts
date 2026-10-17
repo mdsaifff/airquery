@@ -1,6 +1,7 @@
 // Pure gesture classifier: smoothed hand frames in, GestureEvents out.
 // Combines MediaPipe's built-in labels (debounced) with a pinch rule
-// (hysteresis + hold frames) and hold timers for reset / undo.
+// (hysteresis + hold frames), hold timers for reset / explain, hold-still-to-talk
+// and pinch-hold-to-circle.
 import type { config } from '../config.ts';
 import type { HandsFrame, Vec2 } from '../tracking/geometry.ts';
 import {
@@ -16,6 +17,16 @@ import {
 import type { GestureEvent, Hand, HoldGesture } from './types.ts';
 
 export type GestureParams = typeof config.gesture;
+
+const MIDDLE_TIP = 12;
+
+/** Index finger out, middle finger curled: the hand is pointing (any orientation). */
+export function isPointing(points: readonly Vec2[], p: GestureParams): boolean {
+  return (
+    normalizedDistance(points, WRIST, INDEX_TIP) > p.pinchMinIndexReach &&
+    normalizedDistance(points, WRIST, MIDDLE_TIP) < p.pointMiddleMaxReach
+  );
+}
 
 /** A label that only changes after `need` consecutive identical samples. */
 class Debounced {
@@ -41,6 +52,10 @@ interface HandState {
   trail: { t: number; x: number; y: number }[];
   pinching: boolean;
   pinchFrames: number;
+  /** When and where the current pinch started, and whether it can still become a circle. */
+  pinchAt: number;
+  pinchOrigin: Vec2;
+  circleOpen: boolean;
   missing: number;
   lastSeen: number;
 }
@@ -57,7 +72,8 @@ export class GestureClassifier {
   private readonly hands = new Map<Hand, HandState>();
   private clutch = false;
   private talk = false;
-  private lasso = false;
+  /** Hold-still-to-talk: where the pointing finger rests, since when, and whether it listens. */
+  private dwell: { origin: Vec2; start: number; listening: boolean; done: boolean } | null = null;
   private hold: Hold | null = null;
   private zoomDist: number | null = null;
   private lastHandsAt = -Infinity;
@@ -75,18 +91,25 @@ export class GestureClassifier {
     const t = frame.t;
     const ev: GestureEvent[] = [];
 
-    // Cursor from the primary (right, else first) hand.
-    const primary = frame.hands.find((h) => h.hand === 'right') ?? frame.hands[0];
+    // Cursor from the pointing hand (the other one may be raised open to talk),
+    // else a hand that isn't an open palm, else the right hand, else the first.
+    const label = (h: { hand: Hand }) => this.hands.get(h.hand)?.label.stable ?? 'None';
+    const primary =
+      frame.hands.find((h) => isPointing(h.points, p)) ??
+      (frame.hands.length > 1 ? frame.hands.find((h) => label(h) !== 'Open_Palm') : undefined) ??
+      frame.hands.find((h) => h.hand === 'right') ??
+      frame.hands[0];
     if (primary) {
       const pinching = this.hands.get(primary.hand)?.pinching;
       const at = pinching ? pinchPoint(primary.points) : primary.points[INDEX_TIP];
       ev.push({ kind: 'cursor', x: at.x, y: at.y });
     }
+    this.updateDwell(frame.hands.length === 1 ? primary : undefined, t, ev);
 
     for (const h of frame.hands) {
       let s = this.hands.get(h.hand);
       if (!s) {
-        s = { label: new Debounced(), points: h.points, trail: [], pinching: false, pinchFrames: 0, missing: 0, lastSeen: t }; // prettier-ignore
+        s = { label: new Debounced(), points: h.points, trail: [], pinching: false, pinchFrames: 0, pinchAt: t, pinchOrigin: h.points[INDEX_TIP], circleOpen: false, missing: 0, lastSeen: t }; // prettier-ignore
         this.hands.set(h.hand, s);
       }
       s.points = h.points;
@@ -105,12 +128,14 @@ export class GestureClassifier {
         s.pinchFrames = d < p.pinchEnter && !fistLike ? s.pinchFrames + 1 : 0;
         if (s.pinchFrames >= p.pinchStableFrames) {
           s.pinching = true;
+          [s.pinchAt, s.pinchOrigin, s.circleOpen] = [t, at, true];
           ev.push({ kind: 'pinchStart', hand: h.hand, x: at.x, y: at.y });
         }
       } else if (d > p.pinchExit) {
         this.endPinch(h.hand, s, ev, t);
       } else {
         ev.push({ kind: 'pinchMove', hand: h.hand, x: at.x, y: at.y });
+        this.circleHold(h.hand, s, at, t, ev);
       }
       this.detectSwipe(s, raw, t, ev);
     }
@@ -138,10 +163,7 @@ export class GestureClassifier {
     const labels = [...this.hands.values()].map((s) => s.label.stable);
     const clutch = labels.includes('Closed_Fist');
     if (clutch !== this.clutch) ev.push({ kind: 'clutch', active: (this.clutch = clutch) });
-    const talk = labels.includes('Victory');
-    if (talk !== this.talk) ev.push({ kind: 'talk', active: (this.talk = talk) });
-    const lasso = labels.includes('ILoveYou');
-    if (lasso !== this.lasso) ev.push({ kind: 'lasso', active: (this.lasso = lasso) });
+    this.updateTalk(ev);
     this.updateHold(t, ev);
 
     if (frame.hands.length > 0) {
@@ -174,6 +196,73 @@ export class GestureClassifier {
     }
   }
 
+  /** Hands still tracked (a one-frame dropout still counts). */
+  private liveHands(): HandState[] {
+    return [...this.hands.values()].filter((s) => s.missing < this.p.pinchStableFrames);
+  }
+
+  /** Talk: one hand pointing while the other is raised open; or a pointing finger held still. */
+  private updateTalk(ev: GestureEvent[]): void {
+    const live = this.liveHands();
+    const open = live.filter((s) => s.label.stable === 'Open_Palm');
+    const pointer = live.find((s) => !s.pinching && s.label.stable !== 'Open_Palm' && isPointing(s.points, this.p)); // prettier-ignore
+    const raised = live.length === 2 && open.length === 1 && pointer !== undefined;
+    const talk = raised || (this.dwell?.listening ?? false);
+    if (talk === this.talk) return;
+    this.talk = talk;
+    const at = raised && pointer ? pointer.points[INDEX_TIP] : this.dwell?.origin;
+    ev.push(talk && at ? { kind: 'talk', active: true, x: at.x, y: at.y } : { kind: 'talk', active: talk }); // prettier-ignore
+  }
+
+  /** A pointing finger held still (one hand, not pinching) opens the microphone. */
+  private updateDwell(
+    hand: { points: Vec2[]; hand: Hand } | undefined,
+    t: number,
+    ev: GestureEvent[],
+  ): void {
+    const { p } = this;
+    const s = hand ? this.hands.get(hand.hand) : undefined;
+    const pointing = hand && !s?.pinching && isPointing(hand.points, p);
+    const d = this.dwell;
+    if (!hand || !pointing) {
+      if (d && !d.listening && !d.done)
+        ev.push({ kind: 'holdProgress', gesture: 'listen', progress: 0 });
+      this.dwell = null;
+      return;
+    }
+    const tip = hand.points[INDEX_TIP];
+    const drift = d ? dist(tip, d.origin) / handScale(hand.points) : Infinity;
+    if (!d || drift > (d.listening ? p.dwellReleaseDrift : p.dwellMaxDrift)) {
+      if (d && !d.listening && !d.done)
+        ev.push({ kind: 'holdProgress', gesture: 'listen', progress: 0 });
+      this.dwell = { origin: tip, start: t, listening: false, done: false };
+      return;
+    }
+    if (d.done) return; // already listened here: move to listen again
+    if (d.listening) {
+      if (t - d.start > p.dwellTalkMs + p.dwellMaxListenMs) [d.listening, d.done] = [false, true];
+      return;
+    }
+    const progress = Math.min(1, (t - d.start) / p.dwellTalkMs);
+    ev.push({ kind: 'holdProgress', gesture: 'listen', progress });
+    if (progress >= 1) d.listening = true;
+  }
+
+  /** A pinch held still (before it starts rotating) becomes the centre of a circle selection. */
+  private circleHold(hand: Hand, s: HandState, at: Vec2, t: number, ev: GestureEvent[]): void {
+    if (!s.circleOpen) return;
+    if (dist(at, s.pinchOrigin) / handScale(s.points) > this.p.circleMaxDrift) {
+      s.circleOpen = false; // it moved: a rotation, not a circle
+      ev.push({ kind: 'holdProgress', gesture: 'circle', progress: 0 });
+      return;
+    }
+    const progress = Math.min(1, (t - s.pinchAt) / this.p.circleHoldMs);
+    ev.push({ kind: 'holdProgress', gesture: 'circle', progress });
+    if (progress < 1) return;
+    s.circleOpen = false;
+    ev.push({ kind: 'circleHold', hand, x: s.pinchOrigin.x, y: s.pinchOrigin.y });
+  }
+
   private endPinch(hand: Hand, s: HandState, ev: GestureEvent[], t: number): void {
     this.lastPinchEndAt = t;
     s.pinching = false;
@@ -186,12 +275,13 @@ export class GestureClassifier {
     let found: { gesture: HoldGesture; s: HandState } | null = null;
     const holdLabels: [string, HoldGesture][] = [
       ['Open_Palm', 'reset'],
-      ['Thumb_Down', 'undo'],
       [this.p.customExplainLabel, 'explain'],
     ];
     const justReleased = t - this.lastPinchEndAt < this.p.resetAfterPinchMs;
+    // With two hands up, an open palm means "talk", never "start over".
+    const oneHand = this.liveHands().length === 1;
     for (const [label, gesture] of holdLabels) {
-      if (gesture === 'reset' && justReleased) continue; // a relaxing hand, not a reset
+      if (gesture === 'reset' && (justReleased || !oneHand)) continue; // relaxing or talking
       const s = [...this.hands.values()].find((h) => h.label.stable === label);
       if (s) {
         found = { gesture, s };
@@ -216,8 +306,7 @@ export class GestureClassifier {
     }
     const hold = this.hold;
     if (!hold || hold.fired) return;
-    const durations = { reset: this.p.resetHoldMs, undo: this.p.undoHoldMs, explain: this.p.explainHoldMs }; // prettier-ignore
-    const duration = durations[hold.gesture];
+    const duration = hold.gesture === 'reset' ? this.p.resetHoldMs : this.p.explainHoldMs;
     const progress = Math.min(1, (t - hold.start) / duration);
     ev.push({ kind: 'holdProgress', gesture: hold.gesture, progress });
     if (progress >= 1) {

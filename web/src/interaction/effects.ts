@@ -10,12 +10,15 @@ export interface EffectTargets {
   /** false: releasing a hand drag stops the globe instead of flinging it. */
   releaseFling?: boolean;
   cursor(visible: boolean, x?: number, y?: number): void;
-  listening(active: boolean): void;
-  undo(): void;
+  /** at: where the pointing finger rests ("here"), when the hands started listening. */
+  listening(active: boolean, at?: { x: number; y: number }): void;
+  /** Open palm held: camera home, filters cleared, replay stopped, selection dropped. */
+  startOver(): void;
   switchScene(direction: 'left' | 'right'): void;
   /** Custom gesture: "what's this?" without speaking. */
   explain(): void;
-  lasso(step: 'start' | 'point' | 'end' | 'cancel', x?: number, y?: number): void;
+  /** Circle selection: start at (a, b) px, radius a px, end (select) or cancel. */
+  circle(step: 'start' | 'radius' | 'end' | 'cancel', a?: number, b?: number): void;
 }
 
 export function applyEffects(effects: readonly Effect[], t: EffectTargets, now: number): void {
@@ -44,11 +47,8 @@ export function applyEffects(effects: readonly Effect[], t: EffectTargets, now: 
       case 'unfreeze':
         t.camera.setFrozen(false, now);
         break;
-      case 'resetView':
-        t.camera.reset(now);
-        break;
-      case 'undo':
-        t.undo();
+      case 'startOver':
+        t.startOver();
         break;
       case 'showCursor':
         t.cursor(true);
@@ -60,7 +60,7 @@ export function applyEffects(effects: readonly Effect[], t: EffectTargets, now: 
         t.cursor(true, e.x, e.y);
         break;
       case 'startListening':
-        t.listening(true);
+        t.listening(true, e.x !== undefined && e.y !== undefined ? { x: e.x, y: e.y } : undefined);
         break;
       case 'stopListening':
         t.listening(false);
@@ -71,17 +71,17 @@ export function applyEffects(effects: readonly Effect[], t: EffectTargets, now: 
       case 'switchScene':
         t.switchScene(e.direction);
         break;
-      case 'lassoStart':
-        t.lasso('start');
+      case 'circleStart':
+        t.circle('start', e.x, e.y);
         break;
-      case 'lassoPoint':
-        t.lasso('point', e.x, e.y);
+      case 'circleRadius':
+        t.circle('radius', e.r);
         break;
-      case 'lassoEnd':
-        t.lasso('end');
+      case 'circleEnd':
+        t.circle('end');
         break;
-      case 'lassoCancel':
-        t.lasso('cancel');
+      case 'circleCancel':
+        t.circle('cancel');
         break;
     }
   }

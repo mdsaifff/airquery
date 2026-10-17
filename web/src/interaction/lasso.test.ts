@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
 import { pointInPolygon, pointsInPolygon } from '../scene/picking.ts';
-import { area, LassoPath } from './lasso.ts';
+import { area, circlePolygon, LassoPath } from './lasso.ts';
 
 const square = [
   { x: 0, y: 0 },
@@ -57,5 +57,16 @@ describe('lasso', () => {
     const around = [{ x: 180, y: 180 }, { x: 220, y: 180 }, { x: 220, y: 220 }, { x: 180, y: 220 }]; // prettier-ignore
     expect(pointsInPolygon(input, around, true)).toEqual([0]); // 2 is behind, 3 hidden
     expect(pointsInPolygon(input, around, false)).toEqual([0, 2]);
+  });
+});
+
+describe('circle selection', () => {
+  it('a circle becomes a polygon of points on its edge; a tiny circle selects nothing', () => {
+    const poly = circlePolygon(100, 50, 40, 32) ?? [];
+    expect(poly).toHaveLength(32);
+    for (const p of poly) expect(Math.hypot(p.x - 100, p.y - 50)).toBeCloseTo(40);
+    expect(pointInPolygon(100, 50, poly)).toBe(true);
+    expect(pointInPolygon(145, 50, poly)).toBe(false);
+    expect(circlePolygon(100, 50, 3)).toBeNull(); // a still pinch released without moving out
   });
 });

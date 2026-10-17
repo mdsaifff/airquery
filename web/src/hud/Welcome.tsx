@@ -70,10 +70,10 @@ export function Welcome() {
           </li>
           <li>
             <span className="emoji" aria-hidden="true">
-              ✌
+              ✋
             </span>
-            <b>Hold a victory sign</b> and speak
-            <small>or hold Space, or type</small>
+            <b>Raise your other hand</b> and speak
+            <small>or hold your finger still, hold Space, or type</small>
           </li>
         </ul>
         <button className="primary" onClick={close} autoFocus>

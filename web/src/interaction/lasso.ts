@@ -1,4 +1,5 @@
-// Pure lasso path: collects cursor points while drawing, closes into a polygon.
+// Pure selection shapes: the mouse lasso path (cursor points closed into a polygon)
+// and the hand circle (a still pinch, then out to the radius) as a polygon.
 export interface Pt {
   x: number;
   y: number;
@@ -46,4 +47,20 @@ export function area(poly: readonly Pt[]): number {
     a += (poly[j].x + poly[i].x) * (poly[j].y - poly[i].y);
   }
   return a / 2;
+}
+
+/** Circle selection (a still pinch, then out to the radius) as a polygon for the same
+ *  picking; null when the radius is too small to mean anything. */
+export function circlePolygon(
+  cx: number,
+  cy: number,
+  r: number,
+  sides = 32,
+  minRadiusPx = 8,
+): Pt[] | null {
+  if (!(r >= minRadiusPx)) return null;
+  return Array.from({ length: sides }, (_, i) => {
+    const a = (i / sides) * 2 * Math.PI;
+    return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+  });
 }

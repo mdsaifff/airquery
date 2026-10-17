@@ -1,8 +1,9 @@
 // Gesture event contract (docs/ARCHITECTURE.md).
 
 export type Hand = 'left' | 'right';
-/** explain: the custom gesture trained with MediaPipe Model Maker (stretch, T5.5). */
-export type HoldGesture = 'reset' | 'undo' | 'explain';
+/** explain: the custom gesture trained with MediaPipe Model Maker (stretch, T5.5).
+ *  listen: a pointing finger held still; circle: a pinch held still (both show a ring). */
+export type HoldGesture = 'reset' | 'explain' | 'listen' | 'circle';
 
 export type GestureEvent =
   | { kind: 'cursor'; x: number; y: number } // screen px
@@ -11,7 +12,9 @@ export type GestureEvent =
   | { kind: 'holdProgress'; gesture: HoldGesture; progress: number } // 0..1
   | { kind: 'fire'; gesture: HoldGesture }
   | { kind: 'clutch'; active: boolean }
-  | { kind: 'talk'; active: boolean }
+  /** Listening on/off; x, y (screen px) is where the pointing finger rests ("here"). */
+  | { kind: 'talk'; active: boolean; x?: number; y?: number }
   | { kind: 'swipe'; direction: 'left' | 'right' } // switch scene
-  | { kind: 'lasso'; active: boolean } // 🤟 held: trace a loop with the index finger
+  /** A pinch held still: the centre of a circle selection (screen px). */
+  | { kind: 'circleHold'; hand: Hand; x: number; y: number }
   | { kind: 'handsLost' };

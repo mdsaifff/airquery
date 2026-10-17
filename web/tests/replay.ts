@@ -24,8 +24,9 @@ export function summarize(perFrame: GestureEvent[][]): string[] {
     let s: string | null = null;
     if (e.kind === 'pinchStart' || e.kind === 'pinchEnd') s = `${e.kind}:${e.hand}`;
     else if (e.kind === 'fire') s = `fire:${e.gesture}`;
-    else if (e.kind === 'clutch' || e.kind === 'talk' || e.kind === 'lasso')
+    else if (e.kind === 'clutch' || e.kind === 'talk')
       s = `${e.kind}:${e.active ? 'on' : 'off'}`; // prettier-ignore
+    else if (e.kind === 'circleHold') s = `circle:${e.hand}`;
     else if (e.kind === 'handsLost') s = 'handsLost';
     else if (e.kind === 'swipe') s = `swipe:${e.direction}`;
     else if (e.kind === 'twoHandZoom') s = out.at(-1) === 'zoom' ? null : 'zoom';

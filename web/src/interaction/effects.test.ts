@@ -29,10 +29,10 @@ function rig(releaseFling = true) {
     rotateGain: 1,
     releaseFling,
     cursor: (v: boolean) => log.push(v ? 'cursor' : 'nocursor'),
-    listening: (a: boolean) => log.push(a ? 'listen' : 'unlisten'),
-    undo: () => log.push('undo'),
+    listening: (a: boolean, at?: { x: number; y: number }) => log.push(a ? `listen${at ? `@${at.x},${at.y}` : ''}` : 'unlisten'), // prettier-ignore
+    startOver: () => log.push('startOver'),
     switchScene: (d: 'left' | 'right') => log.push(`scene:${d}`),
-    lasso: (step: string) => log.push(`lasso:${step}`),
+    circle: (step: string, a?: number, b?: number) => log.push(`circle:${step}${a === undefined ? '' : `:${a}${b === undefined ? '' : `,${b}`}`}`), // prettier-ignore
     explain: () => log.push('explain'),
   };
   const send = (e: GestureEvent, now: number) => {
@@ -88,21 +88,28 @@ describe('camera control from synthetic gestures', () => {
     expect(camera.orbit.yaw).toBeCloseTo(-0.5);
   });
 
-  it('open-palm reset animates home; undo and listening reach their callbacks', () => {
-    const { camera, send, log } = rig();
+  it('open palm starts over; talk passes where the finger rests; a still pinch draws a circle', () => {
+    const { send, log } = rig();
     send({ kind: 'cursor', x: 0, y: 0 }, 0);
-    send({ kind: 'pinchStart', hand: 'right', x: 0, y: 0 }, 16);
-    send({ kind: 'pinchMove', hand: 'right', x: 100, y: 50 }, 32);
-    send({ kind: 'pinchEnd', hand: 'right', x: 100, y: 50 }, 600);
-    send({ kind: 'fire', gesture: 'reset' }, 600);
-    camera.update(1200);
-    expect(camera.orbit.yaw).toBeCloseTo(0);
-    expect(camera.orbit.pitch).toBeCloseTo(0);
-    send({ kind: 'fire', gesture: 'undo' }, 1300);
-    send({ kind: 'talk', active: true }, 1400);
-    send({ kind: 'talk', active: false }, 2400);
+    send({ kind: 'fire', gesture: 'reset' }, 100);
+    send({ kind: 'talk', active: true, x: 40, y: 50 }, 200);
+    send({ kind: 'talk', active: false }, 900);
+    send({ kind: 'pinchStart', hand: 'right', x: 300, y: 300 }, 1000);
+    send({ kind: 'circleHold', hand: 'right', x: 300, y: 300 }, 1600);
+    send({ kind: 'pinchMove', hand: 'right', x: 330, y: 340 }, 1700);
+    send({ kind: 'pinchEnd', hand: 'right', x: 330, y: 340 }, 1800);
     send({ kind: 'handsLost' }, 3000);
-    expect(log).toEqual(['cursor', 'cursor', 'undo', 'listen', 'unlisten', 'nocursor']);
+    expect(log).toEqual([
+      'cursor', // show
+      'cursor', // move
+      'startOver',
+      'listen@40,50',
+      'unlisten',
+      'circle:start:300,300',
+      'circle:radius:50',
+      'circle:end',
+      'nocursor',
+    ]);
   });
 
   it('fly-to points the camera at a lat/lon', () => {

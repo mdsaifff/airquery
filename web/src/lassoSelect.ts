@@ -1,11 +1,12 @@
-// Air lasso (🤟 + index finger, or Shift+drag): draws the loop, selects the
-// visible points inside it, focuses the scene on them until cleared (Esc or a
-// new query). "What's this?" then summarizes the selection.
+// Selections: the hand circle (pinch and hold still, then out to the radius) and
+// the mouse lasso (Shift+drag). Selects the visible points inside, focuses the scene
+// on them until cleared (Esc, start over or a new query). "What's this?" then
+// summarizes the selection.
 import * as THREE from 'three';
 import { config } from './config.ts';
 import type { Datasets } from './datasets.ts';
 import { hudStore, toast } from './hud/store.ts';
-import { LassoPath } from './interaction/lasso.ts';
+import { circlePolygon, LassoPath } from './interaction/lasso.ts';
 import { pointsInPolygon } from './scene/picking.ts';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -17,6 +18,8 @@ export class LassoSelect {
   private readonly path = new LassoPath(config.lassoMinStepPx);
   private readonly svg: SVGSVGElement;
   private readonly line: SVGPolylineElement;
+  private readonly ring: SVGCircleElement;
+  private circleAt: { x: number; y: number; r: number } | null = null;
   private readonly datasets: Datasets;
   private readonly camera: THREE.PerspectiveCamera;
 
@@ -36,6 +39,8 @@ export class LassoSelect {
     this.svg.setAttribute('class', 'lasso');
     this.line = document.createElementNS(SVG_NS, 'polyline');
     this.svg.appendChild(this.line);
+    this.ring = document.createElementNS(SVG_NS, 'circle');
+    this.svg.appendChild(this.ring);
     parent.appendChild(this.svg);
   }
 
@@ -46,6 +51,24 @@ export class LassoSelect {
     else if (step === 'end') this.select(this.path.finish());
     else this.path.cancel();
     this.line.setAttribute('points', this.path.points.map((p) => `${p.x},${p.y}`).join(' '));
+  }
+
+  /** Driven by the state machine's circle effects: centre, radius, then select or cancel. */
+  circle(step: 'start' | 'radius' | 'end' | 'cancel', a?: number, b?: number): void {
+    const c = this.circleAt;
+    if (step === 'start' && a !== undefined && b !== undefined)
+      this.circleAt = { x: a, y: b, r: 0 };
+    else if (step === 'radius' && c && a !== undefined) c.r = a;
+    else if (step === 'end' && c) {
+      const poly = circlePolygon(c.x, c.y, c.r);
+      if (poly) this.select(poly);
+      else toast('info', 'Keep pinching and move out to size the circle.');
+      this.circleAt = null;
+    } else this.circleAt = null;
+    const now = this.circleAt;
+    this.ring.setAttribute('cx', String(now?.x ?? 0));
+    this.ring.setAttribute('cy', String(now?.y ?? 0));
+    this.ring.setAttribute('r', String(now?.r ?? 0));
   }
 
   /** Drop the selection and show the current query result again. */
@@ -101,7 +124,7 @@ export class LassoSelect {
       poly,
       d.schema.position.kind === 'geo',
     );
-    if (picked.length === 0) return toast('info', 'Nothing inside the loop.');
+    if (picked.length === 0) return toast('info', 'Nothing inside.');
     this.selection = picked;
     const mask = new Uint8Array(d.cloud.count);
     for (const i of picked) mask[i] = 1;

@@ -8,7 +8,7 @@ export const MODE_COLORS: Record<Mode, string> = {
   zooming: '#facc15',
   clutched: '#f87171',
   listening: '#4ade80',
-  lassoing: '#c4b5fd',
+  circling: '#c4b5fd',
 };
 
 export class CursorView {
@@ -55,7 +55,7 @@ export class CursorView {
     this.el.style.color = MODE_COLORS[mode];
     this.ring.style.strokeDashoffset = String(1 - holdProgress);
     this.ring.style.opacity = holdProgress > 0 ? '1' : '0';
-    const text = mode === 'clutched' ? 'clutch' : mode === 'listening' ? 'listening' : mode === 'lassoing' ? 'lasso' : ''; // prettier-ignore
+    const text = mode === 'clutched' ? 'clutch' : mode === 'listening' ? 'listening' : mode === 'circling' ? 'circle' : ''; // prettier-ignore
     if (this.label.textContent !== text) this.label.textContent = text;
   }
 

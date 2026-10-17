@@ -16,7 +16,9 @@ export function TranscriptBar({ onSubmit }: { onSubmit: (text: string) => void }
         <i />
       </span>
       <span className={`said ${transcriptFinal ? 'final' : ''}`}>
-        {listening && !transcript ? 'listening…' : transcript || 'hold ✌ or space to talk'}
+        {listening && !transcript
+          ? 'listening…'
+          : transcript || 'raise your other hand, or hold space, to talk'}
       </span>
       <form
         onSubmit={(e) => {

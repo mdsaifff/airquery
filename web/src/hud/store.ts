@@ -13,7 +13,7 @@ export const hudStore = {
   dataset: 'quakes',
   /** Every scene the user can switch to, in swipe order (the picker and "switch to ..."). */
   scenes: [] as Scene[],
-  /** Push-to-talk is held (hand Victory or spacebar). */
+  /** Listening: the other hand raised open, a finger held still, or the spacebar. */
   listening: false,
   trackingFps: 0,
   renderFps: 0,

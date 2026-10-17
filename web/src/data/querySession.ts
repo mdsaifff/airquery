@@ -39,7 +39,7 @@ export interface SessionDeps {
   /** endedAt: when the voice/typed request ended, or null for a plain re-show (no latency sample). */
   show(view: SceneView, applied: Applied, endedAt: number | null): void;
   flyTo(lat: number, lon: number): void;
-  /** "What's this?": summarize what is under the pointer (or the lasso selection). */
+  /** "What's this?": summarize what is under the pointer (or the circle / lasso selection). */
   explain(pointer: Pointer | null): void;
   resetView(): void;
   notify(kind: 'info' | 'clarify' | 'error', text: string): void;
@@ -166,7 +166,7 @@ export class QuerySession {
     this.show(this.top, null);
   }
 
-  /** Pop the last query (Thumb_Down, Z, or "undo"). */
+  /** Pop the last query (Z, or "undo" / "go back"). */
   undo(endedAt = performance.now()): void {
     this.seq++; // cancels any reply still in flight
     if (this.history.length <= 1) return this.deps.notify('info', 'Nothing to undo.');

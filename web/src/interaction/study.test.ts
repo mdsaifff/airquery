@@ -20,7 +20,7 @@ const PERFECT: Record<StudyGesture, GestureEvent | null> = {
   pinch: { kind: 'pinchStart', hand: 'right', x: 0, y: 0 },
   zoom: { kind: 'twoHandZoom', scaleDelta: 1.1 },
   talk: { kind: 'talk', active: true },
-  undo: { kind: 'fire', gesture: 'undo' },
+  circle: { kind: 'circleHold', hand: 'right', x: 0, y: 0 },
   reset: { kind: 'fire', gesture: 'reset' },
   clutch: { kind: 'clutch', active: true },
 };
@@ -54,16 +54,18 @@ describe('GestureStudy', () => {
   });
 
   it('records confusions, timeouts and point-by-default', () => {
-    // Participant: makes a fist when asked to pinch, does nothing for undo.
+    // Participant: makes a fist when asked to pinch, does nothing for circle.
     const study = runStudy((g) =>
-      g === 'pinch' ? PERFECT.clutch : g === 'undo' ? null : PERFECT[g],
+      g === 'pinch' ? PERFECT.clutch : g === 'circle' ? null : PERFECT[g],
     );
     const m = confusionMatrix(study.trials);
     expect(m.pinch.clutch).toBe(3);
-    expect(m.undo.point).toBe(3); // cursor visible, nothing else: counted as point
+    expect(m.circle.point).toBe(3); // cursor visible, nothing else: counted as point
     expect(m.reset.reset).toBe(3);
     const csv = confusionCsv(study.trials).split('\n');
-    expect(csv[0]).toBe('expected\\detected,point,pinch,zoom,talk,undo,reset,clutch,none,accuracy');
+    expect(csv[0]).toBe(
+      'expected\\detected,point,pinch,zoom,talk,circle,reset,clutch,none,accuracy',
+    );
     expect(csv.find((r) => r.startsWith('pinch,'))).toBe('pinch,0,0,0,0,0,0,3,0,0.000');
     expect(csv.find((r) => r.startsWith('reset,'))).toBe('reset,0,0,0,0,0,3,0,0,1.000');
   });
@@ -89,7 +91,8 @@ describe('GestureStudy', () => {
 describe('helpers', () => {
   it('maps events to outcomes', () => {
     expect(outcomeOf({ kind: 'talk', active: false })).toBeNull();
-    expect(outcomeOf({ kind: 'fire', gesture: 'undo' })).toBe('undo');
+    expect(outcomeOf({ kind: 'circleHold', hand: 'right', x: 0, y: 0 })).toBe('circle');
+    expect(outcomeOf({ kind: 'fire', gesture: 'reset' })).toBe('reset');
     expect(outcomeOf({ kind: 'pinchMove', hand: 'left', x: 0, y: 0 })).toBeNull();
   });
 

@@ -55,8 +55,18 @@ export const config = {
     resetAfterPinchMs: 1500,
     /** Keep spinning after a hand pinch-drag is released (the mouse always does). */
     handReleaseFling: false,
-    /** Thumb down hold for undo (ms). */
-    undoHoldMs: 400,
+    /** Pointing pose: index reach above pinchMinIndexReach and the middle fingertip within this (hand-scale units). */
+    pointMiddleMaxReach: 1.2,
+    /** Hold a pointing finger still this long to start listening (ms)... */
+    dwellTalkMs: 1200,
+    /** ...within this drift; listening stops past dwellReleaseDrift (hand-scale units). */
+    dwellMaxDrift: 0.25,
+    dwellReleaseDrift: 0.6,
+    /** Listening started by holding still stops after this long anyway (ms). */
+    dwellMaxListenMs: 8000,
+    /** A pinch held still this long starts a circle selection (ms), within this drift (hand-scale units). */
+    circleHoldMs: 600,
+    circleMaxDrift: 0.3,
     /** No hands for this long emits handsLost (ms). */
     handsLostMs: 500,
     /** Swipe: wrist travels this far sideways (hand-scale units)... */

@@ -2,7 +2,7 @@
 // matrix, and a false-trigger counter for the "talk with your hands" test.
 import type { GestureEvent } from './types.ts';
 
-export const STUDY_GESTURES = ['point', 'pinch', 'zoom', 'talk', 'undo', 'reset', 'clutch'] as const; // prettier-ignore
+export const STUDY_GESTURES = ['point', 'pinch', 'zoom', 'talk', 'circle', 'reset', 'clutch'] as const; // prettier-ignore
 export type StudyGesture = (typeof STUDY_GESTURES)[number];
 export type Outcome = StudyGesture | 'none';
 export const OUTCOMES: readonly Outcome[] = [...STUDY_GESTURES, 'none'];
@@ -12,9 +12,9 @@ export const PROMPTS: Record<StudyGesture, string> = {
   point: 'Point with your index finger',
   pinch: 'Pinch and drag',
   zoom: 'Pinch with both hands and pull apart',
-  talk: 'Hold a victory sign ✌',
-  undo: 'Hold a thumb down 👎',
-  reset: 'Hold an open palm ✋',
+  talk: 'Point with one hand and raise the other, open',
+  circle: 'Pinch and hold still',
+  reset: 'Hold one open palm ✋ (starts over)',
   clutch: 'Make a fist ✊',
 };
 
@@ -29,8 +29,10 @@ export function outcomeOf(e: GestureEvent): Outcome | null {
       return e.active ? 'talk' : null;
     case 'clutch':
       return e.active ? 'clutch' : null;
+    case 'circleHold':
+      return 'circle';
     case 'fire':
-      return e.gesture === 'explain' ? null : e.gesture;
+      return e.gesture === 'reset' ? 'reset' : null;
     default:
       return null;
   }

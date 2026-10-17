@@ -23,9 +23,10 @@ describe('GestureClassifier (synthetic hands)', () => {
     expect(Number(xs.at(-1))).toBeGreaterThan(Number(xs[0])); // raw x falls -> screen x rises
   });
 
-  it('pinch: one start, one end', () => {
+  it('pinch: one start, one end (held still long enough, it also becomes a circle)', () => {
     expect(run(60, (i) => [right({ pinch: i >= 15 && i < 40 ? 1 : 0 })])).toEqual([
       'pinchStart:right',
+      'circle:right',
       'pinchEnd:right',
     ]);
   });
@@ -44,7 +45,7 @@ describe('GestureClassifier (synthetic hands)', () => {
     const seq = run(90, (i) => [
       right({ pinch: i < 10 ? 0.45 : i < 30 ? 0.8 : i % 2 ? 0.62 : 0.6 }),
     ]);
-    expect(seq).toEqual(['pinchStart:right']);
+    expect(seq).toEqual(['pinchStart:right', 'circle:right']);
   });
 
   it('two-hand pinch pulled apart: zoom with growing scale', () => {
@@ -97,37 +98,58 @@ describe('GestureClassifier (synthetic hands)', () => {
     expect(summarize(events)).toEqual([]);
   });
 
-  it('thumb down held: undo', () => {
-    expect(run(30, () => [right({ pose: 'thumbDown', gesture: 'Thumb_Down' })])).toEqual([
-      'fire:undo',
+  it('thumb down, victory and 🤟 no longer do anything (undo is spoken; talk is the other hand)', () => {
+    expect(run(30, () => [right({ pose: 'thumbDown', gesture: 'Thumb_Down' })])).toEqual([]);
+    expect(run(40, () => [right({ pose: 'victory', gesture: 'Victory' })])).toEqual([]);
+    expect(run(30, () => [right({ gesture: 'ILoveYou' })])).toEqual([]);
+  });
+
+  it('point with one hand, raise the other open: talk while it is up', () => {
+    const events = replay(
+      synthFrames(40, (i) =>
+        i >= 5 && i < 25
+          ? [right({ pose: 'point', cx: 0.4 }), left({ gesture: 'Open_Palm' })]
+          : [right({ pose: 'point', cx: 0.4 })],
+      ),
+    );
+    expect(summarize(events)).toEqual(['talk:on', 'talk:off']);
+    const flat = events.flat();
+    const on = flat.find((e) => e.kind === 'talk' && e.active);
+    const cursor = flat.filter((e) => e.kind === 'cursor').at(-1);
+    // "here" = the pointing fingertip, and the cursor stays on the pointing hand
+    const onAt = on?.kind === 'talk' ? [on.x ?? NaN, on.y ?? NaN] : [NaN, NaN];
+    const cur = cursor?.kind === 'cursor' ? [cursor.x, cursor.y] : [NaN, NaN];
+    expect(Math.hypot(onAt[0] - cur[0], onAt[1] - cur[1])).toBeLessThan(3);
+  });
+
+  it('with two hands up, an open palm never starts over', () => {
+    expect(run(60, () => [right({ pose: 'point' }), left({ gesture: 'Open_Palm' })])).toEqual([
+      'talk:on',
     ]);
   });
 
-  it('victory: talk on while held, off on release; a 2-frame flicker does nothing', () => {
-    expect(
-      run(40, (i) => [right({ pose: 'victory', gesture: i >= 5 && i < 25 ? 'Victory' : 'None' })]),
-    ).toEqual(['talk:on', 'talk:off']);
-    expect(run(20, (i) => [right({ pose: 'victory', gesture: i === 5 || i === 6 ? 'Victory' : 'None' })])).toEqual([]); // prettier-ignore
+  it('hold a pointing finger still: listening starts after the dwell; moving away stops it', () => {
+    const seq = run(70, (i) => [right({ pose: 'point', cx: i < 50 ? 0.4 : 0.4 + (i - 50) * 0.01 })]); // prettier-ignore
+    expect(seq).toEqual(['talk:on', 'talk:off']);
+  });
+
+  it('pinch held still: one circle at the pinch point; a moving pinch rotates, no circle', () => {
+    expect(run(60, () => [right({ pinch: 1 })])).toEqual(['pinchStart:right', 'circle:right']);
+    expect(run(40, (i) => [right({ pinch: 1, cx: 0.6 - i * 0.004 })])).toEqual(['pinchStart:right']); // prettier-ignore
   });
 
   it('custom Model Maker label held: explain', () => {
     expect(run(30, () => [right({ gesture: 'Rock' })])).toEqual(['fire:explain']);
   });
 
-  it('🤟 held: lasso on while held, off on release', () => {
-    expect(run(30, (i) => [right({ gesture: i >= 5 && i < 20 ? 'ILoveYou' : 'None' })])).toEqual([
-      'lasso:on',
-      'lasso:off',
-    ]);
-  });
-
   it('low-confidence labels are ignored', () => {
-    expect(run(40, () => [right({ pose: 'victory', gesture: 'Victory', score: 0.3 })])).toEqual([]);
+    expect(run(60, () => [right({ gesture: 'Open_Palm', score: 0.3 })])).toEqual([]);
   });
 
   it('a one-frame tracking dropout keeps the drag and push-to-talk alive', () => {
-    expect(run(40, (i) => (i === 20 ? [] : [right({ pinch: 1 })]))).toEqual(['pinchStart:right']);
-    expect(run(40, (i) => (i === 20 ? [] : [right({ pose: 'victory', gesture: 'Victory' })]))).toEqual(['talk:on']); // prettier-ignore
+    expect(run(40, (i) => (i === 20 ? [] : [right({ pinch: 1 })]))).toEqual(['pinchStart:right', 'circle:right']); // prettier-ignore
+    const raised = (i: number) => (i === 20 ? [] : [left({ gesture: 'Open_Palm' })]);
+    expect(run(40, (i) => [right({ pose: 'point' }), ...raised(i)])).toEqual(['talk:on']);
   });
 
   it('swipe: a fast sideways sweep of an open hand, once per cooldown', () => {

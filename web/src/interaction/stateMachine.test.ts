@@ -14,6 +14,11 @@ const rotating = st('rotating', {
   last: { x: 100, y: 100 },
 });
 const zooming = st('zooming', { pinching: ['right', 'left'] });
+const circling = st('circling', {
+  pinching: ['right'],
+  dragHand: 'right',
+  center: { x: 100, y: 100 },
+});
 
 interface Row {
   row: string;
@@ -42,15 +47,14 @@ const TABLE: Row[] = [
   { row: 'pointing + talk active', from: st('pointing'), event: { kind: 'talk', active: true }, to: 'listening', effects: ['startListening'] },
   { row: 'idle + talk active', from: st('idle'), event: { kind: 'talk', active: true }, to: 'listening', effects: ['startListening'] },
   { row: 'listening + talk inactive', from: st('listening', { resume: 'pointing' }), event: { kind: 'talk', active: false }, to: 'pointing', effects: ['stopListening'] },
-  { row: 'pointing + fire reset', from: st('pointing'), event: { kind: 'fire', gesture: 'reset' }, to: 'pointing', effects: ['resetView'] },
-  { row: 'pointing + fire undo', from: st('pointing'), event: { kind: 'fire', gesture: 'undo' }, to: 'pointing', effects: ['undo'] },
+  { row: 'pointing + fire reset (start over)', from: st('pointing'), event: { kind: 'fire', gesture: 'reset' }, to: 'pointing', effects: ['startOver'] },
   { row: 'pointing + fire explain (custom gesture)', from: st('pointing'), event: { kind: 'fire', gesture: 'explain' }, to: 'pointing', effects: ['explain'] },
   { row: 'pointing + swipe', from: st('pointing'), event: { kind: 'swipe', direction: 'left' }, to: 'pointing', effects: ['switchScene'] },
   { row: 'idle + swipe', from: st('idle'), event: { kind: 'swipe', direction: 'right' }, to: 'idle', effects: ['switchScene'] },
-  { row: 'pointing + lasso active', from: st('pointing'), event: { kind: 'lasso', active: true }, to: 'lassoing', effects: ['lassoStart'] },
-  { row: 'lassoing + cursor', from: st('lassoing'), event: { kind: 'cursor', x: 5, y: 6 }, to: 'lassoing', effects: ['moveCursor', 'lassoPoint'] },
-  { row: 'lassoing + lasso inactive', from: st('lassoing'), event: { kind: 'lasso', active: false }, to: 'pointing', effects: ['lassoEnd'] },
-  { row: 'lassoing + handsLost', from: st('lassoing'), event: { kind: 'handsLost' }, to: 'idle', effects: ['hideCursor', 'stopDrag', 'lassoCancel'] },
+  { row: 'rotating + circleHold (still pinch)', from: rotating, event: { kind: 'circleHold', hand: 'right', x: 100, y: 100 }, to: 'circling', effects: ['stopDrag', 'circleStart'] },
+  { row: 'circling + pinchMove', from: circling, event: { kind: 'pinchMove', hand: 'right', x: 130, y: 140 }, to: 'circling', effects: ['circleRadius'] },
+  { row: 'circling + pinchEnd', from: circling, event: { kind: 'pinchEnd', hand: 'right', x: 0, y: 0 }, to: 'pointing', effects: ['circleEnd'] },
+  { row: 'circling + handsLost', from: circling, event: { kind: 'handsLost' }, to: 'idle', effects: ['hideCursor', 'stopDrag', 'circleCancel'] },
   ...(['idle', 'pointing', 'rotating', 'zooming'] as const).map((m): Row => ({
     row: `${m} + handsLost`, from: m === 'rotating' ? rotating : st(m), event: { kind: 'handsLost' }, to: 'idle', effects: ['hideCursor', 'stopDrag'],
   })),
@@ -81,7 +85,8 @@ describe('interaction state machine: details', () => {
   it('ignores gestures that the table does not allow in a state', () => {
     for (const [mode, event] of [
       ['rotating', { kind: 'fire', gesture: 'reset' }],
-      ['listening', { kind: 'fire', gesture: 'undo' }],
+      ['listening', { kind: 'fire', gesture: 'reset' }],
+      ['pointing', { kind: 'circleHold', hand: 'right', x: 0, y: 0 }],
       ['rotating', { kind: 'talk', active: true }],
       ['clutched', { kind: 'pinchStart', hand: 'right', x: 0, y: 0 }],
       ['pointing', { kind: 'twoHandZoom', scaleDelta: 2 }],
@@ -90,6 +95,15 @@ describe('interaction state machine: details', () => {
       expect(next.mode, `${mode} + ${event.kind}`).toBe(mode);
       expect(fx).toEqual([]);
     }
+  });
+
+  it('talk carries where the finger rests; the circle radius is the distance from its centre', () => {
+    expect(reduce(st('pointing'), { kind: 'talk', active: true, x: 40, y: 50 })[1]).toEqual([
+      { kind: 'startListening', x: 40, y: 50 },
+    ]);
+    expect(reduce(circling, { kind: 'pinchMove', hand: 'right', x: 130, y: 140 })[1]).toEqual([
+      { kind: 'circleRadius', r: 50 },
+    ]);
   });
 
   it('push-to-talk started without hands returns to idle', () => {
@@ -107,7 +121,6 @@ describe('interaction state machine: details', () => {
 
   it('moves the cursor in every non-idle state', () => {
     for (const mode of ['pointing', 'rotating', 'zooming', 'clutched', 'listening'] as Mode[]) {
-      // (lassoing also adds a lassoPoint: covered by the table)
       expect(reduce(st(mode), { kind: 'cursor', x: 3, y: 4 })[1]).toEqual([
         { kind: 'moveCursor', x: 3, y: 4 },
       ]);

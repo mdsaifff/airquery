@@ -1677,7 +1677,8 @@ button {
   z-index: 5;
 }
 
-.lasso polyline {
+.lasso polyline,
+.lasso circle {
   fill: rgb(196 181 253 / 10%);
   stroke: #c4b5fd;
   stroke-width: 2;

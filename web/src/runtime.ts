@@ -118,6 +118,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
   const screenNow = () =>
     cursor.visible ? cursor.position : hover.mouseOver ? hover.pointer : null;
   const isGeo = () => datasets.current()?.schema.position.kind === 'geo';
+  /** Where the hands said "here" when they started listening (the pointing fingertip). */
+  let talkAt: { x: number; y: number } | null = null;
   let intro: IntroPlayer | null = null;
   let introPlayed = false;
   const startIntro = () => {
@@ -305,7 +307,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
         hudStore.listening = active;
         if (active) {
           replier.hush(); // the globe stops talking when the user starts
-          voiceFirst.captureHere(screenNow(), isGeo());
+          voiceFirst.captureHere(talkAt ?? screenNow(), isGeo());
         } else voiceFirst.releaseAt(performance.now());
       },
       error: (message) => toast('error', message),
@@ -324,10 +326,17 @@ export function startRuntime(els: RuntimeElements): Runtime {
     rotateGain: config.handRotateGain,
     releaseFling: config.gesture.handReleaseFling,
     cursor: (visible, x, y) => cursor.set(visible, x, y),
-    listening: (active) => voice.setListening(active),
-    undo: () => datasets.session().undo(),
+    listening: (active, at) => {
+      talkAt = at ?? null; // where the pointing finger rests: "here" for this request
+      voice.setListening(active);
+    },
+    startOver: () => {
+      lasso.clear();
+      playground.stopTime();
+      datasets.session().reset(); // camera home + every filter cleared, and said back
+    },
     switchScene,
-    lasso: (step, x, y) => lasso.step(step, x, y),
+    circle: (step, a, b) => lasso.circle(step, a, b),
     explain: () => datasets.session().explainNow(),
   });
   const studyHost = els.study;
