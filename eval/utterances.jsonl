@@ -98,3 +98,13 @@
 {"id": "a03", "utterance": "show me the interesting ones", "prev_spec": null, "gold_spec": null, "gold_clarify": true, "tags": ["ambiguous"]}
 {"id": "a04", "utterance": "what about near there", "prev_spec": null, "gold_spec": null, "gold_clarify": true, "tags": ["ambiguous"]}
 {"id": "a05", "utterance": "show me flights to London", "prev_spec": null, "gold_spec": null, "gold_clarify": true, "tags": ["ambiguous", "impossible"]}
+{"id": "v01", "utterance": "play the year", "prev_spec": null, "gold_spec": {"dataset": "quakes", "intent": "timeline", "timeline": {"action": "play"}}, "gold_clarify": false, "tags": ["timeline"]}
+{"id": "v02", "utterance": "pause", "prev_spec": null, "gold_spec": {"dataset": "quakes", "intent": "timeline", "timeline": {"action": "pause"}}, "gold_clarify": false, "tags": ["timeline"]}
+{"id": "v03", "utterance": "go to March", "prev_spec": null, "gold_spec": {"dataset": "quakes", "intent": "timeline", "timeline": {"action": "seek", "date": "2024-03-01"}}, "gold_clarify": false, "tags": ["timeline"]}
+{"id": "v04", "utterance": "replay it a week per second", "prev_spec": null, "gold_spec": {"dataset": "quakes", "intent": "timeline", "timeline": {"action": "play", "speed": "week"}}, "gold_clarify": false, "tags": ["timeline"]}
+{"id": "v05", "utterance": "turn on x-ray", "prev_spec": null, "gold_spec": {"dataset": "quakes", "intent": "view", "view": {"xray": true}}, "gold_clarify": false, "tags": ["view"]}
+{"id": "v06", "utterance": "hide the stats", "prev_spec": null, "gold_spec": {"dataset": "quakes", "intent": "view", "view": {"stats": false}}, "gold_clarify": false, "tags": ["view"]}
+{"id": "v07", "utterance": "be quiet", "prev_spec": null, "gold_spec": {"dataset": "quakes", "intent": "view", "view": {"mute": true}}, "gold_clarify": false, "tags": ["view"]}
+{"id": "v08", "utterance": "show only the quakes around here", "pointer": {"lat": -33.0, "lon": -71.0}, "prev_spec": null, "gold_spec": {"dataset": "quakes", "filters": [{"field": "lat", "op": "between", "value": [-40.5, -25.5]}, {"field": "lon", "op": "between", "value": [-78.5, -63.5]}]}, "gold_clarify": false, "tags": ["pointer"]}
+{"id": "v09", "utterance": "fly here", "pointer": {"lat": 36.0, "lon": 140.0}, "prev_spec": null, "gold_spec": {"dataset": "quakes", "intent": "navigate", "camera_target": {"lat": 36.0, "lon": 140.0, "label": "here"}}, "gold_clarify": false, "tags": ["pointer"]}
+{"id": "v10", "utterance": "what is going on around here?", "prev_spec": null, "gold_spec": null, "gold_clarify": true, "tags": ["pointer"]}

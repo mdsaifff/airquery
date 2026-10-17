@@ -31,9 +31,9 @@ from graph import MAX_RETRIES, build_graph, run_agent  # noqa: E402
 from llm import GroqLLM, LLMAdapter, LLMReply, MockLLM, Prompt, make_llm  # noqa: E402
 from schema_registry import SchemaRegistry  # noqa: E402
 from settings import settings  # noqa: E402
-from spec import DatasetSchema, QuerySpec  # noqa: E402
+from spec import DatasetSchema, Pointer, QuerySpec  # noqa: E402
 
-from scoring import clarify_scores, navigate_ok, percentile, spec_match  # noqa: E402
+from scoring import clarify_scores, navigate_ok, normalize, percentile, spec_match  # noqa: E402
 
 DATA_DIR = ROOT / "web" / "public" / "data"
 REPORTS = EVAL_DIR / "reports"
@@ -111,8 +111,11 @@ def score_item(item: dict, state: dict, schema: DatasetSchema, db: Db) -> dict[s
     row["spec_match"] = spec_match(pred, gold)
     if pred is None:
         row["result_match"] = False
-    elif gold.intent in ("undo", "reset"):
-        row["result_match"] = pred.intent == gold.intent
+    elif gold.intent in ("undo", "reset", "timeline", "view"):  # no SQL: compare the intent
+        same = pred.intent == gold.intent
+        if gold.intent in ("timeline", "view"):
+            same = same and normalize(pred) == normalize(gold)
+        row["result_match"] = same
     else:
         gold_q = compile_spec(gold, schema)
         same_rows = pred_ids is not None and pred_ids == db.ids(gold_q.sql, gold_q.params)
@@ -208,7 +211,8 @@ async def evaluate(items: list[dict], llm: LLMAdapter, repair: bool) -> list[dic
     rows = []
     for item in items:
         prev = QuerySpec.model_validate(item["prev_spec"]) if item["prev_spec"] else None
-        state = await run_agent(graph, schema, item["utterance"], prev)
+        pointer = Pointer.model_validate(item["pointer"]) if item.get("pointer") else None
+        state = await run_agent(graph, schema, item["utterance"], prev, pointer)
         rows.append(score_item(item, dict(state), schema, db))
     return rows
 

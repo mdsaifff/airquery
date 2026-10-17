@@ -14,13 +14,14 @@ ITEMS = load_items()
 
 
 def test_the_set_has_the_documented_mix() -> None:
-    assert len(ITEMS) == 100
-    assert len({i["id"] for i in ITEMS}) == 100
-    assert len({(i["utterance"], str(i["prev_spec"])) for i in ITEMS}) == 100
+    assert len(ITEMS) == 110
+    assert len({i["id"] for i in ITEMS}) == 110
+    assert len({(i["utterance"], str(i["prev_spec"])) for i in ITEMS}) == 110
     mix = Counter(i["tags"][0] for i in ITEMS)
     assert mix == {
         "filter": 30, "encoding": 15, "rank": 10, "time": 10,
         "refine": 20, "noisy": 10, "ambiguous": 5,
+        "timeline": 4, "view": 3, "pointer": 3,
     }  # fmt: skip
 
 
@@ -78,3 +79,20 @@ def test_small_helpers() -> None:
     assert percentile([5, 1, 3], 0.5) == 3
     c = clarify_scores([(True, True), (True, False), (False, True), (False, False)])
     assert (c["precision"], c["recall"]) == (0.5, 0.5)
+
+
+def test_timeline_and_view_items_are_scored_by_intent() -> None:
+    from score import score_item
+
+    items = {i["id"]: i for i in ITEMS}
+    schema = SchemaRegistry.load(DATA_DIR).get("quakes")
+    seek = items["v03"]
+    timeline = {"action": "seek", "date": "2024-03-01T00:00:00"}  # same day, other format
+    pred = QuerySpec.model_validate({**seek["gold_spec"], "timeline": timeline})
+    row = score_item(seek, {"spec": pred, "status": "ok", "sql": None}, schema, None)
+    assert row["spec_match"] and row["result_match"]
+    wrong = QuerySpec.model_validate(
+        {**seek["gold_spec"], "intent": "view", "timeline": None, "view": {"xray": True}}
+    )  # noqa: E501
+    row = score_item(seek, {"spec": wrong, "status": "ok", "sql": None}, schema, None)
+    assert not row["result_match"]

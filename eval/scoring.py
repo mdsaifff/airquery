@@ -29,6 +29,8 @@ def normalize(spec: dict[str, Any] | QuerySpec) -> dict[str, Any]:
     q = QuerySpec.model_validate(spec).model_dump(mode="json")
     for key in ("mode", "version", "camera_target"):
         q.pop(key, None)
+    if q.get("timeline") and q["timeline"].get("date"):  # a day, whatever the format
+        q["timeline"]["date"] = q["timeline"]["date"][:10]
     q["filters"] = sorted(
         ({"field": f["field"], "op": f["op"], "value": _num(f["value"])} for f in q["filters"]),
         key=lambda f: json.dumps(f, sort_keys=True),
