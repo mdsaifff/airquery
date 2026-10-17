@@ -176,6 +176,11 @@ export function startRuntime(els: RuntimeElements): Runtime {
       const pos = d.schema.position;
       hudStore.geo = pos.kind === 'geo';
       hudStore.depthColumn = pos.kind === 'geo' ? (pos.depth ?? null) : null;
+      const timeCol = d.schema.columns.find((c) => c.type === 'timestamp')?.name;
+      const times = timeCol ? d.base.numbers.get(timeCol) : undefined;
+      hudStore.timeline = times
+        ? { times, numbers: d.base.numbers, colors: d.cloud.colors, visible: d.cloud.visible }
+        : null;
       if (name === 'quakes') {
         hudStore.placeOptions = d.schema.columns.find((c) => c.name === 'place')?.examples ?? [];
       }
@@ -268,7 +273,12 @@ export function startRuntime(els: RuntimeElements): Runtime {
     xray.step(dt, config.xrayAnimMs);
     hudStore.xray = xray.target === 1;
     if (d) {
-      if (now - sunAt > 1000) {
+      if (config.sunFollowsCamera) {
+        sunDir
+          .set(...config.sunViewDir)
+          .normalize()
+          .applyQuaternion(sm.camera.quaternion);
+      } else if (now - sunAt > 1000) {
         // The day/night line moves slowly: recompute once a second.
         sunAt = now;
         sunDir.set(
@@ -280,11 +290,13 @@ export function startRuntime(els: RuntimeElements): Runtime {
         if (r.cutoff !== null) {
           d.cloud.setVisibility(d.mask);
           hudStore.shown = r.shown;
+          hudStore.introCutoff = r.cutoff;
           hudStore.introDate = new Date(r.cutoff).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' }); // prettier-ignore
         }
         if (r.done) {
           intro = null;
           hudStore.introDate = '';
+          hudStore.introCutoff = null;
           datasets.session().refresh(); // back to the real view
         }
       }

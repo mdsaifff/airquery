@@ -8,6 +8,7 @@ import { graticuleLines } from './graticule.ts';
 /** three's sphere starts its texture seam at -x; this puts lon -180 at -z like geoToXYZ. */
 export const EARTH_ROTATION_Y = -Math.PI / 2;
 const CLOUD_OPACITY = 0.85;
+const ATMOS_RADIUS = 1.035;
 
 export interface Earth {
   readonly group: THREE.Group;
@@ -61,7 +62,10 @@ export function createEarth(quality: 'high' | 'low' = config.quality): Earth {
       uDay: { value: null },
       uNight: { value: null },
       uWater: { value: null },
+      uClouds: { value: null },
       uHasTex: { value: 0 },
+      uHasClouds: { value: 0 },
+      uCloudShift: { value: 0 },
       uSunDir: sun,
       uSolid: { value: 1 },
       uGlassAlpha: { value: config.xrayCrustOpacity },
@@ -85,11 +89,11 @@ export function createEarth(quality: 'high' | 'low' = config.quality): Earth {
 
   const atmosXray = { value: 0 };
   const atmosphere = new THREE.Mesh(
-    new THREE.SphereGeometry(1.06, 64, 48),
+    new THREE.SphereGeometry(ATMOS_RADIUS, 96, 64),
     new THREE.ShaderMaterial({
       vertexShader: ATMOS_VERT,
       fragmentShader: ATMOS_FRAG,
-      uniforms: { uSunDir: sun, uXray: atmosXray },
+      uniforms: { uSunDir: sun, uXray: atmosXray, uEdge: { value: Math.sqrt(1 - 1 / ATMOS_RADIUS ** 2) } }, // prettier-ignore
       side: THREE.BackSide,
       blending: THREE.AdditiveBlending,
       transparent: true,
@@ -114,6 +118,8 @@ export function createEarth(quality: 'high' | 'low' = config.quality): Earth {
     earthMat.uniforms.uHasTex.value = 1;
     if (t.clouds) {
       cloudMat.uniforms.uClouds.value = t.clouds;
+      earthMat.uniforms.uClouds.value = t.clouds; // their shadows
+      earthMat.uniforms.uHasClouds.value = 1;
       clouds.visible = true;
     }
   });
@@ -126,6 +132,7 @@ export function createEarth(quality: 'high' | 'low' = config.quality): Earth {
       earthMat.transparent = glass; // glass: blended, drawn before the points
       earthMat.depthWrite = mix < 0.5; // keep hiding the far side until the crust is mostly glass
       cloudMat.uniforms.uOpacity.value = CLOUD_OPACITY * (1 - mix);
+      earthMat.uniforms.uHasClouds.value = clouds.visible && mix < 0.5 ? 1 : 0;
       atmosXray.value = mix;
       gridMat.opacity = 0.35 * mix;
       grid.visible = glass;
@@ -133,6 +140,7 @@ export function createEarth(quality: 'high' | 'low' = config.quality): Earth {
     update(sunDir, dtMs) {
       sun.value.copy(sunDir);
       clouds.rotation.y += (config.cloudSpinRadPerSec * dtMs) / 1000;
+      earthMat.uniforms.uCloudShift.value = -(clouds.rotation.y - crust.rotation.y) / (2 * Math.PI);
     },
   };
 }

@@ -1,5 +1,5 @@
-// Top-centre title bar: wordmark, a ticking count of what is shown, the dataset
-// description (or the replay date), and the Replay button.
+// Top-left masthead: wordmark, a large ticking count of what is shown, the
+// dataset description (or the replay date), and the Replay button.
 import { hudStore, useTick } from './store.ts';
 
 const NOUNS: Record<string, string> = { quakes: 'earthquakes', papers: 'papers' };
@@ -7,22 +7,24 @@ const NOUNS: Record<string, string> = { quakes: 'earthquakes', papers: 'papers' 
 export function TopBar({ onReplay }: { onReplay: () => void }) {
   useTick(30);
   const { total, dataset, introDate, subtitle } = hudStore;
+  const filtered = total > 0 && hudStore.shown < total && !introDate;
   return (
-    <header className="topbar panel">
+    <header className="masthead">
       <div className="brand">
         <span className="logo" aria-hidden="true" />
         AirQuery
       </div>
       <div className="count" aria-live="polite">
-        <b>{Math.round(hudStore.shownDisplay).toLocaleString()}</b> {NOUNS[dataset] ?? 'points'}
-        {total > 0 && hudStore.shown < total && (
-          <span className="of"> of {total.toLocaleString()}</span>
-        )}
+        <b>{Math.round(hudStore.shownDisplay).toLocaleString()}</b>
+        <span className="noun">
+          {NOUNS[dataset] ?? 'points'}
+          {filtered && <span className="of">of {total.toLocaleString()}</span>}
+        </span>
       </div>
-      <div className="sub">{introDate ? `replaying · ${introDate}` : subtitle}</div>
+      <p className="sub">{introDate ? `Replaying the year: ${introDate}` : subtitle}</p>
       {dataset === 'quakes' && (
-        <button className="ghost" onClick={onReplay} title="Replay the year">
-          ↻ Replay
+        <button className="text-btn" onClick={onReplay}>
+          Replay the year
         </button>
       )}
     </header>

@@ -76,7 +76,7 @@ export const config = {
   /** Radial depth exaggeration (×): r = 1 - depth/6371 * this. */
   depthExaggeration: 3,
   /** Point diameter range (scene units; Earth radius = 1). */
-  pointMinSize: 0.012,
+  pointMinSize: 0.016,
   pointMaxSize: 0.06,
   /** How much far-side points fade (0..1). */
   farSideDim: 0.6,
@@ -102,6 +102,12 @@ export const config = {
   introStartDistance: 7.5,
   /** Fixed time for the day/night line (ISO string), or null for the real current time. */
   sunTimeOverride: null as string | null,
+  /** Light from a fixed angle to the camera (the lit face always faces you) instead of the real sun. */
+  sunFollowsCamera: true,
+  /** That angle: sun direction in camera space (x right, y up, z toward the viewer; unitless, normalized). */
+  sunViewDir: [-1, 0.35, 0.3] as [number, number, number],
+  /** On wide screens, shift the globe right by this fraction of the viewport width (0..0.5). */
+  sceneOffsetX: 0.09,
   /** Hover picks the nearest point within this radius (px). */
   pickRadiusPx: 14,
   /** Rows kept from a dropped CSV (count); every point is tweened per frame. */

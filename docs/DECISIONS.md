@@ -157,3 +157,20 @@ These double as material for LinkedIn posts.
   runs at startup and after a reset; rotating, zooming or flying to a place turns it off until
   the next reset.
 - **Why:** fewer moving parts in the demo; the globe holds still while someone is exploring.
+
+## D-016 Cinematic look: camera-relative sun, editorial HUD, self-hosted type
+- **Context:** after D-014 the app still read as fake: real-time sunlight often left the
+  visible face in night, clouds were grey on the night side, a brown wash sat on the
+  terminator, and the cyan glass panels with Segoe/Consolas looked like a stock dashboard.
+- **Decision:** the sun is fixed relative to the camera by default (`sunFollowsCamera`,
+  `sunViewDir`; real time still available), with aerial haze at the limb, cloud shadows,
+  thresholded city lights and a thin glint. The globe sits right of centre
+  (`sceneOffsetX`, via `setViewOffset`, so picking still matches). The HUD drops panels for
+  text on space: Instrument Serif count, Geist UI, Geist Mono only for code, neutral chalk
+  chrome so data colours are the only colour. A seismogram strip of the year (spikes in each
+  quake's globe colour, hidden ones faint) plays along with the replay.
+- **Why:** the lit face, not the clock, is what the demo needs; one bold element (the strip)
+  that is the data itself instead of decoration.
+- **Consequences:** reverses the 2026-10-15 redesign spec's "system fonts only": ~95 KB of OFL woff2 in
+  `web/public/fonts/` (licences alongside). The day/night line no longer matches the real
+  time unless `sunFollowsCamera` is turned off.

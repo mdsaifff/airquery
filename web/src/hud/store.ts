@@ -46,8 +46,17 @@ export const hudStore = {
   xray: false,
   geo: true,
   depthColumn: null as string | null,
-  /** Date shown while the opening replay runs ('' otherwise). */
+  /** Date shown while the opening replay runs ('' otherwise), and its time (epoch ms, null otherwise). */
   introDate: '',
+  introCutoff: null as number | null,
+  /** The seismogram strip's source: the dataset's time column, its numbers (sized by the size
+   * legend's column) and the live colour/visibility arrays of its point cloud. Null without time. */
+  timeline: null as {
+    times: ArrayLike<number>;
+    numbers: Map<string, ArrayLike<number>>;
+    colors: Float32Array;
+    visible: Uint8Array;
+  } | null,
   /** One-line description of the current dataset (from its schema). */
   subtitle: '',
   /** Place choices for the baseline dropdown (computed examples from the dataset schema). */

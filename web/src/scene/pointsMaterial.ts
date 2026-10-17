@@ -40,8 +40,8 @@ const fragmentShader = /* glsl */ `
     if (vAlpha < 0.01) discard;
     float d = length(gl_PointCoord - 0.5) * 2.0;
     if (d > 1.0) discard;
-    float core = smoothstep(0.5, 0.0, d);
-    float halo = smoothstep(1.0, 0.35, d) * 0.55;
+    float core = smoothstep(0.42, 0.0, d);
+    float halo = pow(smoothstep(1.0, 0.0, d), 2.5) * 0.6;
     vec3 c = pow(vColor, vec3(2.2)); // ramp colours are sRGB
     vec3 rgb = c * (halo + core * 1.6) + vec3(core * core * 1.5); // white-hot centre, above the bloom threshold
     gl_FragColor = vec4(rgb, vAlpha * max(core, halo));

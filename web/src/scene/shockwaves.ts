@@ -37,10 +37,13 @@ const FRAG = /* glsl */ `
   void main() {
     float t = fract(uTime + vPhase);
     float d = length(vUv - 0.5) * 2.0;
-    float ring = smoothstep(0.14, 0.0, abs(d - t)) * (1.0 - t);
+    // A thin bright front with a soft wake behind it, fading as it spreads.
+    float front = smoothstep(0.035, 0.0, abs(d - t));
+    float wake = smoothstep(0.0, 0.25, t - d) * step(d, t) * 0.12;
+    float ring = (front + wake) * pow(1.0 - t, 1.6);
     if (ring < 0.01) discard;
-    vec3 c = pow(vColor, vec3(2.2)) * 2.5 + vec3(0.35); // hot edge: reads on clouds, catches bloom
-    gl_FragColor = vec4(c, ring * uOpacity);
+    vec3 c = pow(vColor, vec3(2.2)) * 1.6 + vec3(0.12);
+    gl_FragColor = vec4(c, ring * uOpacity * 0.8);
     #include <colorspace_fragment>
   }
 `;

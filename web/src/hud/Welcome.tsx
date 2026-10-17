@@ -43,32 +43,39 @@ export function Welcome() {
   }, [open, close]);
 
   if (!open) return null;
+  const n = hudStore.total;
   return (
     <div className="welcome" role="dialog" aria-modal="true" aria-label="Welcome" onClick={close}>
-      <div className="welcome-card panel" onClick={(e) => e.stopPropagation()}>
-        <h1>AirQuery</h1>
+      <div className="welcome-body" onClick={(e) => e.stopPropagation()}>
+        <h1>Every dot is an earthquake.</h1>
         <p className="lede">
-          Every glowing dot is a 2024 earthquake of magnitude 4.5 or more. Steer the globe with your
-          hands and ask questions out loud.
+          {n > 0 ? `${n.toLocaleString()} of them` : 'All of them'}, magnitude 4.5 and up, recorded
+          around the world in 2024. Steer the globe with your hands and ask questions out loud.
         </p>
-        <ol className="steps">
+        <ul className="steps">
           <li>
-            <span className="emoji">☝</span>
-            <b>Point</b> to inspect a quake
+            <span className="emoji" aria-hidden="true">
+              ☝
+            </span>
+            <b>Point</b> to read a quake
             <small>or move the mouse</small>
           </li>
           <li>
-            <span className="emoji">🤏</span>
-            <b>Pinch &amp; drag</b> to rotate
+            <span className="emoji" aria-hidden="true">
+              🤏
+            </span>
+            <b>Pinch and drag</b> to turn the globe
             <small>or drag; scroll to zoom</small>
           </li>
           <li>
-            <span className="emoji">✌</span>
-            <b>Hold</b> and speak to ask
+            <span className="emoji" aria-hidden="true">
+              ✌
+            </span>
+            <b>Hold a victory sign</b> and speak
             <small>or hold Space, or type</small>
           </li>
-        </ol>
-        <button className="primary" onClick={close}>
+        </ul>
+        <button className="primary" onClick={close} autoFocus>
           Start exploring
         </button>
       </div>

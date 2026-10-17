@@ -7,6 +7,7 @@ import { CapturePanel } from './hud/CapturePanel.tsx';
 import { CsvDrop } from './hud/CsvPanel.tsx';
 import { DebugPanel } from './hud/DebugPanel.tsx';
 import { CamLabel, GlassBox, HowToRead, Stats } from './hud/Hud.tsx';
+import { Seismogram } from './hud/Seismogram.tsx';
 import { StudyPanel } from './hud/StudyPanel.tsx';
 import { TopBar } from './hud/TopBar.tsx';
 import { Toasts, TranscriptBar } from './hud/TranscriptBar.tsx';
@@ -79,11 +80,15 @@ export function App() {
         height={config.cameraHeight / 2}
       />
       {!baseline && <CamLabel />}
-      <GlassBox />
-      <TopBar onReplay={() => runtime.current?.replayIntro()} />
+      <div className="vignette" aria-hidden="true" />
+      <aside className="rail">
+        <TopBar onReplay={() => runtime.current?.replayIntro()} />
+        <GlassBox />
+      </aside>
       <Stats />
       <div className="bottom-left">
         <HowToRead onToggleXray={() => runtime.current?.toggleXray()} />
+        <Seismogram />
         {!baseline && <TranscriptBar onSubmit={(text) => runtime.current?.typed(text)} />}
       </div>
       <Toasts />

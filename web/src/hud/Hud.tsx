@@ -1,5 +1,6 @@
-// HUD panels laid out for a 1080p screen recording: glass box top-left, stats
-// top-right, legend + transcript bottom-left, webcam bottom-right.
+// HUD pieces laid out for a 1080p screen recording: what ran under the masthead
+// (left rail), stats top-right, legend + seismogram + talk bar bottom-left, webcam
+// bottom-right.
 import { useState } from 'react';
 import { RAMP_CSS } from '../scene/colorRamp.ts';
 import { highlightSpec, highlightSql } from './highlight.ts';
@@ -27,7 +28,7 @@ export function GlassBox() {
   const { spec, sql, params } = hudStore.glass;
   const t = hudStore.timings;
   return (
-    <section className="panel glass" aria-label="What ran">
+    <section className="glass" aria-label="What ran">
       <button className="glass-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
         <span className="label">What ran</span>
         {hudStore.thinking && <span className="thinking">thinking…</span>}
@@ -55,18 +56,20 @@ export function GlassBox() {
 export function Stats() {
   useTick();
   return (
-    <div className="stats panel">
-      <div>
-        render <b>{hudStore.renderFps.toFixed(0)}</b> fps · tracking{' '}
-        <b>{hudStore.trackingFps.toFixed(0)}</b> fps
-      </div>
-      <div>
-        voice→render <b>{formatMs(hudStore.latencyMs)}</b>
+    <div className="stats">
+      <span>
+        <b>{hudStore.renderFps.toFixed(0)}</b> fps
+      </span>
+      <span>
+        hands <b>{hudStore.trackingFps.toFixed(0)}</b> fps
+      </span>
+      <span>
+        voice to render <b>{formatMs(hudStore.latencyMs)}</b>
         {metrics.voiceToRender.count > 1 &&
-          ` (median ${formatMs(metrics.voiceToRender.percentile(0.5))})`}
-      </div>
-      {hudStore.status && <div>{hudStore.status}</div>}
-      {hudStore.cameraError && <div className="warn">{hudStore.cameraError}</div>}
+          `, median ${formatMs(metrics.voiceToRender.percentile(0.5))}`}
+      </span>
+      {hudStore.status && <span className="status">{hudStore.status}</span>}
+      {hudStore.cameraError && <span className="warn">{hudStore.cameraError}</span>}
     </div>
   );
 }
@@ -90,48 +93,51 @@ export function HowToRead({ onToggleXray }: { onToggleXray: () => void }) {
   if (!l && !s && !hudStore.geo) return null;
   const isDepth = l?.kind === 'ramp' && l.column === hudStore.depthColumn;
   return (
-    <section className="panel legend" aria-label="How to read this">
-      <div className="label">How to read this</div>
+    <section className="legend" aria-label="How to read the globe">
       {l?.kind === 'ramp' && (
-        <div className="row-block">
+        <>
           <div className="key">Colour</div>
-          <div className="what">{columnLabel(l.column, l.unit)}</div>
-          <div className="ramp" style={{ background: RAMP_CSS }} />
-          {isDepth ? (
-            <div className="bands">
-              {depthBands(l.min, l.max).map((b) => (
-                <span key={b.label} style={{ width: `${b.pct}%` }}>
-                  {b.pct > 14 ? b.label : ''}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <div className="ends">
-              <span>{formatLegendValue(l.min, l.isTime)}</span>
-              <span>{formatLegendValue(l.max, l.isTime)}</span>
-            </div>
-          )}
-        </div>
+          <div className="val">
+            {columnLabel(l.column, l.unit)}
+            <div className="ramp" style={{ background: RAMP_CSS }} />
+            {isDepth ? (
+              <div className="bands">
+                {depthBands(l.min, l.max).map((b, i) => (
+                  <span key={b.label} style={{ width: `${b.pct}%` }}>
+                    {b.pct > 14 || i === 0 ? b.label : ''}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div className="ends">
+                <span>{formatLegendValue(l.min, l.isTime)}</span>
+                <span>{formatLegendValue(l.max, l.isTime)}</span>
+              </div>
+            )}
+          </div>
+        </>
       )}
       {l?.kind === 'categories' && (
-        <div className="row-block">
+        <>
           <div className="key">Colour</div>
-          <div className="what">{columnLabel(l.column, null)}</div>
-          <ul className="swatches">
-            {l.items.map((it) => (
-              <li key={it.label}>
-                <span className="swatch" style={{ background: it.color }} />
-                {it.label}
-              </li>
-            ))}
-          </ul>
-        </div>
+          <div className="val">
+            {columnLabel(l.column, null)}
+            <ul className="swatches">
+              {l.items.map((it) => (
+                <li key={it.label}>
+                  <span className="swatch" style={{ background: it.color }} />
+                  {it.label}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </>
       )}
       {s && (
-        <div className="row-block">
+        <>
           <div className="key">Size</div>
-          <div className="what">{columnLabel(s.column, null)}</div>
-          <div className="sizes">
+          <div className="val sizes">
+            {columnLabel(s.column, null)}
             {sizeSamples(s.column, s.min, s.max).map((x) => (
               <span key={x.label}>
                 <i style={{ width: x.px, height: x.px }} />
@@ -139,20 +145,26 @@ export function HowToRead({ onToggleXray }: { onToggleXray: () => void }) {
               </span>
             ))}
           </div>
-        </div>
+        </>
       )}
       {hudStore.geo && (
         <>
-          <div className="row-block">
-            <div className="key">Dot</div>
-            <div className="what">
-              where it happened{hudStore.xray ? ', at its real depth' : ' (epicentre)'}
-            </div>
+          <div className="key">Place</div>
+          <div className="val">
+            {hudStore.xray ? 'where and how deep it happened' : 'where it happened, on the surface'}
           </div>
-          <button className={`xray-toggle ${hudStore.xray ? 'on' : ''}`} onClick={onToggleXray}>
-            X-ray {hudStore.xray ? 'on' : 'off'} <kbd>X</kbd>
-          </button>
-          <p className="hint">X-ray turns the crust to glass so quakes sink to their true depth.</p>
+          <div className="key" />
+          <div className="val">
+            <button
+              className={`xray-toggle ${hudStore.xray ? 'on' : ''}`}
+              onClick={onToggleXray}
+              aria-pressed={hudStore.xray}
+            >
+              <span className="switch" aria-hidden="true" />
+              X-ray <kbd>X</kbd>
+            </button>
+            <p className="hint">Turns the crust to glass so each quake sinks to its real depth.</p>
+          </div>
         </>
       )}
     </section>

@@ -1,24 +1,64 @@
+/* Fonts: self-hosted latin subsets (SIL OFL, see public/fonts/). */
+@font-face {
+  font-family: Geist;
+  src: url('/fonts/geist.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/geist-mono.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('/fonts/instrument-serif.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('/fonts/instrument-serif-italic.woff2') format('woff2');
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Chrome stays neutral (warm chalk on space) so the data's colours are the only colour.
+   Ember, the hot end of the depth ramp, marks what is live: listening, replaying, on. */
 :root {
-  --bg: #03060c;
-  --fg: #e8f1fb;
-  --muted: #8aa0b8;
-  --dim: #5b6f86;
-  --panel: rgb(10 16 28 / 55%);
-  --panel-solid: rgb(9 14 25 / 92%);
-  --line: rgb(120 220 255 / 16%);
-  --line-strong: rgb(120 220 255 / 34%);
-  --accent: #3ee6ff;
-  --accent-2: #2dd4bf;
-  --warn: #fbbf24;
-  --bad: #fb7185;
-  --good: #4ade80;
-  --hot: #ff8a3d;
-  --gutter: 16px;
-  --cam-w: 320px;
-  --radius: 14px;
-  --sans: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
-  --mono: 'Cascadia Mono', Consolas, ui-monospace, monospace;
-  --glow: 0 0 0 1px var(--line), 0 10px 40px rgb(0 0 0 / 45%), inset 0 1px 0 rgb(255 255 255 / 5%);
+  --space: #010205;
+  --chalk: #edeae4;
+  --mist: #a29e97;
+  --dust: #6f6c67;
+  --hair: rgb(237 234 228 / 12%);
+  --hair-strong: rgb(237 234 228 / 26%);
+  --surface: rgb(5 7 11 / 62%);
+  --surface-solid: rgb(7 9 13 / 92%);
+  --ember: #fdb42f;
+  --alert: #ff7a70;
+  --display: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+  --sans: Geist, 'Segoe UI Variable', system-ui, sans-serif;
+  --mono: 'Geist Mono', 'Cascadia Mono', Consolas, monospace;
+  --gutter: 28px;
+  --cam-w: 300px;
+  --radius: 12px;
+
+  /* Older names, still used by the study and dev panels. */
+  --fg: var(--chalk);
+  --muted: var(--mist);
+  --dim: var(--dust);
+  --line: var(--hair);
+  --line-strong: var(--hair-strong);
+  --panel: var(--surface);
+  --panel-solid: var(--surface-solid);
+  --accent: var(--chalk);
+  --warn: var(--ember);
+  --bad: var(--alert);
+  --good: #9fd8a4;
+  --hot: #ed7953;
 }
 
 html,
@@ -27,9 +67,10 @@ body,
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background: radial-gradient(ellipse at 50% 40%, #0a1424 0%, var(--bg) 70%);
-  color: var(--fg);
-  font-family: var(--sans);
+  background: var(--space);
+  color: var(--chalk);
+  font: 15px/1.45 var(--sans);
+  -webkit-font-smoothing: antialiased;
 }
 
 .scene {
@@ -42,32 +83,39 @@ body,
   touch-action: none;
 }
 
+/* Darkens space behind the text column and the bottom dock, never the globe's centre. */
+.vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgb(1 2 5 / 78%) 0, rgb(1 2 5 / 40%) 22%, transparent 40%),
+    linear-gradient(0deg, rgb(1 2 5 / 80%) 0, transparent 26%);
+  z-index: 1;
+}
+
 .panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: var(--surface);
+  border: 1px solid var(--hair);
   border-radius: var(--radius);
-  box-shadow: var(--glow);
-  backdrop-filter: blur(14px) saturate(140%);
-  animation: enter 0.35s ease-out both;
+  backdrop-filter: blur(18px);
 }
 
 .label {
-  font: 600 10.5px var(--mono);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
+  font-size: 13px;
+  color: var(--mist);
 }
 
 .warn {
-  color: var(--warn);
+  color: var(--ember);
 }
 
 kbd {
-  padding: 1px 6px;
-  border: 1px solid var(--line-strong);
-  border-radius: 5px;
-  font: 600 11px var(--mono);
-  color: var(--fg);
+  padding: 0 5px;
+  border: 1px solid var(--hair-strong);
+  border-radius: 4px;
+  font: 500 11px/1.5 var(--mono);
+  color: var(--mist);
 }
 
 button {
@@ -76,107 +124,131 @@ button {
   cursor: pointer;
 }
 
+:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 3px;
+}
+
 .ghost {
-  padding: 6px 12px;
-  background: rgb(62 230 255 / 8%);
-  border: 1px solid var(--line-strong);
+  padding: 6px 14px;
+  background: rgb(237 234 228 / 6%);
+  border: 1px solid var(--hair-strong);
   border-radius: 999px;
   font-size: 13px;
-  transition:
-    background 0.2s,
-    border-color 0.2s;
+  transition: background 0.2s;
 }
 
 .ghost:hover {
-  background: rgb(62 230 255 / 18%);
-  border-color: var(--accent);
+  background: rgb(237 234 228 / 14%);
 }
 
 .primary {
-  padding: 10px 22px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: #021018;
+  padding: 12px 26px;
+  background: var(--chalk);
+  color: var(--space);
   border: 0;
   border-radius: 999px;
-  font-weight: 650;
-  box-shadow: 0 0 24px rgb(62 230 255 / 35%);
+  font-weight: 600;
+  font-size: 15px;
+  transition: transform 0.15s;
 }
 
-@keyframes enter {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
+.primary:hover {
+  transform: translateY(-1px);
 }
 
-/* --- top-centre: title bar --- */
-.topbar {
-  position: fixed;
-  top: var(--gutter);
-  left: 50%;
-  translate: -50% 0;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 8px 10px 8px 16px;
-  white-space: nowrap;
-  z-index: 4;
-}
-
-.topbar .brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.topbar .logo {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #fff, var(--accent) 45%, #0b4a63 100%);
-  box-shadow: 0 0 12px var(--accent);
-}
-
-.topbar .count {
-  color: var(--muted);
+.text-btn {
+  padding: 0;
+  background: none;
+  border: 0;
   font-size: 14px;
+  color: var(--mist);
+  text-decoration: underline;
+  text-decoration-color: var(--hair-strong);
+  text-underline-offset: 4px;
+  transition: color 0.2s;
 }
 
-.topbar .count b {
-  color: var(--fg);
-  font-size: 22px;
-  font-weight: 650;
-  font-variant-numeric: tabular-nums;
+.text-btn:hover {
+  color: var(--chalk);
 }
 
-.topbar .of {
-  color: var(--dim);
-}
-
-.topbar .sub {
-  max-width: 360px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font: 12px var(--mono);
-  color: var(--muted);
-}
-
-/* --- top-left: what ran (glass box) --- */
-.glass {
+/* --- left rail: masthead + what ran --- */
+.rail {
   position: fixed;
   top: var(--gutter);
   left: var(--gutter);
-  width: min(360px, calc(100vw - 2 * var(--gutter)));
-  padding: 10px 14px 12px;
+  width: min(380px, calc(100vw - 2 * var(--gutter)));
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
   z-index: 3;
+}
+
+.masthead .brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+}
+
+/* A tiny globe: lit limb on the left, like the big one. */
+.masthead .logo {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 40%, #cfe3ff, #2f63b8 45%, #050a14 75%);
+  box-shadow: -1px 0 4px rgb(120 170 255 / 55%);
+}
+
+.masthead .count {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: 12px;
+  margin-top: clamp(14px, 3vh, 34px);
+}
+
+.masthead .count b {
+  font: 400 clamp(64px, 10vh, 112px) / 0.9 var(--display);
+  letter-spacing: -0.01em;
+  font-variant-numeric: lining-nums;
+}
+
+.masthead .noun {
+  display: flex;
+  flex-direction: column;
+  font: italic 26px/1.05 var(--display);
+  color: var(--chalk);
+}
+
+.masthead .of {
+  font: 400 13px/1.6 var(--sans);
+  color: var(--mist);
+}
+
+.masthead .sub {
+  max-width: 34ch;
+  margin: 10px 0 12px;
+  font-size: 14.5px;
+  color: var(--mist);
+}
+
+/* --- what ran (glass box) --- */
+.glass {
+  padding: 10px 14px 12px;
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius);
+  backdrop-filter: blur(18px);
 }
 
 .glass-head {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
   padding: 0;
   background: none;
@@ -186,12 +258,12 @@ button {
 
 .glass-head .chev {
   margin-left: auto;
-  color: var(--muted);
+  color: var(--dust);
 }
 
 .glass .thinking {
-  font: 12px var(--mono);
-  color: var(--accent);
+  font-size: 13px;
+  color: var(--ember);
   animation: blink 1s ease-in-out infinite;
 }
 
@@ -202,54 +274,61 @@ button {
 }
 
 .glass pre {
-  margin: 6px 0 10px;
-  font: 12.5px/1.5 var(--mono);
+  margin: 8px 0 0;
+  font: 12.5px/1.55 var(--mono);
   white-space: pre-wrap;
   word-break: break-word;
 }
 
 .glass .params {
-  margin-top: -6px;
-  color: var(--warn);
+  color: var(--ember);
 }
 
 .tk-key {
-  color: var(--accent);
+  color: var(--chalk);
 }
 
 .tk-str {
-  color: #a7f3d0;
+  color: #c9dba8;
 }
 
 .tk-num {
-  color: var(--hot);
+  color: var(--ember);
 }
 
 .tk-kw {
-  color: #c4b5fd;
-  font-weight: 600;
+  color: #93b6ff;
 }
 
 .timings {
-  font: 11px var(--mono);
-  color: var(--muted);
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--dust);
 }
 
-/* --- top-right: stats pill --- */
+/* --- top-right: live numbers --- */
 .stats {
   position: fixed;
   top: var(--gutter);
   right: var(--gutter);
-  padding: 6px 12px;
-  font: 11.5px/1.6 var(--mono);
-  text-align: right;
-  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 18px;
+  max-width: 46vw;
+  font-size: 12.5px;
+  color: var(--dust);
   z-index: 3;
 }
 
 .stats b {
-  color: var(--fg);
-  font-weight: 600;
+  color: var(--mist);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats .status {
+  color: var(--mist);
 }
 
 /* --- bottom-right: webcam + skeleton, mirrored --- */
@@ -260,9 +339,9 @@ button {
   width: var(--cam-w);
   transform: scaleX(-1);
   border-radius: var(--radius);
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--glow);
+  border: 1px solid var(--hair);
   background: #000;
+  opacity: 0.92;
   z-index: 3;
 }
 
@@ -270,18 +349,15 @@ button {
   position: fixed;
   right: calc(var(--gutter) + 10px);
   bottom: calc(var(--gutter) + 10px);
-  padding: 3px 9px;
+  padding: 2px 10px;
   border-radius: 999px;
-  background: rgb(3 6 12 / 70%);
-  border: 1px solid var(--line);
-  font: 600 10.5px var(--mono);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent);
+  background: rgb(1 2 5 / 72%);
+  font-size: 12px;
+  color: var(--chalk);
   z-index: 4;
 }
 
-/* --- bottom-left: how to read this + transcript, clear of the webcam --- */
+/* --- bottom-left dock: legend, seismogram, talk bar --- */
 .bottom-left {
   position: fixed;
   left: var(--gutter);
@@ -290,45 +366,34 @@ button {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
+  gap: 14px;
   z-index: 4;
 }
 
 .legend {
-  width: 280px;
-  padding: 12px 14px;
-}
-
-.legend .row-block {
-  margin-top: 10px;
-}
-
-.legend .key {
-  font: 600 10.5px var(--mono);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-.legend .what {
-  margin: 2px 0 6px;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 300px);
+  gap: 10px 14px;
   font-size: 13.5px;
 }
 
+.legend .key {
+  color: var(--dust);
+}
+
 .legend .ramp {
-  height: 9px;
+  height: 6px;
+  margin-top: 7px;
   border-radius: 99px;
-  box-shadow: 0 0 12px rgb(255 255 255 / 8%);
 }
 
 .legend .bands,
 .legend .ends {
-  position: relative;
   display: flex;
   justify-content: space-between;
   margin-top: 4px;
-  font: 11px var(--mono);
-  color: var(--muted);
+  font-size: 12px;
+  color: var(--mist);
 }
 
 .legend .bands span {
@@ -337,88 +402,177 @@ button {
   white-space: nowrap;
 }
 
+/* The shallow band is narrow; let its label run past it from the left edge. */
+.legend .bands span:first-child {
+  text-align: left;
+  overflow: visible;
+}
+
 .legend .sizes {
   display: flex;
-  align-items: flex-end;
-  gap: 16px;
-  font: 11px var(--mono);
-  color: var(--muted);
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
 }
 
 .legend .sizes span {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--mist);
 }
 
 .legend .sizes i {
   display: block;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff 0%, var(--hot) 45%, rgb(255 138 61 / 0%) 72%);
+  background: radial-gradient(circle, #fff 0%, #fdb42f 40%, rgb(253 180 47 / 0%) 72%);
 }
 
 .xray-toggle {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 12px;
-  padding: 6px 12px;
-  background: rgb(255 255 255 / 4%);
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  font-size: 13px;
+  gap: 9px;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: 13.5px;
 }
 
-.xray-toggle.on {
-  background: rgb(62 230 255 / 16%);
-  border-color: var(--accent);
-  box-shadow: 0 0 18px rgb(62 230 255 / 30%);
+.xray-toggle .switch {
+  position: relative;
+  width: 26px;
+  height: 14px;
+  border-radius: 99px;
+  background: rgb(237 234 228 / 18%);
+  transition: background 0.2s;
+}
+
+.xray-toggle .switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--chalk);
+  transition: transform 0.2s;
+}
+
+.xray-toggle.on .switch {
+  background: var(--ember);
+}
+
+.xray-toggle.on .switch::after {
+  transform: translateX(12px);
+  background: var(--space);
 }
 
 .legend .hint {
-  margin: 6px 0 0;
-  font-size: 12px;
-  color: var(--muted);
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--dust);
 }
 
-/* --- transcript / talk bar --- */
+.legend .swatches {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legend .swatches li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend .swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+/* --- seismogram strip --- */
+.seismo {
+  position: relative;
+  align-self: stretch;
+  margin: 0;
+}
+
+.seismo canvas {
+  display: block;
+  width: 100%;
+}
+
+.seismo .ticks {
+  position: relative;
+  height: 16px;
+  font-size: 11.5px;
+  color: var(--dust);
+}
+
+.seismo .ticks span {
+  position: absolute;
+  top: 2px;
+  padding-left: 4px;
+  border-left: 1px solid var(--hair);
+  line-height: 1.2;
+}
+
+.seismo .playhead {
+  position: absolute;
+  top: 0;
+  height: 46px;
+  border-left: 1px solid var(--ember);
+  pointer-events: none;
+}
+
+.seismo .playhead span {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: -1px;
+  padding-left: 6px;
+  border-left: 1px solid var(--ember);
+  font-size: 12.5px;
+  color: var(--ember);
+  white-space: nowrap;
+}
+
+/* --- talk bar --- */
 .transcript {
   box-sizing: border-box;
   width: min(760px, 100%);
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: var(--panel);
-  border: 1px solid var(--line);
+  gap: 14px;
+  padding: 8px 8px 8px 18px;
+  background: var(--surface);
+  border: 1px solid var(--hair);
   border-radius: 999px;
-  box-shadow: var(--glow);
-  backdrop-filter: blur(14px) saturate(140%);
-  font-size: 17px;
+  backdrop-filter: blur(18px);
+  font-size: 16px;
   transition:
     border-color 0.2s,
     box-shadow 0.2s;
 }
 
 .transcript.is-listening {
-  border-color: var(--accent);
-  box-shadow:
-    0 0 28px rgb(62 230 255 / 30%),
-    var(--glow);
+  border-color: rgb(253 180 47 / 60%);
+  box-shadow: 0 0 32px rgb(253 180 47 / 18%);
 }
 
 .transcript .said {
   flex: 1;
   min-width: 0;
-  color: var(--muted);
+  color: var(--mist);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .transcript .said.final {
-  color: var(--fg);
+  color: var(--chalk);
 }
 
 .transcript form {
@@ -426,19 +580,23 @@ button {
 }
 
 .transcript input {
-  width: 210px;
-  padding: 7px 12px;
+  width: 220px;
+  padding: 8px 14px;
   color: inherit;
-  background: rgb(255 255 255 / 5%);
-  border: 1px solid var(--line);
+  background: rgb(237 234 228 / 6%);
+  border: 1px solid transparent;
   border-radius: 999px;
   font: inherit;
   font-size: 14px;
   outline: none;
 }
 
+.transcript input::placeholder {
+  color: var(--dust);
+}
+
 .transcript input:focus {
-  border-color: var(--accent);
+  border-color: var(--hair-strong);
 }
 
 .wave {
@@ -450,14 +608,14 @@ button {
 }
 
 .wave i {
-  width: 3px;
+  width: 2px;
   height: 4px;
   border-radius: 2px;
-  background: var(--dim);
+  background: var(--dust);
 }
 
 .is-listening .wave i {
-  background: var(--accent);
+  background: var(--ember);
   animation: wave 0.9s ease-in-out infinite;
 }
 
@@ -483,42 +641,42 @@ button {
   }
 }
 
-/* --- top-centre (under the title bar): toasts --- */
+/* --- top-centre: toasts --- */
 .toasts {
   position: fixed;
-  top: 76px;
+  top: var(--gutter);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 8px;
   z-index: 7;
 }
 
 .toast {
   max-width: min(520px, calc(100vw - 2 * var(--gutter)));
-  padding: 10px 16px;
-  border-radius: 12px;
-  background: var(--panel-solid);
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--glow);
-  font-size: 15px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: var(--surface-solid);
+  border: 1px solid var(--hair);
+  font-size: 14.5px;
   animation: toast-in 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }
 
 @keyframes toast-in {
   from {
     opacity: 0;
-    transform: translateY(-10px) scale(0.97);
+    transform: translateY(-8px);
   }
 }
 
 .toast-clarify {
-  border-color: var(--warn);
+  border-color: rgb(253 180 47 / 55%);
 }
 
 .toast-error {
-  border-color: var(--bad);
+  border-color: rgb(255 122 112 / 60%);
 }
 
 /* --- cursor --- */
@@ -527,8 +685,8 @@ button {
   left: 0;
   top: 0;
   pointer-events: none;
-  color: var(--accent);
-  filter: drop-shadow(0 0 6px rgb(62 230 255 / 60%));
+  color: var(--chalk);
+  filter: drop-shadow(0 0 4px rgb(0 0 0 / 70%));
   z-index: 5;
 }
 
@@ -539,7 +697,7 @@ button {
 
 .cursor .ring {
   fill: none;
-  stroke: currentColor;
+  stroke: var(--ember);
   stroke-width: 3;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
@@ -553,9 +711,7 @@ button {
   top: 40px;
   left: 50%;
   transform: translateX(-50%);
-  font: 600 11px var(--mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 12.5px;
   white-space: nowrap;
 }
 
@@ -565,95 +721,85 @@ button {
   left: 0;
   top: 0;
   z-index: 6;
+  box-sizing: border-box;
   width: 260px;
   pointer-events: none;
-  padding: 12px 14px;
-  background: var(--panel-solid);
-  border: 1px solid var(--line-strong);
+  padding: 14px 16px;
+  background: var(--surface-solid);
+  border: 1px solid var(--hair);
   border-radius: var(--radius);
-  box-shadow: var(--glow);
   font-size: 13px;
 }
 
 .card-title {
-  font-weight: 650;
+  font-weight: 500;
   line-height: 1.3;
 }
 
 .card-badge {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 .card-badge .mag {
-  font-size: 26px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+  font: 400 44px/1 var(--display);
 }
 
 .card-badge .cls {
-  padding: 2px 8px;
-  border-radius: 999px;
-  font: 600 10.5px var(--mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  background: rgb(255 255 255 / 8%);
-}
-
-.tone-minor .cls,
-.tone-light .cls {
-  color: #a7f3d0;
+  font-size: 13px;
+  color: var(--mist);
 }
 
 .tone-moderate .cls {
-  color: var(--warn);
+  color: var(--ember);
 }
 
 .tone-strong .cls {
-  color: var(--hot);
+  color: #ed7953;
 }
 
 .tone-major .cls,
 .tone-great .cls {
-  color: var(--bad);
-  background: rgb(251 113 133 / 14%);
+  color: var(--alert);
 }
 
 .card-gauge {
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .card-gauge .bar {
-  height: 6px;
+  height: 3px;
   border-radius: 99px;
-  background: rgb(255 255 255 / 8%);
+  background: rgb(237 234 228 / 12%);
   overflow: hidden;
 }
 
 .card-gauge .fill {
   height: 100%;
   border-radius: 99px;
-  background: linear-gradient(90deg, var(--accent), #9c179e);
+  background: var(--chalk);
 }
 
 .card-gauge .gauge-label {
-  margin-top: 4px;
-  font: 11.5px var(--mono);
-  color: var(--muted);
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--mist);
 }
 
 .tooltip dl {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 2px 10px;
-  margin: 8px 0 0;
-  font-size: 12px;
+  gap: 3px 12px;
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--hair);
+  font-size: 12.5px;
 }
 
 .tooltip dt {
-  color: var(--muted);
+  color: var(--dust);
 }
 
 .tooltip dd {
@@ -665,12 +811,17 @@ button {
 .welcome {
   position: fixed;
   inset: 0;
-  display: grid;
-  place-items: center;
-  background: rgb(2 5 10 / 55%);
-  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  padding: 0 max(var(--gutter), 7vw);
+  background: linear-gradient(
+    90deg,
+    rgb(1 2 5 / 94%) 0,
+    rgb(1 2 5 / 78%) 48%,
+    rgb(1 2 5 / 30%) 100%
+  );
   z-index: 20;
-  animation: fade 0.4s ease-out both;
+  animation: fade 0.5s ease-out both;
 }
 
 @keyframes fade {
@@ -679,51 +830,63 @@ button {
   }
 }
 
-.welcome-card {
-  width: min(560px, calc(100vw - 2 * var(--gutter)));
-  padding: 26px 28px 24px;
-  background: var(--panel-solid);
+.welcome-body {
+  max-width: 640px;
+  animation: rise 0.8s 0.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
-.welcome-card h1 {
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.welcome h1 {
   margin: 0;
-  font-size: 30px;
-  letter-spacing: 0.01em;
+  font: 400 clamp(44px, 7vw, 80px) / 0.98 var(--display);
+  letter-spacing: -0.01em;
 }
 
-.welcome-card .lede {
-  margin: 8px 0 18px;
-  color: var(--muted);
-  font-size: 15px;
-  line-height: 1.5;
+.welcome .lede {
+  max-width: 48ch;
+  margin: 18px 0 30px;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--mist);
 }
 
-.welcome-card .steps {
+.welcome .steps {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin: 0 0 20px;
-  padding: 0;
+  gap: 22px;
+  margin: 0 0 34px;
+  padding: 20px 0 0;
+  border-top: 1px solid var(--hair);
   list-style: none;
 }
 
-.welcome-card .steps li {
+.welcome .steps li {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgb(255 255 255 / 3%);
-  font-size: 13.5px;
+  gap: 3px;
+  font-size: 14.5px;
+  color: var(--mist);
 }
 
-.welcome-card .emoji {
+.welcome .steps b {
+  color: var(--chalk);
+  font-weight: 500;
+}
+
+.welcome .emoji {
+  margin-bottom: 8px;
   font-size: 26px;
 }
 
-.welcome-card small {
-  color: var(--muted);
+.welcome small {
+  font-size: 12.5px;
+  color: var(--dust);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -732,6 +895,41 @@ button {
   *::after {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* Short screens: the legend gives way first. */
+@media (max-height: 760px) {
+  .legend .hint,
+  .masthead .sub {
+    display: none;
+  }
+}
+
+/* Narrow screens: stack the bottom row above the webcam. */
+@media (max-width: 760px) {
+  :root {
+    --cam-w: 140px;
+    --gutter: 16px;
+  }
+
+  .vignette {
+    background: linear-gradient(0deg, rgb(1 2 5 / 85%) 0, transparent 45%);
+  }
+
+  .bottom-left {
+    right: var(--gutter);
+    bottom: calc(var(--gutter) + 120px);
+  }
+
+  .glass,
+  .legend,
+  .stats {
+    display: none;
+  }
+
+  .welcome .steps {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -754,30 +952,6 @@ button {
 .debug-panel label {
   display: flex;
   flex-direction: column;
-}
-
-/* Narrow screens: stack the bottom row above the webcam. */
-@media (max-width: 760px) {
-  :root {
-    --cam-w: 160px;
-  }
-
-  .bottom-left {
-    right: var(--gutter);
-    bottom: calc(var(--gutter) + 130px);
-  }
-
-  .glass {
-    display: none;
-  }
-
-  .topbar .sub {
-    display: none;
-  }
-
-  .welcome-card .steps {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* --- gesture study (G) --- */

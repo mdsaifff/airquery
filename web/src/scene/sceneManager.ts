@@ -28,9 +28,9 @@ export class SceneManager {
   constructor(container: HTMLElement) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.setClearColor(0x05070d);
+    this.renderer.setClearColor(0x010205);
     // Also as the scene background: colour-managed even when rendering into the bloom buffers.
-    this.scene.background = new THREE.Color(0x05070d);
+    this.scene.background = new THREE.Color(0x010205);
     container.appendChild(this.renderer.domElement);
     this.camera = new THREE.PerspectiveCamera(config.cameraFovDeg, 1, 0.01, 100);
     this.composer =
@@ -92,6 +92,10 @@ export class SceneManager {
     this.renderer.setSize(w, h);
     this.composer?.setSize(w, h);
     this.camera.aspect = w / h;
+    // Wide screens: slide the view so the globe sits right of centre, clear of the HUD column.
+    const shift = w / h > 1.3 ? Math.round(w * config.sceneOffsetX) : 0;
+    if (shift) this.camera.setViewOffset(w, h, -shift, 0, w, h);
+    else this.camera.clearViewOffset();
     this.camera.updateProjectionMatrix();
   }
 }
