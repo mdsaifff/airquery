@@ -126,6 +126,25 @@ def test_compile_has_its_own_limit(quakes_schema, log_path) -> None:
     assert c.post("/compile", json=body).status_code == 200  # /query's limit of 1 doesn't apply
     r = c.post("/compile", json=body)
     assert r.status_code == 429 and r.json()["status"] == "clarify"
+    assert "chip" not in r.json()["message"]  # chips are what is being limited here
+
+
+class RateLimitError(Exception):
+    """Stands in for the provider SDK's rate-limit exception (matched by name)."""
+
+
+def test_a_provider_rate_limit_is_a_friendly_clarify(quakes_schema, log_path) -> None:
+    def busy(_prompt):
+        raise RateLimitError("429 from the provider")
+
+    reg = SchemaRegistry({"quakes": quakes_schema})
+    c = TestClient(create_app(llm=MockLLM(fn=busy), registry=reg, log_path=log_path))
+    body = ask(c, "deeper than 300").json()
+    assert body["status"] == "clarify" and "suggestion chip" in body["message"]
+
+
+def test_the_default_llm_budget_fits_a_free_key() -> None:
+    assert settings.llm_calls_per_min <= 4  # ~1.6k tokens per call vs 8k tokens/min
 
 
 def test_bad_requests_are_rejected_and_logged(quakes_schema, log_path) -> None:

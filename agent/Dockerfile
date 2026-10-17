@@ -19,4 +19,6 @@ ENV PATH="/app/.venv/bin:$PATH" \
 EXPOSE 8000
 
 # Hosts like Render / Cloud Run / Fly set PORT.
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
+# --forwarded-allow-ips: behind the host's proxy, take the visitor IP from X-Forwarded-For
+# (otherwise every visitor shares the proxy's IP and its per-visitor limits).
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT} --forwarded-allow-ips='*'"]

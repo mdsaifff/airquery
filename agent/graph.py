@@ -18,6 +18,7 @@ from spec import DatasetSchema, QuerySpec, Scalar
 from validate import validate_spec
 
 MAX_RETRIES = 2
+BUSY = "The AI is busy right now. Try a suggestion chip, or ask again in a minute."
 
 Status = Literal["ok", "clarify", "rejected"]
 
@@ -74,6 +75,12 @@ def build_graph(llm: LLMAdapter, max_retries: int = MAX_RETRIES):
         try:
             reply = await llm.complete(prompt)
         except Exception as exc:  # provider down, bad key, timeout...
+            if "RateLimit" in type(exc).__name__:  # the provider's own per-minute limit
+                return {
+                    "status": "clarify",
+                    "message": BUSY,
+                    "timings_ms": _add_timing(state, "llm", _ms(t0)),
+                }
             return {
                 "status": "rejected",
                 "message": f"The language model is unavailable ({type(exc).__name__}).",

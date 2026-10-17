@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from compile_sql import InvalidSpecError, compile_explain, compile_spec
-from graph import AgentState, build_graph, run_agent
+from graph import BUSY, AgentState, build_graph, run_agent
 from llm import LLMAdapter, LLMNotConfiguredError, make_llm
 from schema_registry import SchemaRegistry, UnknownDatasetError
 from settings import AGENT_DIR, settings
@@ -23,7 +23,7 @@ CACHE_SIZE = 256
 DEFAULT_LOG = AGENT_DIR / "logs" / "queries.jsonl"
 
 
-BUSY = "The AI is busy right now. Try a suggestion chip, or ask again in a minute."
+TOO_FAST = "Too many clicks at once; wait a few seconds."
 
 
 class RateLimiter:
@@ -179,7 +179,7 @@ def create_app(
         """Mouse baseline: the UI built the spec, the agent still validates and compiles it."""
         ip = request.client.host if request.client else "unknown"
         if not compile_limiter.allow(ip, time.monotonic()):
-            resp = QueryResponse(status="clarify", message=BUSY)
+            resp = QueryResponse(status="clarify", message=TOO_FAST)
             return JSONResponse(resp.model_dump(mode="json"), status_code=429)
         try:
             query = compile_spec(req.spec, registry.get(req.dataset))
