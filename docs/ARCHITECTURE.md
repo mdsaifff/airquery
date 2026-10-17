@@ -187,17 +187,18 @@ type GestureEvent =
   | { kind: 'holdProgress'; gesture: HoldGesture; progress: number } // 0..1
   | { kind: 'fire'; gesture: HoldGesture }
   | { kind: 'clutch'; active: boolean }
-  | { kind: 'talk'; active: boolean }
+  | { kind: 'talk'; active: boolean; x?: number; y?: number }  // x, y: the pointing fingertip ("here")
   | { kind: 'swipe'; direction: 'left' | 'right' }               // switch scene (stretch)
-  | { kind: 'lasso'; active: boolean }                           // 🤟 held: air lasso (stretch)
+  | { kind: 'circleHold'; hand: Hand; x: number; y: number }    // a pinch held still: circle centre
   | { kind: 'handsLost' };
-type HoldGesture = 'reset' | 'undo' | 'explain'; // explain: custom Model Maker gesture (stretch)
+type HoldGesture = 'reset' | 'explain' | 'listen' | 'circle'; // explain: custom Model Maker gesture (stretch)
+// talk: one hand pointing while the other is raised open, or a pointing finger held still (D-021)
 ```
 
 ## Interaction state machine
 
 States: `idle`, `pointing`, `rotating`, `zooming`, `clutched`, `listening`,
-`lassoing` (stretch).
+`circling`.
 
 | From | Event | To | Side effect |
 | --- | --- | --- | --- |
@@ -212,12 +213,12 @@ States: `idle`, `pointing`, `rotating`, `zooming`, `clutched`, `listening`,
 | clutched | clutch inactive | pointing | — |
 | pointing / idle | talk active | listening | start STT |
 | listening | talk inactive | pointing | stop STT, send utterance |
-| pointing | fire reset / undo | pointing | reset view / pop history |
+| pointing | fire reset (one open palm) | pointing | start over: camera home, filters cleared |
 | pointing | fire explain | pointing | "what's this?" (custom gesture, stretch) |
 | pointing / idle | swipe | (same) | switch scene (left = next) |
-| pointing | lasso active | lassoing | start loop |
-| lassoing | cursor | lassoing | add loop point |
-| lassoing | lasso inactive | pointing | select points inside the loop |
+| rotating | circleHold (still pinch) | circling | stop drag, circle centre |
+| circling | pinchMove | circling | circle radius |
+| circling | pinchEnd | pointing | select points inside the circle |
 | any | handsLost (> 500 ms) | idle | hide cursor, stop drag |
 
 The state machine is a pure reducer: `(state, event) => [state, effects[]]`.

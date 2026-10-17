@@ -82,16 +82,16 @@ by magnitude", "the ten strongest", "near Japan", "undo", ...).
 | Move cursor, hover a quake | point (index finger up) | mouse |
 | Rotate | pinch and drag | drag |
 | Zoom | pinch with both hands, pull apart / together | wheel |
-| Talk | hold a victory sign ✌ | hold **space**, or type in the box |
-| Undo | hold thumb down 👎 | **Z** |
-| Reset view | hold open palm ✋ (0.5 s) | **R** |
+| Talk | point with one hand and raise the other, open; or hold your pointing finger still (~1 s) | hold **space**, or type in the box |
+| Undo | say "undo" / "go back" | **Z** |
+| Start over (camera home, filters cleared) | hold one open palm ✋ (1.2 s) | **R** resets the camera |
 | Freeze the scene while repositioning | closed fist ✊ | – |
 | Switch scene (globe ↔ paper galaxy ↔ your CSV) | swipe an open hand sideways | **←** / **→** |
-| Lasso-select points | hold 🤟 and trace a loop | **Shift**+drag, **Esc** clears |
+| Select an area | pinch and hold still (~0.6 s), then move out to size the circle and let go | **Shift**+drag, **Esc** clears |
 | X-ray: see quakes at their real depth | – | **X**, or the button in the legend |
 | What's this? (spoken summary) | say it, or hold the custom gesture | type it |
 
-Hold ✌ (or Space) and speak. Besides filters you can say *play the year*, *pause*, *go to
+Raise your other hand (or hold your pointing finger still, or Space) and speak. Besides filters you can say *play the year*, *pause*, *go to
 March*, *faster*, *stop the replay*, *X-ray on*, *show / hide the stats*, *share this view*,
 *be quiet*. Point at the globe and say *what happened here?*, *only quakes around here* or
 *fly here*. The globe answers out loud and in a subtitle (🔊 toggles the voice). The
