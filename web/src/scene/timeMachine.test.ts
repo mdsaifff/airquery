@@ -91,4 +91,11 @@ describe('TimeMachine', () => {
     const { tm, cloud } = started();
     expect(tm.step(1000, cloud)).toBeNull();
   });
+
+  it('seekDate jumps to a calendar date', () => {
+    const { tm } = started();
+    tm.seekDate(T0 + 5 * DAY_MS);
+    expect(tm.day).toBeCloseTo(5);
+    expect(tm.playing).toBe(false);
+  });
 });

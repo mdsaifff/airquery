@@ -12,7 +12,9 @@ import { CamLabel, GlassBox, HowToRead, Stats } from './hud/Hud.tsx';
 import { Seismogram } from './hud/Seismogram.tsx';
 import { StudyPanel } from './hud/StudyPanel.tsx';
 import { TopBar } from './hud/TopBar.tsx';
+import { MuteToggle, Subtitle } from './hud/Subtitle.tsx';
 import { Toasts, TranscriptBar } from './hud/TranscriptBar.tsx';
+import { TryHints } from './hud/TryHints.tsx';
 import { VoicePanel } from './hud/VoicePanel.tsx';
 import { Welcome } from './hud/Welcome.tsx';
 import { StudyHost } from './interaction/study.ts';
@@ -91,18 +93,23 @@ export function App() {
         <GlassBox />
       </aside>
       <Stats />
-      <Dashboard onPick={() => undefined} />
+      <Dashboard />
       <div className="bottom-left">
         <HowToRead onToggleXray={() => runtime.current?.toggleXray()} />
         <Seismogram
-          onToggle={() => runtime.current?.playground.toggleTime()}
           onSeek={(f) => runtime.current?.playground.seekFraction(f)}
-          onSpeed={(s) => runtime.current?.playground.setSpeed(s)}
           onStop={() => runtime.current?.playground.stopTime()}
         />
         {!baseline && <TranscriptBar onSubmit={(text) => runtime.current?.typed(text)} />}
+        {!baseline && (
+          <div className="voice-row">
+            <TryHints />
+            <MuteToggle onToggle={() => runtime.current?.toggleMute()} />
+          </div>
+        )}
       </div>
       <Toasts />
+      <Subtitle />
       {debug && <DebugPanel />}
       {studyOpen && <StudyPanel host={study} />}
       {baseline && (

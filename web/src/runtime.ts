@@ -34,7 +34,11 @@ import { wantsXray, XrayState } from './scene/xray.ts';
 import { downloadJson, LandmarkRecorder } from './tracking/recorder.ts';
 import { captureFrames } from './tracking/captureFrames.ts';
 import { startTracking } from './tracking/trackingLoop.ts';
+import { describeView, viewSentence } from './voice/describe.ts';
+import { Replier } from './voice/reply.ts';
+import { speak } from './voice/speak.ts';
 import { VoiceController } from './voice/voiceController.ts';
+import { VoiceFirst } from './voiceFirst.ts';
 import { WebSpeechToText } from './voice/webSpeech.ts';
 
 /** Scenes in swipe order. */
@@ -43,6 +47,16 @@ const SCENE_NAMES: Record<string, string> = {
   quakes: 'earthquake globe',
   papers: 'ML paper galaxy',
 };
+/** What the spoken replies call the points of each scene. */
+const NOUNS: Record<string, string> = { quakes: 'quakes', papers: 'papers' };
+
+function safeStorage(): Storage | null {
+  try {
+    return window.localStorage;
+  } catch {
+    return null; // blocked: mute lasts until reload
+  }
+}
 
 export interface RuntimeElements {
   sceneEl: HTMLElement;
@@ -69,6 +83,8 @@ export interface Runtime {
   captureGesture(label: string, onProgress: (done: number) => void): Promise<void>;
   /** X-ray: crust to glass, quakes sink to their real depth (X key, legend button). */
   toggleXray(): void;
+  /** Spoken replies on / off (subtitles stay). */
+  toggleMute(): void;
   /** Replay the year with the time machine (masthead link). */
   playYear(): void;
   /** Copy a link that reopens this view. */
@@ -93,6 +109,13 @@ export function startRuntime(els: RuntimeElements): Runtime {
   const crustSolid = () => !!datasets.current()?.earth && xray.eased < 0.5;
   const hoverMarker = new HoverMarker();
   sm.scene.add(hoverMarker.group);
+  // Voice first: "here" under the hand or mouse, and the globe's spoken replies.
+  const replier = new Replier({ speak, stop: () => window.speechSynthesis?.cancel(), storage: safeStorage() }); // prettier-ignore
+  const voiceFirst = new VoiceFirst({ scene: sm.scene, camera: sm.camera, replier });
+  /** Screen point for "here": the hand cursor, else the mouse while it is over the scene. */
+  const screenNow = () =>
+    cursor.visible ? cursor.position : hover.mouseOver ? hover.pointer : null;
+  const isGeo = () => datasets.current()?.schema.position.kind === 'geo';
   let intro: IntroPlayer | null = null;
   let introPlayed = false;
   const startIntro = () => {
@@ -152,6 +175,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       const { shown, legend, size } = applyView(d.cloud, d.base, d.schema, d.idIndex, d.mask, view);
       Object.assign(hudStore, { shown, legend, sizeLegend: size, glass: applied, total: d.cloud.count }); // prettier-ignore
       playground.onView(d);
+      if (endedAt !== null) voiceFirst.say(describeView(applied.spec, hudStore.dashboard, NOUNS[name] ?? 'points')); // prettier-ignore
       const pos = d.schema.position;
       xray.follow(wantsXray(applied.spec, pos.kind === 'geo' ? (pos.depth ?? null) : null));
       const ringValues = d.schema.default_size_by ? d.base.numbers.get(d.schema.default_size_by) : undefined; // prettier-ignore
@@ -163,12 +187,24 @@ export function startRuntime(els: RuntimeElements): Runtime {
     },
     flyTo: (lat, lon) => camera.flyTo(lat, lon, performance.now()),
     resetView: () => camera.reset(performance.now()),
-    notify: toast,
-    pointer: () => null, // wired in the voice-first task
-    timeline: () => undefined,
-    view: () => undefined,
+    notify: (kind, text) => {
+      toast(kind, text);
+      if (kind === 'clarify') voiceFirst.say(text); // the globe asks back out loud
+    },
+    pointer: () => voiceFirst.pointer(screenNow(), isGeo()),
+    timeline: (t) => voiceFirst.say(playground.applyTimeline(t)),
+    view: (v) => {
+      playground.applyViewChange(v);
+      if (v.mute !== null) replier.setMuted(v.mute);
+      voiceFirst.say(viewSentence(v));
+    },
     explain: () => {
-      const ctx = { datasets, hover, camera: sm.camera, db, selection: () => lasso.selection, occluded: crustSolid }; // prettier-ignore
+      const here = () => {
+        const d = datasets.get(name);
+        return d ? voiceFirst.hereSelection(d) : null;
+      };
+      const say = (text: string) => voiceFirst.say(text);
+      const ctx = { datasets, hover, camera: sm.camera, db, selection: () => lasso.selection ?? here(), occluded: crustSolid, say }; // prettier-ignore
       void explainHere(ctx, name);
     },
   });
@@ -248,6 +284,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
       },
       listening(active) {
         hudStore.listening = active;
+        if (active) voiceFirst.captureHere(screenNow(), isGeo());
+        else voiceFirst.releaseAt(performance.now());
       },
       error: (message) => toast('error', message),
     },
@@ -288,6 +326,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
   }
 
   sm.onFrame((now, dt) => {
+    voiceFirst.update(now);
     if (latencyFrom !== null) {
       // First frame after the scene changed: close the voice-to-render clock.
       hudStore.latencyMs = now - latencyFrom;
@@ -438,6 +477,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
     undo: () => datasets.session().undo(),
     resetView: () => camera.reset(performance.now()),
     toggleXray: () => xray.toggle(),
+    toggleMute: () => replier.setMuted(!replier.muted),
     playYear: () => playground.playYear(),
     share: () => playground.share(),
   };

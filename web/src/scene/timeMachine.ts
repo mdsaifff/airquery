@@ -86,6 +86,11 @@ export class TimeMachine {
     this.dirty = true;
   }
 
+  /** Jump to a calendar time (epoch ms), paused. */
+  seekDate(ms: number): void {
+    this.seek((ms - this.t0) / DAY_MS);
+  }
+
   seekFraction(f: number): void {
     this.seek(f * this.totalDays);
   }

@@ -10,6 +10,8 @@ import { TimeMachine } from './scene/timeMachine.ts';
 import type { XrayState } from './scene/xray.ts';
 import type { CameraController } from './interaction/cameraController.ts';
 import { decodeShare, encodeShare } from './share.ts';
+import type { Timeline, ViewChange } from './contracts/contracts.ts';
+import { timelineSentence } from './voice/describe.ts';
 
 export interface PlaygroundHost {
   datasets: Datasets;
@@ -19,6 +21,8 @@ export interface PlaygroundHost {
   xray: XrayState;
 }
 
+/** Spoken speeds -> days of data per second. */
+const SPEEDS = { day: 1, week: 7, month: 30 } as const;
 const DATE: Intl.DateTimeFormatOptions = { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' }; // prettier-ignore
 
 export class Playground {
@@ -81,6 +85,34 @@ export class Playground {
     this.ripples = [];
     hudStore.introCutoff = null;
     hudStore.introDate = '';
+  }
+
+  /** A spoken timeline command; returns the sentence to say back. */
+  applyTimeline(t: Timeline): string {
+    const { time } = this;
+    if (!time.available) return 'This scene has no timeline.';
+    if (t.speed) this.setSpeed(SPEEDS[t.speed]);
+    if (t.action === 'play') {
+      if (!time.active) this.playYear();
+      else if (!time.playing) time.toggle();
+    } else if (t.action === 'pause') {
+      time.pause();
+    } else if (t.action === 'stop') {
+      this.stopTime();
+    } else if (t.action === 'seek' && t.date) {
+      this.host.skipIntro();
+      time.seekDate(Date.parse(t.date.length === 10 ? `${t.date}T00:00:00Z` : `${t.date}Z`));
+    }
+    const label = new Date(time.cutoffMs()).toLocaleDateString('en-US', DATE);
+    return timelineSentence(t, label);
+  }
+
+  /** A spoken display switch (mute is handled by the reply voice). */
+  applyViewChange(v: ViewChange): void {
+    const { xray } = this.host;
+    if (v.xray !== null && (xray.target === 1) !== v.xray) xray.toggle();
+    if (v.stats !== null) hudStore.statsOpen = v.stats;
+    if (v.share) this.share();
   }
 
   setSpeed(daysPerSec: number): void {

@@ -240,7 +240,7 @@ button {
 .glass {
   padding: 10px 14px 12px;
   /* long queries (chart clicks) scroll instead of running into the legend */
-  max-height: max(110px, calc(100vh - 725px));
+  max-height: max(110px, calc(100vh - 770px));
   overflow-y: auto;
   scrollbar-width: thin;
   background: var(--surface);
@@ -1015,20 +1015,14 @@ button {
   border-bottom: 1px solid var(--hair-strong);
 }
 
-.dash-bars button {
+.dash-bars .bar {
   position: relative;
   flex: 1;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 0;
-  background: none;
-  border: 0;
-}
-
-.dash-bars button:disabled {
-  cursor: default;
+  transition: opacity 0.3s;
 }
 
 .dash-bars i {
@@ -1042,17 +1036,27 @@ button {
     background 0.2s;
 }
 
-.dash-bars button:hover:not(:disabled) i {
+.dash-bars .bar:hover i {
   filter: brightness(1.45);
 }
 
-.dash-bars button.now i {
+/* a spoken filter lights the bars it covers; the rest step back */
+.dash-bars .bar.on i {
+  filter: brightness(1.5);
+  box-shadow: 0 0 10px rgb(237 234 228 / 45%);
+}
+
+.dash-bars:has(.on) .bar:not(.on) {
+  opacity: 0.35;
+}
+
+.dash-bars .bar.now i {
   background: var(--ember);
   box-shadow: 0 0 12px rgb(253 180 47 / 55%);
 }
 
 /* the count, on hover, above the bars */
-.dash-bars button:hover:not(:disabled)::before {
+.dash-bars .bar:hover::before {
   content: attr(data-n);
   position: absolute;
   top: -15px;
@@ -1086,17 +1090,18 @@ button {
   list-style: none;
 }
 
-.dash-regions button {
+.dash-regions li {
   display: grid;
   grid-template-columns: 1fr auto;
   column-gap: 8px;
-  width: 100%;
   padding: 3px 0 4px;
-  background: none;
-  border: 0;
   color: var(--chalk);
   font: 13px var(--sans);
-  text-align: left;
+  transition: opacity 0.3s;
+}
+
+.dash-regions:has(.on) li:not(.on) {
+  opacity: 0.45;
 }
 
 .dash-regions .name {
@@ -1126,7 +1131,7 @@ button {
   transition: background 0.2s;
 }
 
-.dash-regions button:hover .meter i {
+.dash-regions li.on .meter i {
   background: var(--ember);
 }
 
@@ -1423,6 +1428,21 @@ button {
   background: none;
   font-size: 15px;
   cursor: pointer;
+}
+
+.voice-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.try-hints {
+  margin: 0;
+  font: 13px var(--sans);
+  color: var(--dim);
+}
+.seismo-controls .status {
+  font: 13px var(--sans);
+  color: var(--muted);
 }
 
 @media (max-width: 760px) {

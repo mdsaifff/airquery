@@ -2,24 +2,21 @@
 // globe; filtered-out events stay as a faint trace. Plays along with the replay.
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
-import { config } from '../config.ts';
 import { binStrip, timeRange, timeTicks } from './seismogram.ts';
 import { hudStore, useTick } from './store.ts';
 
 const HEIGHT = 46; // css px
-const SPEED_LABELS: Record<number, string> = { 1: '1 day', 7: '1 week', 30: '1 month' };
+const SPEED_WORDS: Record<number, string> = { 1: 'a day', 7: 'a week', 30: 'a month' };
 
-/** The strip doubles as the time machine's timeline: play, speed, click or drag to jump. */
+/** The strip doubles as the time machine's timeline. Voice drives it ("play the year",
+ *  "pause", "go to March"); the status line says what is happening and what to say.
+ *  Clicking the strip, L and Esc stay as quiet fallbacks. */
 export function Seismogram({
-  onToggle,
   onSeek,
-  onSpeed,
   onStop,
 }: {
-  onToggle: () => void;
   onStop: () => void;
   onSeek: (fraction: number) => void;
-  onSpeed: (daysPerSec: number) => void;
 }) {
   useTick(15);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -83,35 +80,20 @@ export function Seismogram({
     <figure className="seismo" aria-label="Events over time">
       {pb.available && (
         <div className="seismo-controls">
-          <button
-            className={`play ${pb.playing ? 'on' : ''}`}
-            onClick={onToggle}
-            aria-label={pb.playing ? 'Pause' : 'Play the year'}
-          >
-            <svg viewBox="0 0 12 12" aria-hidden="true">
-              {pb.playing ? <path d="M3 2h2v8H3zM7 2h2v8H7z" /> : <path d="M3 1.5v9l7.5-4.5z" />}
-            </svg>
-          </button>
-          <div className="speeds" role="group" aria-label="Replay speed">
-            {config.timeSpeeds.map((s) => (
-              <button
-                key={s}
-                className={pb.speed === s ? 'on' : ''}
-                aria-pressed={pb.speed === s}
-                onClick={() => onSpeed(s)}
-              >
-                {SPEED_LABELS[s] ?? `${s} days`}
-              </button>
-            ))}
-          </div>
-          <span className="per">per second</span>
+          <span className="status" aria-live="polite">
+            {pb.playing
+              ? `▶ ${hudStore.introDate} · ${SPEED_WORDS[pb.speed] ?? `${pb.speed} days`} per second · say “pause”`
+              : pb.active
+                ? `❚❚ ${hudStore.introDate} · say “play”`
+                : 'Say “play the year”'}
+          </span>
           {pb.active && (
             <button className="exit" onClick={onStop}>
               Exit replay <kbd>Esc</kbd>
             </button>
           )}
           <span className="hint">
-            <kbd>L</kbd> play or pause, click the strip to jump
+            or <kbd>L</kbd>, or click the strip to jump
           </span>
         </div>
       )}

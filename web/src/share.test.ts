@@ -1,12 +1,24 @@
 import { describe, expect, it } from 'vitest';
-import { blankSpec } from './data/refine.ts';
 import { decodeShare, encodeShare } from './share.ts';
 import type { ShareState } from './share.ts';
 
 const state: ShareState = {
   v: 1,
   dataset: 'quakes',
-  spec: { ...blankSpec('quakes'), filters: [{ field: 'place', op: 'contains', value: 'Japón ✓' }] },
+  spec: {
+    version: 1,
+    dataset: 'quakes',
+    intent: 'query',
+    mode: 'replace',
+    filters: [{ field: 'place', op: 'contains', value: 'Japón ✓' }],
+    color_by: null,
+    size_by: null,
+    sort: null,
+    limit: null,
+    camera_target: null,
+    timeline: null,
+    view: null,
+  },
   orbit: { yaw: 2.6, pitch: 0.3, distance: 3.2 },
   xray: true,
   day: 120.5,
