@@ -134,6 +134,13 @@ export const config = {
   /** Idle globe spin (rad/s) and idle time before it starts (ms); home view only (start, reset). */
   autoSpinRadPerSec: 0.06,
   autoSpinIdleMs: 4000,
+  /** Time machine: playback speeds (days of data per second) and the default. */
+  timeSpeeds: [1, 7, 30] as const,
+  timeDefaultSpeed: 30,
+  /** How long a new arrival glows, in seconds of playback (scaled by the speed). */
+  timeGlowSec: 2.5,
+  /** Ripples kept for the newest arrivals (count). */
+  timeRipples: 24,
   /** Reset / fly-to animation length (ms). */
   animMs: 1200,
   /** Distance a fly-to ends at unless already closer (scene units). */
