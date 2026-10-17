@@ -14,14 +14,14 @@ ITEMS = load_items()
 
 
 def test_the_set_has_the_documented_mix() -> None:
-    assert len(ITEMS) == 110
-    assert len({i["id"] for i in ITEMS}) == 110
-    assert len({(i["utterance"], str(i["prev_spec"])) for i in ITEMS}) == 110
+    assert len(ITEMS) == 111
+    assert len({i["id"] for i in ITEMS}) == 111
+    assert len({(i["utterance"], str(i["prev_spec"])) for i in ITEMS}) == 111
     mix = Counter(i["tags"][0] for i in ITEMS)
     assert mix == {
         "filter": 30, "encoding": 15, "rank": 10, "time": 10,
         "refine": 20, "noisy": 10, "ambiguous": 5,
-        "timeline": 4, "view": 3, "pointer": 3,
+        "timeline": 5, "view": 3, "pointer": 3,
     }  # fmt: skip
 
 
@@ -96,3 +96,9 @@ def test_timeline_and_view_items_are_scored_by_intent() -> None:
     )  # noqa: E501
     row = score_item(seek, {"spec": wrong, "status": "ok", "sql": None}, schema, None)
     assert not row["result_match"]
+
+
+def test_go_to_a_place_is_still_navigate() -> None:
+    item = {i["id"]: i for i in ITEMS}["v11"]
+    assert item["utterance"] == "go to Chile"
+    assert item["gold_spec"]["intent"] == "navigate"
