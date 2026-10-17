@@ -20,9 +20,10 @@ class Settings(BaseSettings):
     rate_limit_per_min: int = 6
     # Chart clicks and share links (POST /compile, no LLM) per visitor IP per minute.
     compile_rate_limit_per_min: int = 60
-    # AI questions per minute across all visitors (~2.1k tokens each): keeps a Groq free key
-    # (8k tokens/min) under its limit. Repairs can add calls; those 429s become "busy" replies.
-    llm_calls_per_min: int = 3
+    # AI questions per minute across all visitors (~2.1k tokens each). A Groq free key allows
+    # 8k tokens/min, so 5 is a little over on purpose: more questions, and an occasional
+    # provider 429 becomes the friendly "busy" reply. Raise it with a paid tier.
+    llm_calls_per_min: int = 5
 
     @property
     def web_origins(self) -> list[str]:

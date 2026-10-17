@@ -82,7 +82,7 @@ by magnitude", "the ten strongest", "near Japan", "undo", ...).
 | Move cursor, hover a quake | point (index finger up) | mouse |
 | Rotate | pinch and drag | drag |
 | Zoom | pinch with both hands, pull apart / together | wheel |
-| Talk | point with one hand and raise the other, open; or hold your pointing finger still (~1 s) | hold **space**, or type in the box |
+| Talk | point with one hand and raise the other, open; or hold your pointing finger still (~2.5 s) | hold **space**, or type in the box |
 | Undo | say "undo" / "go back" | **Z** |
 | Start over (camera home, filters cleared) | hold one open palm ✋ (1.2 s) | **R** resets the camera |
 | Freeze the scene while repositioning | closed fist ✊ | – |
@@ -129,8 +129,9 @@ Agent environment variables (secrets on the host, never in the web build):
 `LLM_PROVIDER`, `LLM_MODEL`, `LLM_API_KEY`, `WEB_ORIGIN` (comma-separated allowed
 origins), `RATE_LIMIT_PER_MIN` (AI questions per visitor per minute, default 6),
 `COMPILE_RATE_LIMIT_PER_MIN` (chart clicks and share links per visitor, default 60)
-and `LLM_CALLS_PER_MIN` (AI questions from all visitors together, default 3; at ~2.1k
-tokens each that keeps a Groq free key inside its 8k tokens/min). When a limit is hit, visitors see "the AI is busy; ask again in
+and `LLM_CALLS_PER_MIN` (AI questions from all visitors together, default 5; at ~2.1k
+tokens each that is a little over a Groq free key's 8k tokens/min, so a busy minute may get
+an occasional "the AI is busy" reply). When a limit is hit, visitors see "the AI is busy; ask again in
 a minute".
 The image reads its `DatasetSchema` files from
 `/app/data` and listens on `$PORT` (default 8000).

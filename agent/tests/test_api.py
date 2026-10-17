@@ -146,7 +146,9 @@ def test_a_provider_rate_limit_is_a_friendly_clarify(quakes_schema, log_path) ->
 
 
 def test_the_default_llm_budget_fits_a_free_key() -> None:
-    assert settings.llm_calls_per_min <= 3  # ~2.1k tokens per call vs 8k tokens/min
+    # ~2.1k tokens per question vs Groq's free 8k/min: 5 is a little over on purpose (more
+    # questions; an occasional provider 429 becomes the friendly 'busy' reply). Not more.
+    assert 4 <= settings.llm_calls_per_min <= 5
 
 
 def test_bad_requests_are_rejected_and_logged(quakes_schema, log_path) -> None:

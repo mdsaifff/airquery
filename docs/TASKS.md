@@ -293,4 +293,5 @@ on the deployed site. Ask the user to record the hero take.
   - Note: D-021. Pure, tested: classifier (pointing pose, two-hand talk, dwell, still-pinch
     circle, one-hand-only reset), state machine (`circling`, `startOver`), effects,
     `circlePolygon`, gesture study (undo → circle). Needs you: feel on the webcam
-    (`dwellTalkMs` 1200, `circleHoldMs` 600, both in the D debug panel).
+    (`dwellTalkMs` 2500 after first use: 1200 fired while reading a quake card; `circleHoldMs`
+    600; both in the D debug panel). Shared AI budget raised to 5 questions/min.

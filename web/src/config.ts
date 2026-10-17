@@ -58,7 +58,7 @@ export const config = {
     /** Pointing pose: index reach above pinchMinIndexReach and the middle fingertip within this (hand-scale units). */
     pointMiddleMaxReach: 1.2,
     /** Hold a pointing finger still this long to start listening (ms)... */
-    dwellTalkMs: 1200,
+    dwellTalkMs: 2500,
     /** ...within this drift; listening stops past dwellReleaseDrift (hand-scale units). */
     dwellMaxDrift: 0.25,
     dwellReleaseDrift: 0.6,

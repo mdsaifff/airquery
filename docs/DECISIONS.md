@@ -209,7 +209,8 @@ These double as material for LinkedIn posts.
 - **Why:** one input loop (gesture + voice) reaches everything; "put that there" pointing is
   the most natural multimodal move; numbers in replies stay grounded in DuckDB.
 - **Consequences:** the prompt grew to ~2.1k tokens per call (3 new examples, capped at 12),
-  so the shared AI budget defaults to 3 questions/min; a box around "here" cannot cross the
+  so the shared AI budget defaults to 3 questions/min (raised to 5 on 2026-10-17 at the user's
+  request: slightly over the free key, an occasional provider 429 becomes "busy"); a box around "here" cannot cross the
   antimeridian; the pointed lat/lon is now sent to the agent (still no frames or audio). On
   gpt-oss-120b the 11 new eval items plus the existing fly-to items score 13/13 (2026-10-17).
 
@@ -233,7 +234,7 @@ These double as material for LinkedIn posts.
   "here" landed off target; the 🤟 lasso was hard to hold while tracing; 👎 undo was unreliable
   and rarely useful once commands are spoken.
 - **Decision:** talk = keep pointing with one hand and raise the other, open (or hold the pointing
-  finger still ~1.2 s; Space on the keyboard); "here" is the pointing fingertip at that moment.
+  finger still ~2.5 s; Space on the keyboard); "here" is the pointing fingertip at that moment.
   One open palm held 1.2 s starts over (camera home, filters cleared, replay stopped); with two
   hands up an open palm means talk, never start over. Undo is spoken ("undo", "go back") or Z.
   Area selection = pinch and hold still ~0.6 s, then move out to size a circle, release to
