@@ -44,7 +44,7 @@ export interface CompileRequest {
 export interface QuerySpec {
   version: 1;
   dataset: string;
-  intent: 'query' | 'navigate' | 'undo' | 'reset' | 'explain';
+  intent: 'query' | 'navigate' | 'undo' | 'reset' | 'explain' | 'timeline' | 'view';
   mode: 'refine' | 'replace';
   filters: Filter[];
   color_by: string | null;
@@ -52,6 +52,8 @@ export interface QuerySpec {
   sort: Sort | null;
   limit: number | null;
   camera_target: CameraTarget | null;
+  timeline: Timeline | null;
+  view: ViewChange | null;
 }
 /**
  * This interface was referenced by `AirQueryContracts`'s JSON-Schema
@@ -69,6 +71,29 @@ export interface Filter {
 export interface Sort {
   field: string;
   direction: 'asc' | 'desc';
+}
+/**
+ * A time machine command: play / pause / stop the year replay, seek, or change speed.
+ *
+ * This interface was referenced by `AirQueryContracts`'s JSON-Schema
+ * via the `definition` "Timeline".
+ */
+export interface Timeline {
+  action: 'play' | 'pause' | 'stop' | 'seek' | 'speed';
+  date: string | null;
+  speed: ('day' | 'week' | 'month') | null;
+}
+/**
+ * Display switches; set only what changes.
+ *
+ * This interface was referenced by `AirQueryContracts`'s JSON-Schema
+ * via the `definition` "ViewChange".
+ */
+export interface ViewChange {
+  xray: boolean | null;
+  stats: boolean | null;
+  share: boolean | null;
+  mute: boolean | null;
 }
 /**
  * This interface was referenced by `AirQueryContracts`'s JSON-Schema
@@ -127,6 +152,16 @@ export interface ExplainRequest {
   dataset_schema: DatasetSchema | null;
 }
 /**
+ * The globe point under the user's hand or mouse when they spoke ("here").
+ *
+ * This interface was referenced by `AirQueryContracts`'s JSON-Schema
+ * via the `definition` "Pointer".
+ */
+export interface Pointer {
+  lat: number;
+  lon: number;
+}
+/**
  * This interface was referenced by `AirQueryContracts`'s JSON-Schema
  * via the `definition` "QueryRequest".
  */
@@ -134,6 +169,7 @@ export interface QueryRequest {
   dataset: string;
   utterance: string;
   current_spec: QuerySpec | null;
+  pointer: Pointer | null;
   dataset_schema: DatasetSchema | null;
 }
 /**

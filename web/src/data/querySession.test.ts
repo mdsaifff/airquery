@@ -47,6 +47,8 @@ const spec = (over: Partial<QuerySpec>): QuerySpec => ({
   sort: null,
   limit: null,
   camera_target: null,
+  timeline: null,
+  view: null,
   ...over,
 });
 
@@ -108,7 +110,7 @@ describe('voice to scene (mocked agent)', () => {
     await r.session.submit('only deeper than 300 km', 0);
     expect(fetchMock).toHaveBeenCalledOnce();
     const sent = JSON.parse((fetchMock.mock.calls[0] as unknown as [string, { body: string }])[1].body); // prettier-ignore
-    expect(sent).toEqual({ dataset: 'quakes', utterance: 'only deeper than 300 km', current_spec: null, dataset_schema: null }); // prettier-ignore
+    expect(sent).toEqual({ dataset: 'quakes', utterance: 'only deeper than 300 km', current_spec: null, dataset_schema: null, pointer: null }); // prettier-ignore
     expect(r.runs).toEqual([`${DEEP_SQL} [300]`]);
     expect([...r.globe.visible]).toEqual([0, 1, 0, 1]);
     r.globe.update(10_000, 3, 1000); // let the fade finish

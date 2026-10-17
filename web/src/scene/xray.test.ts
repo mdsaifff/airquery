@@ -13,6 +13,8 @@ const spec = (over: Partial<QuerySpec>): QuerySpec => ({
   sort: null,
   limit: null,
   camera_target: null,
+  timeline: null,
+  view: null,
   ...over,
 });
 

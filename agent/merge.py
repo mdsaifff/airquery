@@ -7,7 +7,7 @@ def merge(prev: QuerySpec | None, new: QuerySpec) -> QuerySpec:
     """Apply `new` on top of `prev`.
 
     - replace (or no previous spec, or a different dataset): `new` as is.
-    - undo / reset: returned as is; the frontend's history stack handles them.
+    - undo / reset / timeline / view: returned as is; the browser handles them.
     - refine: a filter on a field replaces earlier filters on that field, other
       filters are kept; color_by, size_by, sort and limit change only when set.
       camera_target is a one-off move and is never carried over.
@@ -15,7 +15,7 @@ def merge(prev: QuerySpec | None, new: QuerySpec) -> QuerySpec:
     if (
         prev is None
         or new.mode == "replace"
-        or new.intent in ("undo", "reset")
+        or new.intent in ("undo", "reset", "timeline", "view")
         or prev.dataset != new.dataset
     ):
         return new

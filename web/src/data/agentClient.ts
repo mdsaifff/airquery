@@ -20,7 +20,7 @@ const Filter = z.object({
 export const QuerySpecSchema = z.object({
   version: z.literal(1),
   dataset: z.string(),
-  intent: z.enum(['query', 'navigate', 'undo', 'reset', 'explain']),
+  intent: z.enum(['query', 'navigate', 'undo', 'reset', 'explain', 'timeline', 'view']),
   mode: z.enum(['refine', 'replace']),
   filters: z.array(Filter),
   color_by: z.string().nullable(),
@@ -32,6 +32,21 @@ export const QuerySpecSchema = z.object({
       lat: z.number().min(-90).max(90),
       lon: z.number().min(-180).max(180),
       label: z.string(),
+    })
+    .nullable(),
+  timeline: z
+    .object({
+      action: z.enum(['play', 'pause', 'stop', 'seek', 'speed']),
+      date: z.string().nullable(),
+      speed: z.enum(['day', 'week', 'month']).nullable(),
+    })
+    .nullable(),
+  view: z
+    .object({
+      xray: z.boolean().nullable(),
+      stats: z.boolean().nullable(),
+      share: z.boolean().nullable(),
+      mute: z.boolean().nullable(),
     })
     .nullable(),
 });

@@ -103,3 +103,17 @@ def test_invalid_current_spec_is_rejected_without_calling_the_llm(
     assert state["status"] == "rejected"
     assert "current_spec is not valid" in state["message"]
     assert mock.calls == []
+
+
+def test_timeline_and_view_produce_no_sql(quakes_schema: DatasetSchema) -> None:
+    for out in (
+        {
+            "dataset": "quakes",
+            "intent": "timeline",
+            "timeline": {"action": "play", "speed": "month"},
+        },
+        {"dataset": "quakes", "intent": "view", "view": {"xray": True}},
+    ):
+        state, _ = run(quakes_schema, [LLMReply(spec=out)])
+        assert state["status"] == "ok" and state["sql"] is None
+        assert state["spec"].intent == out["intent"]

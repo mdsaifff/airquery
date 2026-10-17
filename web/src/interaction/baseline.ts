@@ -74,6 +74,8 @@ export function buildSpec(form: BaselineForm, dataset = 'quakes'): QuerySpec {
     sort: top ? { field: 'magnitude', direction: 'desc' } : null,
     limit: top,
     camera_target: null,
+    timeline: null,
+    view: null,
   };
 }
 

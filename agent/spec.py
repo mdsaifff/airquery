@@ -48,10 +48,34 @@ class CameraTarget(Contract):
     label: str
 
 
+class Timeline(Contract):
+    """A time machine command: play / pause / stop the year replay, seek, or change speed."""
+
+    action: Literal["play", "pause", "stop", "seek", "speed"]
+    date: str | None = None  # ISO date, for seek
+    speed: Literal["day", "week", "month"] | None = None  # playback speed per second
+
+
+class ViewChange(Contract):
+    """Display switches; set only what changes."""
+
+    xray: bool | None = None
+    stats: bool | None = None
+    share: bool | None = None
+    mute: bool | None = None
+
+
+class Pointer(Contract):
+    """The globe point under the user's hand or mouse when they spoke ("here")."""
+
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
+
+
 class QuerySpec(Contract):
     version: Literal[1] = 1
     dataset: str
-    intent: Literal["query", "navigate", "undo", "reset", "explain"] = "query"
+    intent: Literal["query", "navigate", "undo", "reset", "explain", "timeline", "view"] = "query"
     mode: Literal["refine", "replace"] = "refine"
     filters: list[Filter] = []
     color_by: str | None = None
@@ -59,6 +83,8 @@ class QuerySpec(Contract):
     sort: Sort | None = None
     limit: int | None = Field(default=None, ge=1, le=5000)
     camera_target: CameraTarget | None = None
+    timeline: Timeline | None = None
+    view: ViewChange | None = None
 
 
 # --- HTTP API ---------------------------------------------------------------
@@ -68,6 +94,8 @@ class QueryRequest(Contract):
     dataset: str
     utterance: str = Field(min_length=1, max_length=500)
     current_spec: QuerySpec | None = None
+    # The globe point under the hand or mouse when the user spoke ("here"), if any.
+    pointer: Pointer | None = None
     # Only for user-dropped CSVs (dataset "user_*"): the schema inferred in the browser.
     dataset_schema: "DatasetSchema | None" = None
 

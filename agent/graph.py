@@ -136,7 +136,7 @@ def build_graph(llm: LLMAdapter, max_retries: int = MAX_RETRIES):
         spec = state["spec"]
         assert spec is not None
         t0 = time.perf_counter()
-        if spec.intent in ("undo", "reset"):  # handled by the frontend's history stack
+        if spec.intent in ("undo", "reset", "timeline", "view"):  # handled in the browser
             return {"status": "ok", "sql": None, "params": []}
         query = compile_spec(spec, state["schema"])  # re-validates: defense in depth
         return {

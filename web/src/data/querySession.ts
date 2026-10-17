@@ -74,6 +74,7 @@ export class QuerySession {
       utterance,
       current_spec: this.current,
       dataset_schema: deps.datasetSchema ?? null,
+      pointer: null, // set from deps in the next task
     };
     await this.handle(() => deps.ask(req), endedAt);
   }

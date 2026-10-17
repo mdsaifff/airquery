@@ -112,3 +112,32 @@ def test_categorical_text_columns_can_drive_colour(quakes_schema: DatasetSchema)
     schema = quakes_schema.model_copy(update={"columns": cols})
     assert validate_spec(spec(color_by="mag_type"), schema) == []
     assert validate_spec(spec(size_by="mag_type"), schema)  # size stays numeric-only
+
+
+def test_timeline_specs_are_checked(quakes_schema) -> None:
+    ok = spec(intent="timeline", timeline={"action": "seek", "date": "2024-03-01"})
+    assert validate_spec(ok, quakes_schema) == []
+    late = spec(intent="timeline", timeline={"action": "seek", "date": "2031-01-01"})
+    assert any("outside the data" in e for e in validate_spec(late, quakes_schema))
+    no_date = spec(intent="timeline", timeline={"action": "seek"})
+    assert any("needs a date" in e for e in validate_spec(no_date, quakes_schema))
+    no_speed = spec(intent="timeline", timeline={"action": "speed"})
+    assert any("day, week or month" in e for e in validate_spec(no_speed, quakes_schema))
+    missing = spec(intent="timeline")
+    assert any("needs a timeline" in e for e in validate_spec(missing, quakes_schema))
+
+
+def test_timeline_needs_a_time_column(quakes_schema) -> None:
+    no_time = quakes_schema.model_copy(
+        update={"columns": [c for c in quakes_schema.columns if c.type != "timestamp"]}
+    )
+    s = spec(intent="timeline", timeline={"action": "play"})
+    assert any("no time column" in e for e in validate_spec(s, no_time))
+
+
+def test_view_specs_are_checked(quakes_schema) -> None:
+    assert validate_spec(spec(intent="view", view={"xray": True}), quakes_schema) == []
+    empty = spec(intent="view", view={})
+    assert any("at least one of" in e for e in validate_spec(empty, quakes_schema))
+    stray = spec(intent="query", view={"xray": True})
+    assert any("only for intent view" in e for e in validate_spec(stray, quakes_schema))

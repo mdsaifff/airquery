@@ -97,4 +97,35 @@ def validate_spec(spec: QuerySpec, schema: DatasetSchema) -> list[str]:
         errors.append(f"unknown sort field {spec.sort.field!r}")
     if spec.intent == "navigate" and spec.camera_target is None:
         errors.append("intent navigate needs a camera_target with lat, lon and label")
+    return errors + _check_timeline_view(spec, schema)
+
+
+def _check_timeline_view(spec: QuerySpec, schema: DatasetSchema) -> list[str]:
+    errors: list[str] = []
+    t, v = spec.timeline, spec.view
+    if spec.intent == "timeline":
+        time_col = next((c for c in schema.columns if c.type == "timestamp"), None)
+        if t is None:
+            errors.append("intent timeline needs a timeline object {action, date, speed}")
+        elif time_col is None:
+            errors.append("this dataset has no time column, so there is no timeline to play")
+        else:
+            if t.action == "seek":
+                if t.date is None or not _is_date(t.date):
+                    errors.append("timeline seek needs a date like 2024-03-01")
+                elif isinstance(time_col.min, str) and isinstance(time_col.max, str):
+                    lo, hi = time_col.min[:10], time_col.max[:10]
+                    if not lo <= t.date[:10] <= hi:
+                        errors.append(
+                            f"timeline date {t.date[:10]} is outside the data ({lo}..{hi})"
+                        )
+            if t.action == "speed" and t.speed is None:
+                errors.append("timeline speed needs speed: day, week or month")
+    elif t is not None:
+        errors.append("timeline is only for intent timeline")
+    if spec.intent == "view":
+        if v is None or all(x is None for x in (v.xray, v.stats, v.share, v.mute)):
+            errors.append("intent view needs at least one of xray, stats, share, mute")
+    elif v is not None:
+        errors.append("view is only for intent view")
     return errors

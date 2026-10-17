@@ -370,6 +370,29 @@
       "title": "GeoPosition",
       "type": "object"
     },
+    "Pointer": {
+      "description": "The globe point under the user's hand or mouse when they spoke (\"here\").",
+      "properties": {
+        "lat": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Lat",
+          "type": "number"
+        },
+        "lon": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Lon",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lat",
+        "lon"
+      ],
+      "title": "Pointer",
+      "type": "object"
+    },
     "QueryRequest": {
       "properties": {
         "dataset": {
@@ -393,6 +416,17 @@
           ],
           "default": null
         },
+        "pointer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Pointer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "dataset_schema": {
           "anyOf": [
             {
@@ -409,6 +443,7 @@
         "dataset",
         "utterance",
         "current_spec",
+        "pointer",
         "dataset_schema"
       ],
       "title": "QueryRequest",
@@ -523,7 +558,9 @@
             "navigate",
             "undo",
             "reset",
-            "explain"
+            "explain",
+            "timeline",
+            "view"
           ],
           "title": "Intent",
           "type": "string"
@@ -604,6 +641,28 @@
             }
           ],
           "default": null
+        },
+        "timeline": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timeline"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "view": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ViewChange"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -616,7 +675,9 @@
         "size_by",
         "sort",
         "limit",
-        "camera_target"
+        "camera_target",
+        "timeline",
+        "view"
       ],
       "title": "QuerySpec",
       "type": "object"
@@ -642,6 +703,119 @@
         "direction"
       ],
       "title": "Sort",
+      "type": "object"
+    },
+    "Timeline": {
+      "description": "A time machine command: play / pause / stop the year replay, seek, or change speed.",
+      "properties": {
+        "action": {
+          "enum": [
+            "play",
+            "pause",
+            "stop",
+            "seek",
+            "speed"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "speed": {
+          "anyOf": [
+            {
+              "enum": [
+                "day",
+                "week",
+                "month"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Speed"
+        }
+      },
+      "required": [
+        "action",
+        "date",
+        "speed"
+      ],
+      "title": "Timeline",
+      "type": "object"
+    },
+    "ViewChange": {
+      "description": "Display switches; set only what changes.",
+      "properties": {
+        "xray": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Xray"
+        },
+        "stats": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stats"
+        },
+        "share": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Share"
+        },
+        "mute": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mute"
+        }
+      },
+      "required": [
+        "xray",
+        "stats",
+        "share",
+        "mute"
+      ],
+      "title": "ViewChange",
       "type": "object"
     },
     "XyzPosition": {

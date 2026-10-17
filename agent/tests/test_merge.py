@@ -76,3 +76,10 @@ def test_undo_and_reset_pass_through() -> None:
 def test_other_dataset_is_not_merged() -> None:
     new = QuerySpec.model_validate({"dataset": "papers"})
     assert merge(PREV, new) == new
+
+
+def test_timeline_and_view_pass_through_untouched() -> None:
+    t = spec(intent="timeline", timeline={"action": "play"})
+    assert merge(PREV, t) == t
+    v = spec(intent="view", view={"xray": True})
+    assert merge(PREV, v) == v

@@ -16,6 +16,8 @@ export function blankSpec(dataset: string): QuerySpec {
     sort: null,
     limit: null,
     camera_target: null,
+    timeline: null,
+    view: null,
   };
 }
 
