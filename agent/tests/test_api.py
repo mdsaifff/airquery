@@ -106,7 +106,8 @@ def test_rate_limit_per_ip(quakes_schema, log_path) -> None:
     assert ask(c, "a").status_code == 200  # cached, still counts
     r = ask(c, "a")
     assert r.status_code == 429
-    assert r.json()["status"] == "clarify" and "suggestion chip" in r.json()["message"]
+    assert r.json()["status"] == "clarify" and "busy" in r.json()["message"]
+    assert "chip" not in r.json()["message"]  # chips were removed
     assert log_lines(log_path)[-1]["errors"] == ["rate limited"]
 
 
@@ -140,7 +141,8 @@ def test_a_provider_rate_limit_is_a_friendly_clarify(quakes_schema, log_path) ->
     reg = SchemaRegistry({"quakes": quakes_schema})
     c = TestClient(create_app(llm=MockLLM(fn=busy), registry=reg, log_path=log_path))
     body = ask(c, "deeper than 300").json()
-    assert body["status"] == "clarify" and "suggestion chip" in body["message"]
+    assert body["status"] == "clarify" and "busy" in body["message"]
+    assert "chip" not in body["message"]  # chips were removed
 
 
 def test_the_default_llm_budget_fits_a_free_key() -> None:

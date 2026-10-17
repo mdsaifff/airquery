@@ -18,7 +18,7 @@ from spec import DatasetSchema, QuerySpec, Scalar
 from validate import validate_spec
 
 MAX_RETRIES = 2
-BUSY = "The AI is busy right now. Try a suggestion chip, or ask again in a minute."
+BUSY = "The AI is busy right now; ask again in a minute."
 
 Status = Literal["ok", "clarify", "rejected"]
 

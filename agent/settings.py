@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     web_origin: str = "http://localhost:5173,http://localhost:4173"
     # AI questions (POST /query) per visitor IP per minute.
     rate_limit_per_min: int = 6
-    # Chips, chart clicks and share links (POST /compile, no LLM) per visitor IP per minute.
+    # Chart clicks and share links (POST /compile, no LLM) per visitor IP per minute.
     compile_rate_limit_per_min: int = 60
     # AI questions per minute across all visitors (~1.6k tokens each): keeps a Groq free key
     # (8k tokens/min) under its limit. Repairs can add calls; those 429s become "busy" replies.
