@@ -20,10 +20,13 @@ including where gestures lose.
   2 minutes of talking.
 
 ## 3. Query accuracy
-- Set: `eval/utterances.jsonl`, 100 items:
-  `{"id", "utterance", "prev_spec", "gold_spec", "tags"}`.
+- Set: `eval/utterances.jsonl`, 110 items:
+  `{"id", "utterance", "prev_spec", "gold_spec", "tags"}` (+ optional `"pointer"`).
   Mix: 30 filters, 15 encodings, 10 ranks, 10 time, 20 refine chains,
-  10 noisy transcripts (speech errors, typos), 5 ambiguous (gold = clarify).
+  10 noisy transcripts (speech errors, typos), 5 ambiguous (gold = clarify),
+  and (D-019) 4 timeline, 3 view and 3 pointer ("here") items. Timeline and view
+  items are scored on the intent and its fields (they run no SQL); compare
+  per-category numbers with reports made before 2026-10-17, not totals.
 - Metrics: spec exact match (after normalizing filter order); result-set
   match (same row ids from DuckDB); clarify precision/recall on the
   ambiguous items; invalid SQL reaching DuckDB (must be 0).

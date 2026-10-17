@@ -1,0 +1,458 @@
+{
+  "meta": {
+    "date": "2026-10-17",
+    "model": "openai/gpt-oss-120b",
+    "provider": "groq",
+    "repair": true,
+    "seconds": 41.5
+  },
+  "summary": {
+    "n": 10,
+    "spec_exact_match": 1.0,
+    "result_set_match": 1.0,
+    "by_category": {
+      "pointer": {
+        "n": 3,
+        "spec": 1.0,
+        "result": 1.0
+      },
+      "timeline": {
+        "n": 4,
+        "spec": 1.0,
+        "result": 1.0
+      },
+      "view": {
+        "n": 3,
+        "spec": 1.0,
+        "result": 1.0
+      }
+    },
+    "clarify": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "invalid_sql": 0,
+    "repairs_used": 0,
+    "latency_ms": {
+      "total_p50": 1184.4,
+      "total_p90": 15854.2,
+      "llm_p50": 1175.5,
+      "llm_p90": 15849.8
+    },
+    "tokens": {
+      "input": 21436,
+      "output": 822
+    },
+    "cost_usd_per_100_queries": null
+  },
+  "rows": [
+    {
+      "id": "v01",
+      "tags": [
+        "timeline"
+      ],
+      "utterance": "play the year",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "intent": "timeline",
+        "timeline": {
+          "action": "play"
+        }
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "intent": "timeline",
+        "timeline": {
+          "action": "play"
+        }
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1189.5,
+        "validate": 0.1,
+        "total": 1211.9
+      },
+      "tokens": {
+        "input": 2139,
+        "output": 83
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "v02",
+      "tags": [
+        "timeline"
+      ],
+      "utterance": "pause",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "intent": "timeline",
+        "timeline": {
+          "action": "pause"
+        }
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "intent": "timeline",
+        "timeline": {
+          "action": "pause"
+        }
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1175.5,
+        "validate": 0.1,
+        "total": 1184.4
+      },
+      "tokens": {
+        "input": 2137,
+        "output": 91
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "v03",
+      "tags": [
+        "timeline"
+      ],
+      "utterance": "go to March",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "intent": "timeline",
+        "timeline": {
+          "action": "seek",
+          "date": "2024-03-01"
+        }
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "intent": "timeline",
+        "timeline": {
+          "action": "seek",
+          "date": "2024-03-01"
+        }
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 495.1,
+        "validate": 2.1,
+        "total": 502.2
+      },
+      "tokens": {
+        "input": 2139,
+        "output": 61
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "v04",
+      "tags": [
+        "timeline"
+      ],
+      "utterance": "replay it a week per second",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "intent": "timeline",
+        "timeline": {
+          "action": "play",
+          "speed": "week"
+        }
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "intent": "timeline",
+        "timeline": {
+          "action": "play",
+          "speed": "week"
+        }
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 567.6,
+        "validate": 0.1,
+        "total": 573.8
+      },
+      "tokens": {
+        "input": 2143,
+        "output": 91
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "v05",
+      "tags": [
+        "view"
+      ],
+      "utterance": "turn on x-ray",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "intent": "view",
+        "view": {
+          "xray": true
+        }
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "intent": "view",
+        "view": {
+          "xray": true
+        }
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 477.9,
+        "validate": 0.1,
+        "total": 482.7
+      },
+      "tokens": {
+        "input": 2140,
+        "output": 91
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "v06",
+      "tags": [
+        "view"
+      ],
+      "utterance": "hide the stats",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "intent": "view",
+        "view": {
+          "stats": false
+        }
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "intent": "view",
+        "view": {
+          "stats": false
+        }
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 18364.3,
+        "validate": 0.1,
+        "total": 18371.4
+      },
+      "tokens": {
+        "input": 2139,
+        "output": 83
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "v07",
+      "tags": [
+        "view"
+      ],
+      "utterance": "be quiet",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "intent": "view",
+        "view": {
+          "mute": true
+        }
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "intent": "view",
+        "view": {
+          "mute": true
+        }
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 525.0,
+        "validate": 0.1,
+        "total": 528.8
+      },
+      "tokens": {
+        "input": 2138,
+        "output": 79
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "v08",
+      "tags": [
+        "pointer"
+      ],
+      "utterance": "show only the quakes around here",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "lat",
+            "op": "between",
+            "value": [
+              -40.5,
+              -25.5
+            ]
+          },
+          {
+            "field": "lon",
+            "op": "between",
+            "value": [
+              -78.5,
+              -63.5
+            ]
+          }
+        ]
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "filters": [
+          {
+            "field": "lat",
+            "op": "between",
+            "value": [
+              -40.5,
+              -25.5
+            ]
+          },
+          {
+            "field": "lon",
+            "op": "between",
+            "value": [
+              -78.5,
+              -63.5
+            ]
+          }
+        ]
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 15849.8,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 15854.2
+      },
+      "tokens": {
+        "input": 2162,
+        "output": 114
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "v09",
+      "tags": [
+        "pointer"
+      ],
+      "utterance": "fly here",
+      "status": "ok",
+      "message": null,
+      "retries": 0,
+      "pred_spec": {
+        "dataset": "quakes",
+        "intent": "navigate",
+        "camera_target": {
+          "lat": 36.0,
+          "lon": 140.0,
+          "label": "here"
+        }
+      },
+      "gold_spec": {
+        "dataset": "quakes",
+        "intent": "navigate",
+        "camera_target": {
+          "lat": 36.0,
+          "lon": 140.0,
+          "label": "here"
+        }
+      },
+      "gold_clarify": false,
+      "predicted_clarify": false,
+      "timings_ms": {
+        "llm": 1305.9,
+        "validate": 0.1,
+        "compile": 0.1,
+        "total": 1315.0
+      },
+      "tokens": {
+        "input": 2157,
+        "output": 81
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    },
+    {
+      "id": "v10",
+      "tags": [
+        "pointer"
+      ],
+      "utterance": "what is going on around here?",
+      "status": "clarify",
+      "message": "Point at a place on the globe first, then ask.",
+      "retries": 0,
+      "pred_spec": null,
+      "gold_spec": null,
+      "gold_clarify": true,
+      "predicted_clarify": true,
+      "timings_ms": {
+        "llm": 1359.2,
+        "total": 1361.9
+      },
+      "tokens": {
+        "input": 2142,
+        "output": 48
+      },
+      "invalid_sql": false,
+      "spec_match": true,
+      "result_match": true
+    }
+  ]
+}

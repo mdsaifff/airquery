@@ -222,7 +222,7 @@ def main() -> None:
     ap.add_argument("--llm", choices=["real", "gold", "fake"], default="real")
     ap.add_argument("--model", help="override LLM_MODEL for model-tier ablations")
     ap.add_argument("--no-repair", action="store_true", help="ablation: no repair retries")
-    ap.add_argument("--tag", help="only items whose first tag matches")
+    ap.add_argument("--tag", help="only items whose first tag is one of these (comma list)")
     ap.add_argument("--limit", type=int)
     ap.add_argument("--sample", type=int, help="N evenly spaced items across all categories")
     ap.add_argument("--price-in", type=float, help="USD per 1M input tokens")
@@ -231,7 +231,7 @@ def main() -> None:
 
     items = load_items()
     if args.tag:
-        items = [i for i in items if i["tags"][0] == args.tag]
+        items = [i for i in items if i["tags"][0] in args.tag.split(",")]
     items = items[: args.limit] if args.limit else items
     if args.sample:
         items = [items[i * len(items) // args.sample] for i in range(min(args.sample, len(items)))]

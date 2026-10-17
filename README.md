@@ -53,7 +53,7 @@ Measured on the demo laptop (Chrome, plugged in). Method: `docs/EVAL.md`.
 | Rendering | 60 fps | pending: HUD readout during a 2-min session |
 | Hand tracking | ≥ 25 fps | pending: HUD readout |
 | Voice → render latency (median) | < 1.5 s | pending: `make latency` (press **M** in the app for frontend timings) |
-| Query accuracy, result-set match (100 utterances) | ≥ 90 % | pending: `make eval` |
+| Query accuracy, result-set match (110 utterances) | ≥ 90 % | pending: `make eval` |
 | Gesture accuracy per gesture (5 people × 7 gestures × 20 tries) | ≥ 95 % | pending: study panel (**G**) + `make gestures` |
 | False triggers while talking | < 1 per 5 min | pending: study panel counter |
 | Invalid SQL reaching DuckDB | 0 | 0 by construction (every spec is validated, then compiled from a whitelist); checked by `make eval` |
@@ -91,9 +91,12 @@ by magnitude", "the ten strongest", "near Japan", "undo", ...).
 | X-ray: see quakes at their real depth | – | **X**, or the button in the legend |
 | What's this? (spoken summary) | say it, or hold the custom gesture | type it |
 
-Click a bar in the dashboard to filter (no AI needed; **Z** undoes it). ▶ on the strip or
-**L** replays the year; click the strip to jump to a date, ✕ or **Esc** leaves the replay.
-*Share this view* copies a link that reopens the same query, camera, X-ray and date.
+Hold ✌ (or Space) and speak. Besides filters you can say *play the year*, *pause*, *go to
+March*, *faster*, *stop the replay*, *X-ray on*, *show / hide the stats*, *share this view*,
+*be quiet*. Point at the globe and say *what happened here?*, *only quakes around here* or
+*fly here*. The globe answers out loud and in a subtitle (🔊 toggles the voice). The
+dashboard lights up what your filter covers. Quiet fallbacks: click the strip to jump to a
+date, **L** plays or pauses, **Esc** leaves the replay; *Share this view* copies a link.
 
 Study tools: **G** gesture study + false-trigger counter, **B** mouse baseline
 (dropdown filters), **T** task timer, **M** download frontend timings,
@@ -126,8 +129,8 @@ Agent environment variables (secrets on the host, never in the web build):
 `LLM_PROVIDER`, `LLM_MODEL`, `LLM_API_KEY`, `WEB_ORIGIN` (comma-separated allowed
 origins), `RATE_LIMIT_PER_MIN` (AI questions per visitor per minute, default 6),
 `COMPILE_RATE_LIMIT_PER_MIN` (chart clicks and share links per visitor, default 60)
-and `LLM_CALLS_PER_MIN` (AI calls from all visitors together, default 20; keeps a Groq free
-key inside its 8k tokens/min). When a limit is hit, visitors see "the AI is busy; ask again in
+and `LLM_CALLS_PER_MIN` (AI questions from all visitors together, default 3; at ~2.1k
+tokens each that keeps a Groq free key inside its 8k tokens/min). When a limit is hit, visitors see "the AI is busy; ask again in
 a minute".
 The image reads its `DatasetSchema` files from
 `/app/data` and listens on `$PORT` (default 8000).

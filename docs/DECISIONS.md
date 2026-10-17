@@ -198,3 +198,18 @@ These double as material for LinkedIn posts.
 - **Consequences:** reverses part of D-017; visitors get a camera prompt on arrival. When the
   AI is rate-limited the reply is "ask again in a minute" (there is no chip to fall back on).
 
+## D-019 Voice first: every action by voice, "here" from pointing, spoken replies
+- **Context:** the user wants gesture → listen → voice to be the way to use the app, not
+  clicking (after D-018 removed the chips).
+- **Decision:** QuerySpec gains `timeline` and `view` intents (no SQL) and the request a
+  `pointer` (lat/lon under the hand or mouse when listening starts, or when a typed command
+  is sent). The browser speaks and subtitles a reply after every command, built from the
+  data on screen. Dashboard bars and timeline buttons are no longer clickable; strip clicks,
+  L and Esc remain as fallbacks.
+- **Why:** one input loop (gesture + voice) reaches everything; "put that there" pointing is
+  the most natural multimodal move; numbers in replies stay grounded in DuckDB.
+- **Consequences:** the prompt grew to ~2.1k tokens per call (3 new examples, capped at 12),
+  so the shared AI budget defaults to 3 questions/min; a box around "here" cannot cross the
+  antimeridian; the pointed lat/lon is now sent to the agent (still no frames or audio). On
+  gpt-oss-120b the 10 new eval items score 10/10 (2026-10-17).
+
