@@ -1,0 +1,17 @@
+[
+  { "label": "Deepest quakes", "pinned": true, "spec": { "filters": [{ "field": "depth_km", "op": ">", "value": 300 }], "color_by": "depth_km" } },
+  { "label": "Biggest of 2024", "pinned": true, "spec": { "sort": { "field": "magnitude", "direction": "desc" }, "limit": 25 } },
+  { "label": "Andes", "pinned": true, "spec": { "filters": [{ "field": "lat", "op": "between", "value": [-45, 10] }, { "field": "lon", "op": "between", "value": [-82, -62] }] } },
+  { "label": "Japan", "pinned": true, "spec": { "filters": [{ "field": "place", "op": "contains", "value": "Japan" }] } },
+  { "label": "Shallow & strong", "pinned": true, "spec": { "filters": [{ "field": "depth_km", "op": "<", "value": 30 }, { "field": "magnitude", "op": ">=", "value": 6 }] } },
+  { "label": "Colour by magnitude", "pinned": true, "spec": { "color_by": "magnitude" } },
+  { "label": "Chile", "spec": { "filters": [{ "field": "place", "op": "contains", "value": "Chile" }] } },
+  { "label": "Indonesia", "spec": { "filters": [{ "field": "place", "op": "contains", "value": "Indonesia" }] } },
+  { "label": "Tonga", "spec": { "filters": [{ "field": "place", "op": "contains", "value": "Tonga" }] } },
+  { "label": "Alaska", "spec": { "filters": [{ "field": "place", "op": "contains", "value": "Alaska" }] } },
+  { "label": "Philippines", "spec": { "filters": [{ "field": "place", "op": "contains", "value": "Philippines" }] } },
+  { "label": "M6 and up", "spec": { "filters": [{ "field": "magnitude", "op": ">=", "value": 6 }], "color_by": "magnitude" } },
+  { "label": "December", "spec": { "filters": [{ "field": "time", "op": "last_days", "value": 31 }] } },
+  { "label": "Deep under Fiji", "spec": { "filters": [{ "field": "place", "op": "contains", "value": "Fiji" }, { "field": "depth_km", "op": ">", "value": 400 }] } },
+  { "label": "Strongest 50", "spec": { "sort": { "field": "magnitude", "direction": "desc" }, "limit": 50, "color_by": "depth_km" } }
+]
