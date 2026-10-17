@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { DatasetSchema } from '../contracts/contracts.ts';
 import type { Columns } from '../data/arrow.ts';
 import {
-  bands, byMonth, computeDashboard, filterFor, histogram, niceWidth, region, topRegions,
+  bands, byMonth, computeDashboard, coveredBars, histogram, niceWidth, region, topRegions,
 } from './dashboard.ts'; // prettier-ignore
 import type { Chart } from './dashboard.ts';
 
@@ -52,30 +52,6 @@ describe('dashboard maths', () => {
       ['Chile', 1],
     ]);
   });
-
-  it('turns a clicked bar into a filter', () => {
-    const range: Chart = {
-      key: 'size',
-      title: 'Magnitude',
-      field: 'magnitude',
-      kind: 'range',
-      bars: [],
-    };
-    expect(filterFor(range, { label: '5', count: 1, lo: 5, hi: 5.5, closed: false })).toEqual({
-      field: 'magnitude',
-      op: 'between',
-      value: [5, 5.499],
-    });
-    const time: Chart = { ...range, key: 'time', field: 'time', kind: 'time' };
-    const mar = { label: 'Mar', count: 1, lo: Date.UTC(2024, 2, 1), hi: Date.UTC(2024, 3, 1) - 1000, closed: true }; // prettier-ignore
-    expect(filterFor(time, mar).value).toEqual(['2024-03-01T00:00:00', '2024-03-31T23:59:59']);
-    const text: Chart = { ...range, key: 'text', field: 'place', kind: 'text' };
-    expect(filterFor(text, { label: 'Japan', count: 2, lo: 0, hi: 0, closed: true })).toEqual({
-      field: 'place',
-      op: 'contains',
-      value: 'Japan',
-    });
-  });
 });
 
 const quakeSchema = {
@@ -124,5 +100,29 @@ describe('computeDashboard', () => {
     const d = computeDashboard(schema, cols, all(3));
     expect(d.charts.map((c) => c.key)).toEqual(['size']);
     expect(d.medianDepth).toBeNull();
+  });
+});
+
+describe('coveredBars', () => {
+  const bars = (edges: number[]) => edges.slice(0, -1).map((lo, i) => ({ label: String(lo), count: 1, lo, hi: edges[i + 1], closed: i === edges.length - 2 })); // prettier-ignore
+  const mag: Chart = { key: 'size', title: 'Magnitude', field: 'magnitude', kind: 'range', bars: bars([4.5, 5, 5.5, 6, 6.5, 7, 7.5]) }; // prettier-ignore
+
+  it('lights the bars a filter on the chart field covers', () => {
+    expect([...coveredBars(mag, [{ field: 'magnitude', op: '>=', value: 6 }])]).toEqual([3, 4, 5]);
+    expect([...coveredBars(mag, [{ field: 'magnitude', op: 'between', value: [5, 5.9] }])]).toEqual(
+      [1, 2],
+    );
+    expect(coveredBars(mag, [{ field: 'depth_km', op: '>', value: 300 }]).size).toBe(0);
+  });
+
+  it('lights regions by contains and months by date range', () => {
+    const regions: Chart = { key: 'text', title: 'Top regions', field: 'place', kind: 'text', bars: [{ label: 'Japan', count: 2, lo: 0, hi: 0, closed: true }, { label: 'Chile', count: 1, lo: 0, hi: 0, closed: true }] }; // prettier-ignore
+    expect([...coveredBars(regions, [{ field: 'place', op: 'contains', value: 'japan' }])]).toEqual(
+      [0],
+    );
+    const months: Chart = { key: 'time', title: 'By month', field: 'time', kind: 'time', bars: [0, 1, 2].map((m) => ({ label: String(m), count: 1, lo: Date.UTC(2024, m, 1), hi: Date.UTC(2024, m + 1, 1) - 1000, closed: true })) }; // prettier-ignore
+    expect([...coveredBars(months, [{ field: 'time', op: '>=', value: '2024-02-01' }])]).toEqual([
+      1, 2,
+    ]);
   });
 });

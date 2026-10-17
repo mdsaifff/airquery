@@ -145,6 +145,24 @@ export const config = {
   timeGlowSec: 2.5,
   /** Ripples kept for the newest arrivals (count). */
   timeRipples: 24,
+  /** "Around here": half the side of the box around the pointed spot (degrees). */
+  hereHalfDeg: 7.5,
+  /** How long the pin under "here" stays after listening ends (ms). */
+  pinShowMs: 5000,
+  /** Spoken-reply subtitles: base time on screen plus time per character (ms). */
+  subtitleMs: { base: 2500, perChar: 45 },
+  /** "Try saying …" examples under the talk bar, and how long each shows (ms). */
+  voiceHints: [
+    'play the year',
+    'only magnitude 6 and up',
+    'what happened here?',
+    'X-ray on',
+    'go to March',
+    'show only quakes around here',
+    'deeper than 300 km',
+    'hide the stats',
+  ],
+  voiceHintMs: 6000,
   /** Reset / fly-to animation length (ms). */
   animMs: 1200,
   /** Distance a fly-to ends at unless already closer (scene units). */

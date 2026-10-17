@@ -3,7 +3,6 @@
 import type { DatasetSchema } from '../contracts/contracts.ts';
 import { range } from '../data/arrow.ts';
 import type { Columns } from '../data/arrow.ts';
-import type { SpecFilter } from '../data/refine.ts';
 
 /** One bar: [lo, hi) — or [lo, hi] when closed (the last bin, months, regions). */
 export interface Bar {
@@ -180,13 +179,30 @@ export function computeDashboard(
   return { count, maxSize: size.max, medianDepth: depth.median, charts };
 }
 
-const iso = (ms: number) => new Date(ms).toISOString().slice(0, 19);
-const round3 = (v: number) => Math.round(v * 1000) / 1000;
+type Filter = { field: string; op: string; value: number | string | (number | string)[] };
+const asNum = (v: number | string) => (typeof v === 'number' ? v : Date.parse(v.length === 10 ? `${v}T00:00:00Z` : `${v}Z`)); // prettier-ignore
 
-/** The filter a click on `bar` applies (between for ranges and months, contains for regions). */
-export function filterFor(chart: Chart, bar: Bar): SpecFilter {
-  if (chart.kind === 'text') return { field: chart.field, op: 'contains', value: bar.label };
-  if (chart.kind === 'time')
-    return { field: chart.field, op: 'between', value: [iso(bar.lo), iso(bar.hi)] };
-  return { field: chart.field, op: 'between', value: [round3(bar.lo), round3(bar.closed ? bar.hi : bar.hi - 0.001)] }; // prettier-ignore
+/** The bars a filter on this chart's field covers (lit up after a spoken filter). */
+export function coveredBars(chart: Chart, filters: readonly Filter[]): Set<number> {
+  const out = new Set<number>();
+  for (const f of filters) {
+    if (f.field !== chart.field) continue;
+    chart.bars.forEach((b, i) => {
+      if (chart.kind === 'text') {
+        if (f.op === 'contains' && b.label.toLowerCase().includes(String(f.value).toLowerCase()))
+          out.add(i);
+        return;
+      }
+      const v = f.value;
+      const [lo, hi] = Array.isArray(v) ? [asNum(v[0]), asNum(v[1])] : [asNum(v), asNum(v)];
+      const hit =
+        f.op === 'between' ? (b.closed ? b.hi >= lo : b.hi > lo) && b.lo <= hi
+        : f.op === '>' || f.op === '>=' ? b.hi > lo
+        : f.op === '<' || f.op === '<=' ? b.lo < hi
+        : f.op === '=' ? b.lo <= lo && lo <= b.hi
+        : false; // prettier-ignore
+      if (hit) out.add(i);
+    });
+  }
+  return out;
 }

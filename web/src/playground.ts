@@ -1,10 +1,8 @@
 // Playground release wiring: the dashboard, the time machine and
 // share links. runtime.ts only calls these hooks; the logic lives in pure modules.
 import { config } from './config.ts';
-import { refine } from './data/refine.ts';
 import type { Datasets } from './datasets.ts';
-import { computeDashboard, filterFor } from './hud/dashboard.ts';
-import type { Bar, Chart } from './hud/dashboard.ts';
+import { computeDashboard } from './hud/dashboard.ts';
 import { timeRange } from './hud/seismogram.ts';
 import { hudStore, toast } from './hud/store.ts';
 import type { LoadedDataset } from './scene/loadDataset.ts';
@@ -52,12 +50,6 @@ export class Playground {
   onView(d: LoadedDataset): void {
     hudStore.dashboard = computeDashboard(d.schema, d.base, d.cloud.visible);
     this.time.onView(d.cloud.visible);
-  }
-
-  pickBar(chart: Chart, bar: Bar): void {
-    const { datasets } = this.host;
-    const s = datasets.session();
-    void s.applySpec(refine(s.current, datasets.active, filterFor(chart, bar)));
   }
 
   /** "Replay the year": the time machine from Jan 1. */

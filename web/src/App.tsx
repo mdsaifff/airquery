@@ -91,7 +91,7 @@ export function App() {
         <GlassBox />
       </aside>
       <Stats />
-      <Dashboard onPick={(c, b) => runtime.current?.playground.pickBar(c, b)} />
+      <Dashboard onPick={() => undefined} />
       <div className="bottom-left">
         <HowToRead onToggleXray={() => runtime.current?.toggleXray()} />
         <Seismogram
