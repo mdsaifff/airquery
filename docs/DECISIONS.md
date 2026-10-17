@@ -211,5 +211,5 @@ These double as material for LinkedIn posts.
 - **Consequences:** the prompt grew to ~2.1k tokens per call (3 new examples, capped at 12),
   so the shared AI budget defaults to 3 questions/min; a box around "here" cannot cross the
   antimeridian; the pointed lat/lon is now sent to the agent (still no frames or audio). On
-  gpt-oss-120b the 10 new eval items score 10/10 (2026-10-17).
+  gpt-oss-120b the 11 new eval items plus the existing fly-to items score 13/13 (2026-10-17).
 

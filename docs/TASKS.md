@@ -278,4 +278,4 @@ on the deployed site. Ask the user to record the hero take.
 - [x] **T5.9 Voice first** — voice controls the replay, X-ray, stats, share and mute; point
   and speak ("what happened here?", "only around here", "fly here"); spoken + subtitled
   replies; display-only dashboard.
-  - Note: spec `docs/superpowers/specs/2026-10-17-voice-first-design.md`, plan `docs/superpowers/plans/2026-10-17-voice-first.md` (D-019). Headless checks with the fake agent (play/pause/stop, X-ray, stats, here over Chile, no-pointer clarify, mute keeps subtitles). Real model (gpt-oss-120b): new timeline/view/pointer items 10/10. Needs you: pointing then speaking on the webcam; voice and reply length.
+  - Note: spec `docs/superpowers/specs/2026-10-17-voice-first-design.md`, plan `docs/superpowers/plans/2026-10-17-voice-first.md` (D-019). Headless checks with the fake agent (play/pause/stop, X-ray, stats, here over Chile, no-pointer clarify, mute keeps subtitles). Real model (gpt-oss-120b): new timeline/view/pointer items plus fly-to items 13/13. Needs you: pointing then speaking on the webcam; voice and reply length.
