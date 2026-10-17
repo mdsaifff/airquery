@@ -7,6 +7,7 @@ import { askAgent, compileSpec } from './data/agentClient.ts';
 import { Db } from './data/db.ts';
 import type { SessionDeps } from './data/querySession.ts';
 import { Datasets } from './datasets.ts';
+import { Playground } from './playground.ts';
 import { explainHere } from './explainHere.ts';
 import { LassoSelect } from './lassoSelect.ts';
 import { CursorView, MODE_COLORS } from './hud/cursor.ts';
@@ -50,6 +51,8 @@ export interface RuntimeElements {
 }
 
 export interface Runtime {
+  /** Chips, dashboard clicks, time machine, share links. */
+  playground: Playground;
   dispose(): void;
   /** Mouse baseline: ignore hands and voice; specs come from dropdowns. */
   setBaseline(on: boolean): void;
@@ -145,6 +148,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       lasso.selection = null; // a new query replaces any lasso focus
       const { shown, legend, size } = applyView(d.cloud, d.base, d.schema, d.idIndex, d.mask, view);
       Object.assign(hudStore, { shown, legend, sizeLegend: size, glass: applied, total: d.cloud.count }); // prettier-ignore
+      playground.onView(d);
       const pos = d.schema.position;
       xray.follow(wantsXray(applied.spec, pos.kind === 'geo' ? (pos.depth ?? null) : null));
       const ringValues = d.schema.default_size_by ? d.base.numbers.get(d.schema.default_size_by) : undefined; // prettier-ignore
@@ -165,6 +169,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
 
   const db = Db.open();
   const datasets = new Datasets(DATASETS, sm.scene, db, sessionDeps);
+  const playground = new Playground({ datasets });
   cleanups.push(() => datasets.dispose());
 
   async function showDataset(name: string, announce: boolean): Promise<void> {
@@ -184,6 +189,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       if (name === 'quakes') {
         hudStore.placeOptions = d.schema.columns.find((c) => c.name === 'place')?.examples ?? [];
       }
+      void playground.onDataset(name);
       datasets.session(name).refresh();
       if (name === DATASETS[0] && !introPlayed) {
         introPlayed = true;
@@ -375,6 +381,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
   });
 
   return {
+    playground,
     dispose() {
       disposed = true;
       cleanups.reverse().forEach((fn) => fn());

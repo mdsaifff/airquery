@@ -6,6 +6,8 @@ import { BaselinePanel, TaskPanel } from './hud/BaselinePanels.tsx';
 import { CapturePanel } from './hud/CapturePanel.tsx';
 import { CsvDrop } from './hud/CsvPanel.tsx';
 import { DebugPanel } from './hud/DebugPanel.tsx';
+import { Chips } from './hud/Chips.tsx';
+import { Dashboard } from './hud/Dashboard.tsx';
 import { CamLabel, GlassBox, HowToRead, Stats } from './hud/Hud.tsx';
 import { Seismogram } from './hud/Seismogram.tsx';
 import { StudyPanel } from './hud/StudyPanel.tsx';
@@ -86,9 +88,16 @@ export function App() {
         <GlassBox />
       </aside>
       <Stats />
+      <Dashboard onPick={(c, b) => runtime.current?.playground.pickBar(c, b)} />
       <div className="bottom-left">
         <HowToRead onToggleXray={() => runtime.current?.toggleXray()} />
         <Seismogram />
+        {!baseline && (
+          <Chips
+            onPick={(c) => runtime.current?.playground.pickChip(c)}
+            onSurprise={() => runtime.current?.playground.surpriseMe()}
+          />
+        )}
         {!baseline && <TranscriptBar onSubmit={(text) => runtime.current?.typed(text)} />}
       </div>
       <Toasts />

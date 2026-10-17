@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 
 import type { QuerySpec } from '../contracts/contracts.ts';
+import type { Chip } from '../data/chips.ts';
+import type { Dashboard } from './dashboard.ts';
 import type { Mode } from '../interaction/stateMachine.ts';
 import type { Legend } from '../scene/applyView.ts';
 
@@ -57,6 +59,10 @@ export const hudStore = {
     colors: Float32Array;
     visible: Uint8Array;
   } | null,
+  /** Charts for what is on screen (recomputed per view change), or null before data. */
+  dashboard: null as Dashboard | null,
+  /** Suggestion chips for the current dataset (empty: no chips file). */
+  chips: [] as Chip[],
   /** One-line description of the current dataset (from its schema). */
   subtitle: '',
   /** Place choices for the baseline dropdown (computed examples from the dataset schema). */
