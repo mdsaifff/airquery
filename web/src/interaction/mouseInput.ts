@@ -1,18 +1,31 @@
-// Mouse fallback: drag to rotate, wheel to zoom. Same controller as the hands.
+// Mouse and touch: drag to rotate, wheel or two-finger pinch to zoom. Same controller as the hands.
 import { config } from '../config.ts';
 import type { CameraController } from './cameraController.ts';
+import { Pinch } from './pinch.ts';
 
 export function attachMouse(el: HTMLElement, camera: CameraController): () => void {
   let dragging = false;
+  const pinch = new Pinch();
   const down = (e: PointerEvent) => {
+    pinch.down(e.pointerId, e.clientX, e.clientY);
+    if (pinch.count >= 2) {
+      dragging = false; // a second finger turns the drag into a pinch
+      camera.stop(performance.now());
+      return;
+    }
     dragging = true;
     el.setPointerCapture(e.pointerId);
     camera.beginDrag(performance.now());
   };
   const move = (e: PointerEvent) => {
-    if (dragging) camera.rotateBy(e.movementX, e.movementY, performance.now());
+    const k = pinch.move(e.pointerId, e.clientX, e.clientY);
+    if (k !== null) camera.dollyBy(k, performance.now());
+    else if (dragging && pinch.count <= 1) {
+      camera.rotateBy(e.movementX, e.movementY, performance.now());
+    }
   };
-  const up = () => {
+  const up = (e: PointerEvent) => {
+    pinch.up(e.pointerId);
     if (!dragging) return;
     dragging = false;
     camera.endDrag(performance.now());

@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { RAMP_CSS } from '../scene/colorRamp.ts';
 import { highlightSpec, highlightSql } from './highlight.ts';
 import type { Token } from './highlight.ts';
-import { depthBands, sizeSamples } from './legend.ts';
+import { depthBands, depthTicks, sizeSamples } from './legend.ts';
 import { formatLegendValue, formatMs, prettySpec, prettySql } from './format.ts';
 import { debugMode } from './debug.ts';
 import { metrics } from './metrics.ts';
@@ -106,11 +106,20 @@ export function HowToRead({ onToggleXray }: { onToggleXray: () => void }) {
           <div className="val">
             {columnLabel(l.column, l.unit)}
             <div className="ramp" style={{ background: RAMP_CSS }} />
-            {isDepth ? (
+            {isDepth && (
               <div className="bands">
                 {depthBands(l.min, l.max).map((b, i) => (
                   <span key={b.label} style={{ width: `${b.pct}%` }}>
                     {b.pct > 14 || i === 0 ? b.label : ''}
+                  </span>
+                ))}
+              </div>
+            )}
+            {isDepth ? (
+              <div className="ticks">
+                {depthTicks(l.min, l.max).map((t) => (
+                  <span key={t.label} style={{ left: `${t.pct}%` }}>
+                    {t.label}
                   </span>
                 ))}
               </div>

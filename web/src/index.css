@@ -1140,7 +1140,65 @@ button {
   align-self: flex-start;
 }
 
+.scene canvas {
+  touch-action: none;
+}
+.legend .ticks {
+  position: relative;
+  height: 14px;
+  margin-top: 2px;
+  font: 10.5px var(--sans);
+  color: var(--dim);
+}
+.legend .ticks span {
+  position: absolute;
+  translate: -50% 0;
+  white-space: nowrap;
+}
+.legend .ticks span:first-child {
+  translate: 0 0;
+}
+.legend .ticks span:last-child {
+  translate: -100% 0;
+}
+
 @media (max-width: 760px) {
+  /* phone: the dashboard is a sheet that drops from the top-right corner */
+  .dash {
+    top: calc(var(--gutter) - 6px);
+    width: calc(100vw - 2 * var(--gutter));
+    max-height: 65vh;
+  }
+  .dash.closed {
+    pointer-events: none;
+  }
+  .dash.closed .dash-head {
+    pointer-events: auto;
+  }
+  .dash:not(.closed) {
+    z-index: 8; /* above the strip, chips and talk bar */
+    box-sizing: border-box;
+    padding: 12px 14px;
+    background: var(--surface-solid);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    max-width: 100%;
+  }
+  .chip {
+    flex: none;
+  }
+  .seismo-controls .hint {
+    display: none;
+  }
+  .bottom-left {
+    right: var(--gutter);
+  }
+
   :root {
     --cam-w: 140px;
     --gutter: 16px;

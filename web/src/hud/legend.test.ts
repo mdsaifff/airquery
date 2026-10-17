@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { depthBands, sizeSamples } from './legend.ts';
+import { depthBands, depthTicks, sizeSamples } from './legend.ts';
 
 describe('sizeSamples', () => {
   it('uses M5/M6/M7 for magnitude, growing like the point sizes', () => {
@@ -19,5 +19,12 @@ describe('depthBands', () => {
     expect(b.map((x) => x.label)).toEqual(['shallow', 'intermediate', 'deep']);
     expect(b.reduce((n, x) => n + x.pct, 0)).toBeCloseTo(100);
     expect(b[0].pct).toBeCloseTo(10);
+  });
+});
+
+describe('depthTicks', () => {
+  it('depth ticks mark 70 and 300 km between the ends', () => {
+    expect(depthTicks(1.4, 653.8).map((t) => t.label)).toEqual(['1', '70', '300', '654 km']);
+    expect(depthTicks(0, 100).map((t) => t.label)).toEqual(['0', '70', '100 km']);
   });
 });

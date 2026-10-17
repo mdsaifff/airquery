@@ -45,8 +45,12 @@ export class Hover {
   private readonly onMove = (e: PointerEvent) => {
     this.mouse = e.buttons ? null : { x: e.clientX, y: e.clientY }; // no hover while dragging
   };
-  private readonly onLeave = () => {
-    this.mouse = null;
+  private readonly onLeave = (e: PointerEvent) => {
+    if (e.pointerType !== 'touch') this.mouse = null; // touch "leaves" right after every tap
+  };
+  /** A tap on a touch screen shows the card for what is under the finger. */
+  private readonly onTap = (e: PointerEvent) => {
+    if (e.pointerType === 'touch') this.mouse = { x: e.clientX, y: e.clientY };
   };
 
   /** The mouse is over the scene (not dragging). */
@@ -59,6 +63,7 @@ export class Hover {
     this.el = el;
     el.addEventListener('pointermove', this.onMove);
     el.addEventListener('pointerleave', this.onLeave);
+    el.addEventListener('pointerup', this.onTap);
   }
 
   /** handCursor wins over the mouse when a hand is up. */
@@ -102,6 +107,7 @@ export class Hover {
   dispose(): void {
     this.el.removeEventListener('pointermove', this.onMove);
     this.el.removeEventListener('pointerleave', this.onLeave);
+    this.el.removeEventListener('pointerup', this.onTap);
     this.tooltip.dispose();
   }
 }

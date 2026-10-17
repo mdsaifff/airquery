@@ -25,3 +25,15 @@ export function depthBands(min: number, max: number): { label: string; pct: numb
     { label: 'deep', pct: 100 - at(300) },
   ];
 }
+
+/** Numbers under the depth ramp: the ends plus the shallow/intermediate/deep borders. */
+export function depthTicks(min: number, max: number): { label: string; pct: number }[] {
+  const span = max - min || 1;
+  const at = (km: number) => Math.min(100, Math.max(0, ((km - min) / span) * 100));
+  const inner = [70, 300].filter((km) => km > min && km < max);
+  return [
+    { label: String(Math.round(min)), pct: 0 },
+    ...inner.map((km) => ({ label: String(km), pct: at(km) })),
+    { label: `${Math.round(max)} km`, pct: 100 },
+  ];
+}
