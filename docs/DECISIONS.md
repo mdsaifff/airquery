@@ -246,7 +246,7 @@ These double as material for LinkedIn posts.
 - **Consequences:** a pinch held still before rotating becomes a circle (tune `circleHoldMs`).
   The gesture study swaps "undo" for "circle".
 
-## D-021 New built-in scenes come from one prep script and name themselves
+## D-022 New built-in scenes come from one prep script and name themselves
 - **Context:** five more public datasets (NOAA IBTrACS, NASA meteorites, NOAA deep-sea
   corals, OurAirports, HYG stars) after the scene picker (D-020).
 - **Decision:** `data_prep/catalog.py` holds every extra scene as data: a source URL, one
