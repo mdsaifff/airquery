@@ -7,3 +7,6 @@
 {"utterance": "forget that, show everything in Indonesia", "current_spec": {"dataset": "quakes", "filters": [{"field": "depth_km", "op": ">", "value": 300}], "color_by": "magnitude"}, "output": {"spec": {"dataset": "quakes", "mode": "replace", "filters": [{"field": "place", "op": "contains", "value": "Indonesia"}]}, "clarify": null}}
 {"utterance": "show the big ones", "current_spec": null, "output": {"spec": null, "clarify": "How big? For example, magnitude 6 and above?"}}
 {"utterance": "papers about diffusion models", "current_spec": null, "output": {"spec": null, "clarify": "This scene only has earthquakes. You can filter by time, latitude, longitude, depth, magnitude, magnitude type and place."}}
+{"utterance": "go to March", "current_spec": null, "output": {"spec": {"dataset": "quakes", "intent": "timeline", "timeline": {"action": "seek", "date": "2024-03-01"}}, "clarify": null}}
+{"utterance": "x-ray on", "current_spec": null, "output": {"spec": {"dataset": "quakes", "intent": "view", "view": {"xray": true}}, "clarify": null}}
+{"utterance": "show only quakes around here", "pointer": {"lat": 36.0, "lon": 138.0}, "current_spec": null, "output": {"spec": {"dataset": "quakes", "filters": [{"field": "lat", "op": "between", "value": [28.5, 43.5]}, {"field": "lon", "op": "between", "value": [130.5, 145.5]}]}, "clarify": null}}

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from llm import Prompt
-from spec import DatasetSchema, QuerySpec
+from spec import DatasetSchema, Pointer, QuerySpec
 
 PROMPTS_DIR = Path(__file__).parent / "prompts"
 
@@ -49,6 +49,11 @@ def describe_schema(schema: DatasetSchema) -> str:
     return "\n".join(lines)
 
 
+def pointing(p: Pointer) -> str:
+    """The "here" line: where the user pointed on the globe when they spoke."""
+    return f'\nThe user is pointing at lat {p.lat:.1f}, lon {p.lon:.1f} ("here").'
+
+
 def _render_examples(dataset: str) -> str:
     blocks = []
     for ex in load_examples(dataset):
@@ -56,8 +61,9 @@ def _render_examples(dataset: str) -> str:
         answer = {"spec": compact(out["spec"]) if out["spec"] else None, "clarify": out["clarify"]}
         spec_json = answer["spec"] or "null"
         clarify_json = json.dumps(answer["clarify"])
+        here = pointing(Pointer.model_validate(ex["pointer"])) if ex.get("pointer") else ""
         blocks.append(
-            f"Current spec: {compact(ex['current_spec'])}\n"
+            f"Current spec: {compact(ex['current_spec'])}{here}\n"
             f'Request: "{ex["utterance"]}"\n'
             f'Answer: {{"spec":{spec_json},"clarify":{clarify_json}}}'
         )
@@ -80,10 +86,12 @@ def build_prompt(
     utterance: str,
     current_spec: QuerySpec | None,
     *,
+    pointer: Pointer | None = None,
     previous: dict[str, Any] | None = None,
     errors: list[str] | None = None,
 ) -> Prompt:
-    user = f"Current spec: {compact(current_spec)}\nRequest: {json.dumps(utterance)}"
+    here = pointing(pointer) if pointer else ""
+    user = f"Current spec: {compact(current_spec)}{here}\nRequest: {json.dumps(utterance)}"
     if errors:
         bullet_list = "\n".join(f"- {e}" for e in errors)
         user += (

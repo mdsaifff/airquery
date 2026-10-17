@@ -147,6 +147,8 @@ def create_app(
         prev_json = req.current_spec.model_dump_json() if req.current_spec else ""
         if req.dataset_schema:
             prev_json += req.dataset_schema.model_dump_json()
+        if req.pointer:  # "here" at another place is another question
+            prev_json += req.pointer.model_dump_json()
         key = (req.dataset, " ".join(req.utterance.lower().split()), prev_json)
         if key in cache:
             cache.move_to_end(key)
@@ -158,7 +160,9 @@ def create_app(
             resp = QueryResponse(status="clarify", message=BUSY)
             return respond(req, resp, 429, errors=["llm budget"])
 
-        state: AgentState = await run_agent(graph, schema, req.utterance, req.current_spec)
+        state: AgentState = await run_agent(
+            graph, schema, req.utterance, req.current_spec, req.pointer
+        )
         resp = QueryResponse(
             status=state.get("status") or "rejected",
             spec=state.get("spec") if state.get("status") == "ok" else None,

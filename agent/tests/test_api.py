@@ -241,3 +241,13 @@ def test_user_csv_datasets_bring_their_schema(quakes_schema, log_path) -> None:
     r = c.post("/explain", json={"dataset": "user_listings", "ids": ["1"],
                                  "dataset_schema": USER_SCHEMA})  # fmt: skip
     assert 'mode("room type")' in r.json()["sql"]
+
+
+def test_the_pointer_is_part_of_the_cache_key(quakes_schema, log_path) -> None:
+    replies = [LLMReply(spec={"dataset": "quakes", "intent": "explain"})] * 2
+    c, mock = client(quakes_schema, log_path, replies)
+    body = {"dataset": "quakes", "utterance": "what happened here?"}
+    c.post("/query", json={**body, "pointer": {"lat": 35, "lon": 139}})
+    c.post("/query", json={**body, "pointer": {"lat": -33, "lon": -70}})
+    assert len(mock.calls) == 2  # a different place is a different question
+    assert "lat -33.0" in mock.calls[1].user

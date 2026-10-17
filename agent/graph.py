@@ -14,7 +14,7 @@ from compile_sql import compile_spec
 from llm import LLMAdapter
 from merge import merge
 from prompt_builder import build_prompt
-from spec import DatasetSchema, QuerySpec, Scalar
+from spec import DatasetSchema, Pointer, QuerySpec, Scalar
 from validate import validate_spec
 
 MAX_RETRIES = 2
@@ -30,6 +30,7 @@ class AgentState(TypedDict, total=False):
     schema: DatasetSchema
     utterance: str
     prev_spec: QuerySpec | None
+    pointer: Pointer | None  # where the user pointed ("here"), if anywhere
     candidate_spec: dict[str, Any] | None  # raw LLM proposal, unvalidated
     spec: QuerySpec | None  # validated (then merged) spec
     errors: list[str]
@@ -68,6 +69,7 @@ def build_graph(llm: LLMAdapter, max_retries: int = MAX_RETRIES):
             schema,
             state["utterance"],
             state.get("prev_spec"),
+            pointer=state.get("pointer"),
             previous=state.get("candidate_spec") if repairing else None,
             errors=state.get("errors") if repairing else None,
         )
@@ -174,7 +176,11 @@ def build_graph(llm: LLMAdapter, max_retries: int = MAX_RETRIES):
 
 
 async def run_agent(
-    graph: Any, schema: DatasetSchema, utterance: str, prev_spec: QuerySpec | None
+    graph: Any,
+    schema: DatasetSchema,
+    utterance: str,
+    prev_spec: QuerySpec | None,
+    pointer: Pointer | None = None,
 ) -> AgentState:
     """Run the graph once. A previous spec that fails validation is rejected up front."""
     t0 = time.perf_counter()
@@ -191,6 +197,7 @@ async def run_agent(
             "schema": schema,
             "utterance": utterance,
             "prev_spec": prev_spec,
+            "pointer": pointer,
             "errors": [],
             "retries": 0,
             "params": [],

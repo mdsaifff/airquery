@@ -208,3 +208,18 @@ def test_groq_adapter_returns_raw_spec_and_tokens() -> None:
     truncated = FakeCompletions("{", finish_reason="length")
     with pytest.raises(RuntimeError, match="max_completion_tokens"):
         asyncio.run(groq_with(truncated).complete(Prompt("s", "u")))
+
+
+def test_the_pointer_reaches_the_prompt(quakes_schema) -> None:
+    from spec import Pointer
+
+    here = Pointer(lat=35.24, lon=139.71)
+    p = build_prompt(quakes_schema, "what happened here?", None, pointer=here)
+    assert 'pointing at lat 35.2, lon 139.7 ("here")' in p.user
+    assert "pointing at" not in build_prompt(quakes_schema, "x", None).user
+
+
+def test_the_rules_teach_timeline_view_and_here(quakes_schema) -> None:
+    system = build_prompt(quakes_schema, "x", None).system
+    for needle in ('"timeline"', '"view"', "go to <month", "around here", "Point at a place"):
+        assert needle in system, needle
