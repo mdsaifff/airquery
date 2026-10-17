@@ -534,11 +534,14 @@ button {
 
 .seismo .playhead span {
   position: absolute;
-  bottom: calc(100% + 4px);
+  top: -9px;
   left: -1px;
-  padding-left: 6px;
-  border-left: 1px solid var(--ember);
-  font-size: 12.5px;
+  padding: 0 8px;
+  background: var(--space);
+  border: 1px solid rgb(253 180 47 / 55%);
+  border-radius: 999px;
+  font-size: 11.5px;
+  line-height: 16px;
   color: var(--ember);
   white-space: nowrap;
 }
@@ -910,159 +913,320 @@ button {
   }
 }
 
-/* Narrow screens: stack the bottom row above the webcam. */
 /* --- right column: dashboard --- */
 .dash {
   position: fixed;
   top: calc(var(--gutter) + 30px);
   right: var(--gutter);
-  width: 280px;
-  max-height: calc(100vh - var(--gutter) * 2 - 30px - var(--cam-w) * 0.75);
+  box-sizing: border-box;
+  width: 300px;
+  max-height: calc(100vh - var(--gutter) * 3 - 30px - var(--cam-w) * 0.75);
   overflow-y: auto;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--hair-strong) transparent;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
+  padding: 14px 16px 16px;
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius);
+  backdrop-filter: blur(18px);
   font: 13px/1.4 var(--sans);
-  color: var(--muted);
+  color: var(--mist);
   z-index: 3;
 }
+
+.dash.closed {
+  padding-block: 8px;
+}
+
 .dash-head {
-  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
   background: none;
   border: 0;
-  color: var(--muted);
-  font: 12px var(--sans);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
+  color: var(--chalk);
+  font: 500 13px var(--sans);
+  text-align: left;
 }
-.dash-summary b {
-  color: var(--fg);
-  font-weight: 500;
+
+.dash-head .chev {
+  width: 10px;
+  height: 10px;
+  margin-left: auto;
+  fill: none;
+  stroke: var(--dust);
+  stroke-width: 1.4;
+  transition: rotate 0.2s;
 }
+
+.dash.closed .chev {
+  rotate: -90deg;
+}
+
+.dash-summary {
+  display: flex;
+  gap: 22px;
+  margin: -4px 0 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--hair);
+}
+
+.dash-summary div {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.dash-summary dt {
+  font-size: 11.5px;
+  color: var(--dust);
+}
+
+.dash-summary dd {
+  margin: 0;
+  font: 32px/1 var(--display);
+  color: var(--chalk);
+  font-variant-numeric: lining-nums;
+}
+
+.dash-summary small {
+  font: italic 17px var(--display);
+  color: var(--mist);
+}
+
 .dash-chart {
   margin: 0;
 }
+
 .dash-chart figcaption {
+  margin-bottom: 16px;
   font-size: 12px;
-  color: var(--dim);
-  margin-bottom: 6px;
+  color: var(--mist);
 }
+
 .dash-bars {
   display: flex;
   align-items: flex-end;
   gap: 3px;
-  height: 48px;
+  height: 46px;
+  border-bottom: 1px solid var(--hair-strong);
 }
+
 .dash-bars button {
+  position: relative;
   flex: 1;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  align-items: stretch;
   padding: 0;
   background: none;
   border: 0;
-  cursor: pointer;
 }
+
 .dash-bars button:disabled {
   cursor: default;
 }
+
 .dash-bars i {
   display: block;
   min-height: 1px;
-  background: rgb(237 234 228 / 45%);
+  background: rgb(237 234 228 / 34%);
   border-radius: 2px 2px 0 0;
   transition:
-    height 0.4s ease-out,
+    height 0.5s cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 0.2s,
     background 0.2s;
 }
-.dash-bars button:hover:not(:disabled) i,
+
+.dash-bars button:hover:not(:disabled) i {
+  filter: brightness(1.45);
+}
+
 .dash-bars button.now i {
-  background: var(--fg);
+  background: var(--ember);
+  box-shadow: 0 0 12px rgb(253 180 47 / 55%);
 }
+
+/* the count, on hover, above the bars */
+.dash-bars button:hover:not(:disabled)::before {
+  content: attr(data-n);
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  translate: -50% 0;
+  font-size: 11px;
+  color: var(--chalk);
+  white-space: nowrap;
+}
+
 .dash-bars span {
-  font: 10px var(--sans);
-  color: var(--dim);
-  margin-top: 4px;
-  text-align: center;
-  overflow: hidden;
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 50%;
+  translate: -50% 0;
+  font-size: 10.5px;
+  line-height: 1.2;
+  color: var(--dust);
+  white-space: nowrap;
 }
+
+.dash-chart:has(.dash-bars) {
+  padding-bottom: 18px;
+}
+
 .dash-regions {
-  list-style: none;
-  margin: 0;
+  display: grid;
+  gap: 2px;
+  margin: -8px 0 0;
   padding: 0;
-  display: grid;
-  gap: 3px;
+  list-style: none;
 }
+
 .dash-regions button {
-  width: 100%;
   display: grid;
-  grid-template-columns: 1fr 64px 36px;
-  gap: 8px;
-  align-items: center;
+  grid-template-columns: 1fr auto;
+  column-gap: 8px;
+  width: 100%;
+  padding: 3px 0 4px;
   background: none;
   border: 0;
-  padding: 2px 0;
-  color: var(--muted);
-  font: 12.5px var(--sans);
+  color: var(--chalk);
+  font: 13px var(--sans);
   text-align: left;
-  cursor: pointer;
 }
-.dash-regions button:hover {
-  color: var(--fg);
-}
+
 .dash-regions .name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.dash-regions .meter {
-  height: 3px;
-  background: var(--line);
-  border-radius: 2px;
-}
-.dash-regions .meter i {
-  display: block;
-  height: 100%;
-  background: rgb(237 234 228 / 55%);
-  border-radius: 2px;
-}
+
 .dash-regions .n {
-  text-align: right;
+  color: var(--mist);
   font-variant-numeric: tabular-nums;
 }
 
+.dash-regions .meter {
+  grid-column: 1 / -1;
+  height: 2px;
+  margin-top: 3px;
+  background: var(--hair);
+  border-radius: 1px;
+}
+
+.dash-regions .meter i {
+  display: block;
+  height: 100%;
+  background: rgb(237 234 228 / 50%);
+  border-radius: 1px;
+  transition: background 0.2s;
+}
+
+.dash-regions button:hover .meter i {
+  background: var(--ember);
+}
+
+.dash-hint {
+  margin: -4px 0 0;
+  font-size: 11.5px;
+  color: var(--dust);
+}
+
+/* --- time machine controls, above the strip --- */
 .seismo-controls {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
-  font: 12px var(--sans);
-  color: var(--dim);
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 12.5px;
+  color: var(--dust);
 }
+
 .seismo-controls button {
-  padding: 3px 9px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
   background: none;
-  color: var(--muted);
-  font: 12px var(--sans);
-  cursor: pointer;
+  border: 0;
+  padding: 0;
+  color: var(--mist);
 }
-.seismo-controls button.on,
-.seismo-controls button:hover {
-  color: var(--fg);
-  border-color: var(--line-strong);
-}
+
 .seismo-controls .play {
-  min-width: 34px;
-  color: var(--fg);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: var(--chalk);
+  border-radius: 50%;
+  color: var(--space);
+  transition:
+    background 0.2s,
+    box-shadow 0.2s;
 }
-.seismo-controls .hint {
+
+.seismo-controls .play svg {
+  width: 11px;
+  height: 11px;
+  fill: currentColor;
+}
+
+.seismo-controls .play.on {
+  background: var(--ember);
+  box-shadow: 0 0 18px rgb(253 180 47 / 45%);
+}
+
+.seismo-controls .speeds {
+  display: flex;
+  padding: 2px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+}
+
+.seismo-controls .speeds button {
+  padding: 3px 11px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.seismo-controls .speeds button:hover {
+  color: var(--chalk);
+}
+
+.seismo-controls .speeds button.on {
+  background: rgb(237 234 228 / 14%);
+  color: var(--chalk);
+}
+
+.seismo-controls .exit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-left: 6px;
+  color: var(--ember);
+}
+
+.seismo-controls .exit kbd {
+  border-color: rgb(253 180 47 / 40%);
+  color: var(--ember);
+}
+
+.seismo-controls .hint {
+  margin-left: 14px;
+  white-space: nowrap;
+}
+
+.seismo-controls .hint kbd {
+  margin-right: 4px;
+}
+
+.seismo-track {
+  position: relative;
+  cursor: pointer;
 }
 
 .masthead-links {
@@ -1070,45 +1234,140 @@ button {
   gap: 18px;
 }
 
+/* --- first-visit loading --- */
 .loading {
   position: fixed;
   inset: 0;
+  z-index: 30;
   display: grid;
   place-content: center;
-  gap: 18px;
-  background: var(--space);
-  color: var(--muted);
+  justify-items: start;
+  background: radial-gradient(ellipse at 50% 55%, #07101f 0%, var(--space) 60%);
+  color: var(--mist);
   font: 15px/1.6 var(--sans);
-  z-index: 30;
 }
+
 .loading h1 {
   margin: 0;
-  font: 64px/1 var(--display);
-  color: var(--fg);
+  font: 72px/1 var(--display);
+  color: var(--chalk);
 }
+
+.loading .trace {
+  width: 320px;
+  height: 40px;
+  margin: 14px 0 22px;
+  overflow: visible;
+}
+
+.loading .trace polyline {
+  fill: none;
+  stroke: var(--ember);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  animation: trace 2.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  filter: drop-shadow(0 0 4px rgb(253 180 47 / 60%));
+}
+
+@keyframes trace {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  75% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
 .loading ol {
-  list-style: none;
+  display: grid;
+  gap: 6px;
   margin: 0;
   padding: 0;
+  list-style: none;
 }
-.loading li.done {
-  color: var(--dim);
+
+.loading li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--dust);
 }
+
+/* step marker: hollow (to do), ember pulse (now), chalk (done) */
+.loading li::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--dust);
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
 .loading li.now {
-  color: var(--fg);
+  color: var(--chalk);
 }
+
+.loading li.now::before {
+  border: 0;
+  background: var(--ember);
+  box-shadow: 0 0 0 0 rgb(253 180 47 / 60%);
+  animation: pulse 1.4s ease-out infinite;
+}
+
+.loading li.done {
+  color: var(--mist);
+}
+
+.loading li.done::before {
+  border: 0;
+  background: var(--chalk);
+}
+
+@keyframes pulse {
+  to {
+    box-shadow: 0 0 0 8px rgb(253 180 47 / 0%);
+  }
+}
+
+.loading .hint {
+  margin: 26px 0 0;
+  font-size: 13px;
+  color: var(--dust);
+}
+
 .loading .err {
-  color: var(--bad);
+  margin: 26px 0 0;
+  color: var(--alert);
 }
+
 .loading button {
-  padding: 6px 14px;
-  border: 1px solid var(--line-strong);
+  margin-left: 10px;
+  padding: 6px 16px;
+  background: var(--chalk);
+  border: 0;
   border-radius: 999px;
-  background: none;
-  color: var(--fg);
-  font: 13px var(--sans);
-  cursor: pointer;
+  color: var(--space);
+  font: 600 13px var(--sans);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .loading .trace polyline,
+  .loading li.now::before {
+    animation: none;
+  }
+  .loading .trace polyline {
+    stroke-dashoffset: 0;
+  }
+}
+
 .scene canvas {
   touch-action: none;
 }
@@ -1131,7 +1390,19 @@ button {
   translate: -100% 0;
 }
 
+/* The shortcut hint would run over the globe on laptop widths. */
+@media (max-width: 1500px) {
+  .seismo-controls .hint {
+    display: none;
+  }
+}
+
+/* Narrow screens: stack the bottom row above the webcam. */
 @media (max-width: 760px) {
+  .masthead {
+    text-shadow: 0 1px 14px rgb(1 2 5 / 95%);
+  }
+
   /* phone: the dashboard is a sheet that drops from the top-right corner */
   .dash {
     top: calc(var(--gutter) - 6px);
@@ -1139,6 +1410,8 @@ button {
     max-height: 65vh;
   }
   .dash.closed {
+    left: auto;
+    width: auto;
     pointer-events: none;
   }
   .dash.closed .dash-head {

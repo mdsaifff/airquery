@@ -89,6 +89,10 @@ export const config = {
   xrayCrustOpacity: 0.12,
   /** Cloud layer drift (rad/s). */
   cloudSpinRadPerSec: 0.006,
+  /** Cloud veil opacity at the home view (0..1); thin so coastlines stay readable. */
+  cloudOpacity: 0.5,
+  /** Clouds fade out as you zoom in: gone at the first camera distance, full at the second (scene units). */
+  cloudFadeDistance: [2.0, 3.0] as [number, number],
   /** Bloom glow: strength (×), radius (0..1) and threshold (linear luminance); 'high' quality only. */
   bloomStrength: 0.9,
   bloomRadius: 0.5,

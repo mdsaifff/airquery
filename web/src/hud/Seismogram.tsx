@@ -7,7 +7,7 @@ import { binStrip, timeRange, timeTicks } from './seismogram.ts';
 import { hudStore, useTick } from './store.ts';
 
 const HEIGHT = 46; // css px
-const SPEED_LABELS: Record<number, string> = { 1: 'day/s', 7: 'week/s', 30: 'month/s' };
+const SPEED_LABELS: Record<number, string> = { 1: '1 day', 7: '1 week', 30: '1 month' };
 
 /** The strip doubles as the time machine's timeline: play, speed, click or drag to jump. */
 export function Seismogram({
@@ -84,36 +84,45 @@ export function Seismogram({
       {pb.available && (
         <div className="seismo-controls">
           <button
-            className="play"
+            className={`play ${pb.playing ? 'on' : ''}`}
             onClick={onToggle}
             aria-label={pb.playing ? 'Pause' : 'Play the year'}
           >
-            {pb.playing ? '❚❚' : '▶'}
+            <svg viewBox="0 0 12 12" aria-hidden="true">
+              {pb.playing ? <path d="M3 2h2v8H3zM7 2h2v8H7z" /> : <path d="M3 1.5v9l7.5-4.5z" />}
+            </svg>
           </button>
-          {config.timeSpeeds.map((s) => (
-            <button key={s} className={pb.speed === s ? 'on' : ''} onClick={() => onSpeed(s)}>
-              {SPEED_LABELS[s] ?? `${s}d/s`}
-            </button>
-          ))}
+          <div className="speeds" role="group" aria-label="Replay speed">
+            {config.timeSpeeds.map((s) => (
+              <button
+                key={s}
+                className={pb.speed === s ? 'on' : ''}
+                aria-pressed={pb.speed === s}
+                onClick={() => onSpeed(s)}
+              >
+                {SPEED_LABELS[s] ?? `${s} days`}
+              </button>
+            ))}
+          </div>
+          <span className="per">per second</span>
           {pb.active && (
-            <button onClick={onStop} aria-label="Leave the replay" title="Leave the replay (Esc)">
-              ✕
+            <button className="exit" onClick={onStop}>
+              Exit replay <kbd>Esc</kbd>
             </button>
           )}
-          <span className="hint">L to play · click the strip to jump</span>
+          <span className="hint">
+            <kbd>L</kbd> play or pause, click the strip to jump
+          </span>
         </div>
       )}
-      <canvas
-        ref={canvas}
-        style={{ height: HEIGHT, cursor: 'pointer' }}
-        onPointerDown={seek}
-        onPointerMove={seek}
-      />
-      {at !== null && (
-        <div className="playhead" style={{ left: `${at * 100}%` }}>
-          <span>{hudStore.introDate}</span>
-        </div>
-      )}
+      <div className="seismo-track">
+        <canvas ref={canvas} style={{ height: HEIGHT }} onPointerDown={seek} onPointerMove={seek} />
+        {at !== null && (
+          <div className="playhead" style={{ left: `${at * 100}%` }}>
+            <span>{hudStore.introDate}</span>
+          </div>
+        )}
+      </div>
       <div className="ticks" aria-hidden="true">
         {timeTicks(t0, t1).map((t) => (
           <span key={t.label} style={{ left: `${t.at * 100}%` }}>

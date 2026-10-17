@@ -22,6 +22,7 @@ export const EARTH_FRAG = /* glsl */ `
   uniform float uHasTex;
   uniform float uHasClouds;
   uniform float uCloudShift; // cloud layer's drift relative to the crust (uv.x)
+  uniform vec2 uFade; // clouds: gone at uFade.x camera distance, full at uFade.y
   uniform vec3 uSunDir;
   uniform float uSolid;
   uniform float uGlassAlpha;
@@ -38,15 +39,17 @@ export const EARTH_FRAG = /* glsl */ `
     vec3 dayCol = uHasTex > 0.5 ? texture2D(uDay, vUv).rgb : vec3(0.01, 0.03, 0.09);
     vec3 nightCol = uHasTex > 0.5 ? texture2D(uNight, vUv).rgb : vec3(0.0);
     float water = uHasTex > 0.5 ? texture2D(uWater, vUv).r : 0.0;
-    float cloud = uHasClouds > 0.5 ? texture2D(uClouds, vUv + vec2(uCloudShift, 0.0)).r : 0.0;
+    // Only dense cloud counts, and none once zoomed in, so the land stays readable.
+    float veil = uHasClouds > 0.5 ? smoothstep(uFade.x, uFade.y, length(cameraPosition)) : 0.0;
+    float cloud = veil * smoothstep(0.3, 1.0, texture2D(uClouds, vUv + vec2(uCloudShift, 0.0)).r);
     // Shadow: the same clouds, nudged away from the sun.
-    float shadow = uHasClouds > 0.5 ? texture2D(uClouds, vUv + vec2(uCloudShift - 0.0025, 0.0015)).r : 0.0;
+    float shadow = veil * smoothstep(0.3, 1.0, texture2D(uClouds, vUv + vec2(uCloudShift - 0.0025, 0.0015)).r);
 
     // Blue Marble is flat: a little more saturation, and deeper oceans.
     float luma = dot(dayCol, vec3(0.2126, 0.7152, 0.0722));
     dayCol = max(mix(vec3(luma), dayCol, 1.3), 0.0);
     dayCol *= mix(vec3(1.0), vec3(0.45, 0.62, 0.95), water);
-    dayCol *= 1.0 - 0.5 * smoothstep(0.2, 0.8, shadow);
+    dayCol *= 1.0 - 0.35 * shadow;
 
     float diffuse = max(sunDot, 0.0);
     vec3 col = dayCol * (0.012 + 1.05 * pow(diffuse, 0.85));
@@ -75,12 +78,14 @@ export const CLOUDS_FRAG = /* glsl */ `
   uniform sampler2D uClouds;
   uniform vec3 uSunDir;
   uniform float uOpacity;
+  uniform vec2 uFade;
   varying vec2 vUv;
   varying vec3 vNormalW;
   varying vec3 vViewW;
   void main() {
     vec3 n = normalize(vNormalW);
-    float c = smoothstep(0.1, 1.0, texture2D(uClouds, vUv).r);
+    // Thin veil: wisps dropped, dense systems kept; fades out as the camera zooms in.
+    float c = smoothstep(0.3, 1.0, texture2D(uClouds, vUv).r) * smoothstep(uFade.x, uFade.y, length(cameraPosition));
     float sd = dot(n, uSunDir);
     float lit = smoothstep(-0.12, 0.3, sd);
     vec3 col = vec3(0.96, 0.97, 1.0) * (0.04 + 0.82 * pow(max(sd, 0.0), 0.8));

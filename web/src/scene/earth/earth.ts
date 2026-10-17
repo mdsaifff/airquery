@@ -7,7 +7,6 @@ import { graticuleLines } from './graticule.ts';
 
 /** three's sphere starts its texture seam at -x; this puts lon -180 at -z like geoToXYZ. */
 export const EARTH_ROTATION_Y = -Math.PI / 2;
-const CLOUD_OPACITY = 0.85;
 const ATMOS_RADIUS = 1.035;
 
 export interface Earth {
@@ -60,6 +59,7 @@ export function texturesReady(): Promise<unknown> {
 
 export function createEarth(quality: 'high' | 'low' = config.quality): Earth {
   const sun = { value: new THREE.Vector3(0, 0, 1) };
+  const fade = { value: new THREE.Vector2(...config.cloudFadeDistance) };
   const earthMat = new THREE.ShaderMaterial({
     vertexShader: EARTH_VERT,
     fragmentShader: EARTH_FRAG,
@@ -71,6 +71,7 @@ export function createEarth(quality: 'high' | 'low' = config.quality): Earth {
       uHasTex: { value: 0 },
       uHasClouds: { value: 0 },
       uCloudShift: { value: 0 },
+      uFade: fade,
       uSunDir: sun,
       uSolid: { value: 1 },
       uGlassAlpha: { value: config.xrayCrustOpacity },
@@ -83,7 +84,7 @@ export function createEarth(quality: 'high' | 'low' = config.quality): Earth {
   const cloudMat = new THREE.ShaderMaterial({
     vertexShader: EARTH_VERT,
     fragmentShader: CLOUDS_FRAG,
-    uniforms: { uClouds: { value: null }, uSunDir: sun, uOpacity: { value: CLOUD_OPACITY } },
+    uniforms: { uClouds: { value: null }, uSunDir: sun, uOpacity: { value: config.cloudOpacity }, uFade: fade }, // prettier-ignore
     transparent: true,
     depthWrite: false,
   });
@@ -136,7 +137,7 @@ export function createEarth(quality: 'high' | 'low' = config.quality): Earth {
       earthMat.uniforms.uSolid.value = 1 - mix;
       earthMat.transparent = glass; // glass: blended, drawn before the points
       earthMat.depthWrite = mix < 0.5; // keep hiding the far side until the crust is mostly glass
-      cloudMat.uniforms.uOpacity.value = CLOUD_OPACITY * (1 - mix);
+      cloudMat.uniforms.uOpacity.value = config.cloudOpacity * (1 - mix);
       earthMat.uniforms.uHasClouds.value = clouds.visible && mix < 0.5 ? 1 : 0;
       atmosXray.value = mix;
       gridMat.opacity = 0.35 * mix;
