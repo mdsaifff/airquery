@@ -164,6 +164,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
     flyTo: (lat, lon) => camera.flyTo(lat, lon, performance.now()),
     resetView: () => camera.reset(performance.now()),
     notify: toast,
+    pointer: () => null, // wired in the voice-first task
+    timeline: () => undefined,
+    view: () => undefined,
     explain: () => {
       const ctx = { datasets, hover, camera: sm.camera, db, selection: () => lasso.selection, occluded: crustSolid }; // prettier-ignore
       void explainHere(ctx, name);

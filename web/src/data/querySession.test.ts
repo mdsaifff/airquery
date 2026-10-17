@@ -2,7 +2,7 @@
 // DuckDB (fake) -> applyView -> the globe's point buffers.
 import * as THREE from 'three';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { DatasetSchema, QuerySpec } from '../contracts/contracts.ts';
+import type { DatasetSchema, Pointer, QuerySpec } from '../contracts/contracts.ts';
 import { applyView } from '../scene/applyView.ts';
 import { PointCloud } from '../scene/pointCloud.ts';
 import { positionsFor } from '../scene/positions.ts';
@@ -77,6 +77,7 @@ function rig() {
   const flights: [number, number][] = [];
   const legends: (string | null)[] = [];
   const runs: string[] = [];
+  let pointer: Pointer | null = null;
   const session = new QuerySession({
     dataset: 'quakes',
     ask: (req) => askAgent(req, 'http://agent.test'),
@@ -92,10 +93,14 @@ function rig() {
     explain: () => notes.push('explain'),
     resetView: () => notes.push('resetView'),
     notify: (kind, text) => notes.push(`${kind}:${text}`),
+    pointer: () => pointer,
+    timeline: (t) => notes.push(`timeline:${t.action}`),
+    view: (v) => notes.push(`view:${JSON.stringify(v)}`),
   });
   const colors = () => Array.from(globe['geometry'].getAttribute('aColor').array as Float32Array); // prettier-ignore
   const alpha = () => Array.from(globe['geometry'].getAttribute('aAlpha').array as Float32Array); // prettier-ignore
-  return { globe, session, notes, flights, legends, runs, colors, alpha };
+  const setPointer = (p: Pointer | null) => (pointer = p);
+  return { globe, session, notes, flights, legends, runs, colors, alpha, setPointer };
 }
 
 const DEEP = spec({ filters: [{ field: 'depth_km', op: '>', value: 300 }] });
@@ -248,8 +253,38 @@ describe('refresh', () => {
       explain: () => {},
       resetView: () => {},
       notify: () => {},
+      pointer: () => null,
+      timeline: () => {},
+      view: () => {},
     });
     session.refresh();
     expect(ended).toEqual([null]);
+  });
+
+  it('routes timeline and view commands without touching the history', async () => {
+    const r = rig();
+    const timeline = { action: 'play' as const, date: null, speed: 'month' as const };
+    const view = { xray: true, stats: null, share: null, mute: null };
+    agentReplies(
+      { ...okResponse(spec({ intent: 'timeline', timeline }), '', []), sql: null },
+      { ...okResponse(spec({ intent: 'view', view }), '', []), sql: null },
+    );
+    await r.session.submit('play the year', 0);
+    await r.session.submit('x-ray on', 0);
+    expect(r.notes).toEqual(['timeline:play', `view:${JSON.stringify(view)}`]);
+    expect(r.session.current).toBeNull(); // nothing pushed onto the history
+    expect(r.runs).toEqual([]); // no SQL ran
+  });
+
+  it('typed commands use the pointer at submit time', async () => {
+    const r = rig();
+    r.setPointer({ lat: 35, lon: 139 });
+    const fetchMock = agentReplies({
+      ...okResponse(spec({ intent: 'explain' }), '', []),
+      sql: null,
+    });
+    await r.session.submit('what happened here?', 0);
+    const sent = JSON.parse((fetchMock.mock.calls[0] as unknown as [string, { body: string }])[1].body); // prettier-ignore
+    expect(sent.pointer).toEqual({ lat: 35, lon: 139 });
   });
 });

@@ -2,10 +2,13 @@
 // All I/O is injected, so the whole flow runs in tests with a mocked agent.
 import type {
   CompileRequest,
+  Pointer,
   DatasetSchema,
   QueryRequest,
   QueryResponse,
   QuerySpec,
+  Timeline,
+  ViewChange,
 } from '../contracts/contracts.ts';
 import type { Columns } from './arrow.ts';
 import type { Param } from './db.ts';
@@ -39,6 +42,12 @@ export interface SessionDeps {
   explain(): void;
   resetView(): void;
   notify(kind: 'info' | 'clarify' | 'error', text: string): void;
+  /** The globe point under the hand or mouse ("here"), or null. Read when a request is sent. */
+  pointer(): Pointer | null;
+  /** Time machine commands (play, pause, stop, seek, speed). */
+  timeline(t: Timeline): void;
+  /** Display switches (X-ray, stats, share, mute). */
+  view(v: ViewChange): void;
 }
 
 interface Entry extends Applied {
@@ -74,7 +83,7 @@ export class QuerySession {
       utterance,
       current_spec: this.current,
       dataset_schema: deps.datasetSchema ?? null,
-      pointer: null, // set from deps in the next task
+      pointer: deps.pointer(),
     };
     await this.handle(() => deps.ask(req), endedAt);
   }
@@ -109,6 +118,8 @@ export class QuerySession {
     if (spec.intent === 'undo') return this.undo(endedAt);
     if (spec.intent === 'reset') return this.reset(endedAt);
     if (spec.intent === 'explain') return deps.explain();
+    if (spec.intent === 'timeline') return spec.timeline ? deps.timeline(spec.timeline) : undefined;
+    if (spec.intent === 'view') return spec.view ? deps.view(spec.view) : undefined;
     if (spec.intent === 'navigate') {
       if (spec.camera_target) {
         deps.flyTo(spec.camera_target.lat, spec.camera_target.lon);
