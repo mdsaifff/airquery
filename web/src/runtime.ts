@@ -180,7 +180,12 @@ export function startRuntime(els: RuntimeElements): Runtime {
       const { shown, legend, size } = applyView(d.cloud, d.base, d.schema, d.idIndex, d.mask, view);
       Object.assign(hudStore, { shown, legend, sizeLegend: size, glass: applied, total: d.cloud.count }); // prettier-ignore
       playground.onView(d);
-      if (endedAt !== null) voiceFirst.say(describeView(applied.spec, hudStore.dashboard, NOUNS[name] ?? 'points')); // prettier-ignore
+      if (endedAt !== null) {
+        const sizeCol = d.schema.default_size_by;
+        const unit = d.schema.columns.find((c) => c.name === sizeCol)?.unit ?? null;
+        const size = sizeCol ? { column: sizeCol, unit } : undefined;
+        voiceFirst.say(describeView(applied.spec, hudStore.dashboard, NOUNS[name] ?? 'points', size)); // prettier-ignore
+      }
       const pos = d.schema.position;
       xray.follow(wantsXray(applied.spec, pos.kind === 'geo' ? (pos.depth ?? null) : null));
       const ringValues = d.schema.default_size_by ? d.base.numbers.get(d.schema.default_size_by) : undefined; // prettier-ignore

@@ -20,10 +20,29 @@ function phrase(f: F): string | null {
   }
   if (f.op === 'contains') return `in ${String(v)}`;
   if (f.field === 'lat' || f.field === 'lon') return 'around there';
+  // Any other column: a plain phrase ("with category 4 and up", "with type large airport").
+  const name = f.field.replace(/_(km|kt|mb|kg|ft|ly)$/, '').replace(/_/g, ' ');
+  if (f.op === '>' || f.op === '>=') return `with ${name} ${num(v)} and up`;
+  if (f.op === '<' || f.op === '<=') return `with ${name} below ${num(v)}`;
+  if (f.op === 'between') return `with ${name} ${num(v)}`;
+  if (f.op === '=') return `with ${name} ${String(v)}`;
+  if (f.op === 'in') return `with ${name} ${Array.isArray(v) ? v.join(' or ') : String(v)}`;
+  if (f.op === 'last_days') return `from the last ${num(v)} days`;
   return null;
 }
 
-export function describeView(spec: QuerySpec | null, dash: Dashboard | null, noun: string): string {
+/** The size column and its unit, for "up to 165 knots" (quakes keep "strongest magnitude"). */
+export interface SizeUnit {
+  column: string;
+  unit: string | null;
+}
+
+export function describeView(
+  spec: QuerySpec | null,
+  dash: Dashboard | null,
+  noun: string,
+  size?: SizeUnit,
+): string {
   if (!dash) return '';
   if (dash.count === 0) return `No ${noun} match that.`;
   const parts = [...new Set((spec?.filters ?? []).map(phrase).filter((p): p is string => !!p))];
@@ -31,7 +50,14 @@ export function describeView(spec: QuerySpec | null, dash: Dashboard | null, nou
   const head = parts.length ? `${n} ${noun} ${parts.join(', ')}` : `All ${n} ${noun}`;
   const top = dash.charts.find((c) => c.kind === 'text')?.bars[0]?.label;
   const near = top && !parts.some((p) => p.includes(top)) ? `, mostly near ${top}` : '';
-  const strongest = dash.maxSize !== null ? `, strongest magnitude ${dash.maxSize.toFixed(1)}` : '';
+  const max = dash.maxSize;
+  const unit = size?.unit && !size.unit.includes(',') ? ` ${size.unit}` : '';
+  const strongest =
+    max === null
+      ? ''
+      : !size || size.column === 'magnitude'
+        ? `, strongest magnitude ${max.toFixed(1)}`
+        : `, up to ${Math.abs(max) >= 100 ? Math.round(max) : max.toFixed(1)}${unit}`;
   return `${head}${near}${strongest}.`;
 }
 

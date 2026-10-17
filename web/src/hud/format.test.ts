@@ -52,6 +52,8 @@ describe('HUD formatting', () => {
     expect(formatMs(1234)).toBe('1.23 s');
     expect(formatLegendValue(653.7, false)).toBe('654');
     expect(formatLegendValue(4.5, false)).toBe('4.5');
+    expect(formatLegendValue(0.00001, false)).toBe('0.00001'); // not "0.0": the lightest meteorite
+    expect(formatLegendValue(0, false)).toBe('0.0');
     expect(formatLegendValue(Date.parse('2024-03-05T10:00:00Z'), true)).toBe('2024-03-05');
   });
 });

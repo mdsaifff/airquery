@@ -1,16 +1,17 @@
 // Pure helpers for the "How to read this" card.
+import { isLogScale, rampPosition } from '../scene/colorRamp.ts';
 
-/** Sample dots for the size key; px grows like PointCloud.setSizes (t^1.5). */
+/** Sample dots for the size key; px grows like PointCloud.setSizes (t^1.5, log for wide data). */
 export function sizeSamples(
   column: string,
   min: number,
   max: number,
 ): { label: string; px: number }[] {
-  const values = column === 'magnitude' ? [5, 6, 7] : [min, (min + max) / 2, max];
-  const span = max - min || 1;
+  const middle = isLogScale(min, max) ? Math.sqrt(min * max) : (min + max) / 2;
+  const values = column === 'magnitude' ? [5, 6, 7] : [min, middle, max];
   return values.map((v) => {
-    const t = Math.min(1, Math.max(0, (v - min) / span));
-    const label = column === 'magnitude' ? `M${v}` : String(Math.round(v * 100) / 100);
+    const t = rampPosition(v, min, max);
+    const label = column === 'magnitude' ? `M${v}` : String(Number(v.toPrecision(3)));
     return { label, px: Math.round(6 + t ** 1.5 * 18) };
   });
 }
@@ -24,6 +25,12 @@ export function depthBands(min: number, max: number): { label: string; pct: numb
     { label: 'intermediate', pct: at(300) - at(70) },
     { label: 'deep', pct: 100 - at(300) },
   ];
+}
+
+/** The earthquake depth bands (shallow < 70 km < intermediate < 300 km < deep) only mean
+ *  something for data that goes that deep; deep-sea corals (1–6 km) get plain numbers. */
+export function showDepthBands(_min: number, max: number): boolean {
+  return max > 300;
 }
 
 /** Numbers under the depth ramp: the ends plus the shallow/intermediate/deep borders. */

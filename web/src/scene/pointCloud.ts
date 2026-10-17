@@ -3,7 +3,7 @@
 // or removed. Dataset-agnostic: positions come from positions.ts.
 import * as THREE from 'three';
 import { config } from '../config.ts';
-import { CATEGORY_COLORS, OTHER_COLOR, rampColor } from './colorRamp.ts';
+import { CATEGORY_COLORS, OTHER_COLOR, rampColor, rampPosition } from './colorRamp.ts';
 import { createPointsMaterial } from './pointsMaterial.ts';
 
 export class PointCloud {
@@ -49,12 +49,12 @@ export class PointCloud {
     scene.add(this.group);
   }
 
-  /** Colour each point by value, mapped through the sequential ramp over [min, max]. */
+  /** Colour each point by value, mapped through the sequential ramp over [min, max]
+   *  (logarithmic for positive data spanning 1000x or more, see rampPosition). */
   setColors(values: ArrayLike<number>, min: number, max: number): void {
     const attr = this.geometry.getAttribute('aColor') as THREE.BufferAttribute;
     const out = attr.array as Float32Array;
-    const span = max - min || 1;
-    for (let i = 0; i < this.count; i++) rampColor((values[i] - min) / span, out, i * 3);
+    for (let i = 0; i < this.count; i++) rampColor(rampPosition(values[i], min, max), out, i * 3);
     attr.needsUpdate = true;
   }
 
@@ -75,9 +75,8 @@ export class PointCloud {
     const attr = this.geometry.getAttribute('aSize') as THREE.BufferAttribute;
     const out = attr.array as Float32Array;
     const { pointMinSize: lo, pointMaxSize: hi } = config;
-    const span = max - min || 1;
     for (let i = 0; i < this.count; i++) {
-      const t = values ? Math.min(1, Math.max(0, (values[i] - min) / span)) : 0.25;
+      const t = values ? rampPosition(values[i], min, max) : 0.25;
       out[i] = lo + t ** 1.5 * (hi - lo);
     }
     attr.needsUpdate = true;

@@ -1,8 +1,8 @@
 // Right column: what is on screen as small charts. Display only: a spoken filter lights
 // up the bars it covers. Bars for the colour column wear the globe's colours; the
 // replay's month glows ember. "Show / hide the stats" (or the header) opens and closes it.
-import { rampColor } from '../scene/colorRamp.ts';
-import { coveredBars } from './dashboard.ts';
+import { rampColor, rampPosition } from '../scene/colorRamp.ts';
+import { coveredBars, maxTile } from './dashboard.ts';
 import type { Bar, Chart } from './dashboard.ts';
 import { hudStore, useTick } from './store.ts';
 
@@ -11,7 +11,7 @@ function tint(chart: Chart, b: Bar): string | undefined {
   const l = hudStore.legend;
   if (l?.kind !== 'ramp' || l.column !== chart.field || !(l.max > l.min)) return undefined;
   const c = [0, 0, 0];
-  rampColor(((b.lo + b.hi) / 2 - l.min) / (l.max - l.min), c);
+  rampColor(rampPosition((b.lo + b.hi) / 2, l.min, l.max), c);
   return `rgb(${c.map((v) => Math.round(v * 255)).join(' ')})`;
 }
 
@@ -64,6 +64,7 @@ export function Dashboard() {
   if (!d) return null;
   const month = hudStore.introCutoff === null ? null : new Date(hudStore.introCutoff).getUTCMonth();
   const filters = hudStore.glass.spec?.filters ?? [];
+  const top = d.maxSize === null ? null : maxTile(d.charts.find((c) => c.key === 'size')?.field, d.maxSize); // prettier-ignore
   return (
     <aside className={`dash ${open ? '' : 'closed'}`} aria-label="What is on screen">
       <button
@@ -83,10 +84,10 @@ export function Dashboard() {
               <dt>shown</dt>
               <dd>{d.count.toLocaleString()}</dd>
             </div>
-            {d.maxSize !== null && (
+            {top && (
               <div>
-                <dt>strongest</dt>
-                <dd>{d.maxSize.toFixed(1)}</dd>
+                <dt>{top.label}</dt>
+                <dd>{top.value}</dd>
               </div>
             )}
             {d.medianDepth !== null && (

@@ -3,6 +3,8 @@
 import type { DatasetSchema } from '../contracts/contracts.ts';
 import { range } from '../data/arrow.ts';
 import type { Columns } from '../data/arrow.ts';
+import { isLogScale } from '../scene/colorRamp.ts';
+import { formatLegendValue } from './format.ts';
 
 /** One bar: [lo, hi) — or [lo, hi] when closed (the last bin, months, regions). */
 export interface Bar {
@@ -85,6 +87,14 @@ export function bands(
   return bars;
 }
 
+/** Bar edges every 1000x, for data the globe draws on a log scale (meteorite mass). */
+export function logEdges(lo: number, hi: number): number[] {
+  const edges: number[] = [];
+  for (let k = Math.floor(Math.log10(lo)); 10 ** k <= hi; k += 3)
+    edges.push(Number((10 ** k).toPrecision(1)));
+  return edges;
+}
+
 /** Twelve monthly bars for one calendar year; null when the data spans several years. */
 export function byMonth(times: ArrayLike<number>, mask: Uint8Array): Bar[] | null {
   let year: number | null = null;
@@ -142,6 +152,13 @@ const title = (column: string) => {
   return t.charAt(0).toUpperCase() + t.slice(1);
 };
 
+/** The summary's top number: "strongest 7.8" for quakes, "max wind 165" for anything else. */
+export function maxTile(field: string | undefined, v: number): { label: string; value: string } {
+  if (!field || field === 'magnitude') return { label: 'strongest', value: v.toFixed(1) };
+  const name = field.replace(/_(km|kt|mb|kg|ft|ly)$/, '').replace(/_/g, ' ');
+  return { label: `max ${name}`, value: formatLegendValue(v, false) };
+}
+
 export function computeDashboard(
   schema: DatasetSchema,
   base: Columns,
@@ -157,6 +174,10 @@ export function computeDashboard(
   const hist = (key: Chart['key'], field: string, values: ArrayLike<number>) => {
     const [lo, hi] = range(values);
     if (!(hi >= lo)) return;
+    if (isLogScale(lo, hi)) {
+      charts.push({ key, title: title(field), field, kind: 'range', bars: bands(values, mask, logEdges(lo, hi), hi) }); // prettier-ignore
+      return;
+    }
     charts.push({ key, title: title(field), field, kind: 'range', bars: histogram(values, mask, lo, hi, niceWidth(hi - lo, 6)) }); // prettier-ignore
   };
   const sizes = sizeCol ? base.numbers.get(sizeCol) : undefined;

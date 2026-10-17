@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { DatasetSchema } from '../contracts/contracts.ts';
 import type { Columns } from '../data/arrow.ts';
 import {
-  bands, byMonth, computeDashboard, coveredBars, histogram, niceWidth, region, topRegions,
+  bands, byMonth, computeDashboard, coveredBars, histogram, logEdges, maxTile, niceWidth, region, topRegions,
 } from './dashboard.ts'; // prettier-ignore
 import type { Chart } from './dashboard.ts';
 
@@ -131,5 +131,21 @@ describe('coveredBars', () => {
     expect([...coveredBars(months, [{ field: 'time', op: '>=', value: '2024-02-01' }])]).toEqual([
       1, 2,
     ]);
+  });
+});
+
+describe('maxTile', () => {
+  it('says strongest for quake magnitude, the column and its size for anything else', () => {
+    expect(maxTile(undefined, 7.84)).toEqual({ label: 'strongest', value: '7.8' });
+    expect(maxTile('magnitude', 7.84)).toEqual({ label: 'strongest', value: '7.8' });
+    expect(maxTile('wind_kt', 165)).toEqual({ label: 'max wind', value: '165' });
+    expect(maxTile('mass_kg', 60000)).toEqual({ label: 'max mass', value: '60000' });
+  });
+});
+
+describe('logEdges', () => {
+  it('steps by 1000x for data spanning decades (meteorite mass in kg)', () => {
+    expect(logEdges(0.00001, 60000)).toEqual([0.00001, 0.01, 10, 10000]);
+    expect(logEdges(0.3, 900)).toEqual([0.1, 100]);
   });
 });

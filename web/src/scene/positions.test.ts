@@ -42,7 +42,7 @@ describe('positionsFor', () => {
 });
 
 describe('categorical colour', () => {
-  it('gives the first three categories palette slots and folds the rest to grey', () => {
+  it('gives each category its own palette slot (up to 8; beyond that, grey "other")', () => {
     const cloud = new PointCloud(new THREE.Scene(), positionsFor(papers, base, 3));
     const { legend } = applyView(cloud, base, papers, new Map(), new Uint8Array(3), {
       result: null,
@@ -56,13 +56,13 @@ describe('categorical colour', () => {
         { label: 'vision', color: '#3987e5' },
         { label: 'language', color: '#d95926' },
         { label: 'machine learning', color: '#199e70' },
-        { label: 'other', color: '#6b7280' },
+        { label: 'robots', color: '#e6b800' },
       ],
     });
     const colors = cloud['geometry'].getAttribute('aColor').array as Float32Array;
     const hex = (i: number) =>
       '#' + [0, 1, 2].map((c) => Math.round(colors[i * 3 + c] * 255).toString(16).padStart(2, '0')).join(''); // prettier-ignore
-    expect([hex(0), hex(1), hex(2)]).toEqual(['#3987e5', '#6b7280', '#d95926']);
+    expect([hex(0), hex(1), hex(2)]).toEqual(['#3987e5', '#e6b800', '#d95926']);
   });
 });
 

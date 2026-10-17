@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { depthBands, depthTicks, sizeSamples } from './legend.ts';
+import { depthBands, depthTicks, showDepthBands, sizeSamples } from './legend.ts';
 
 describe('sizeSamples', () => {
   it('uses M5/M6/M7 for magnitude, growing like the point sizes', () => {
@@ -10,6 +10,11 @@ describe('sizeSamples', () => {
   });
   it('uses min / middle / max for other columns', () => {
     expect(sizeSamples('revenue', 0, 100).map((x) => x.label)).toEqual(['0', '50', '100']);
+  });
+  it('takes the geometric middle on a log scale, sized like the dots (meteorite mass)', () => {
+    const s = sizeSamples('mass_kg', 0.00001, 60000);
+    expect(s.map((x) => x.label)).toEqual(['0.00001', '0.775', '60000']);
+    expect(s[1].px).toBe(Math.round(6 + 0.5 ** 1.5 * 18));
   });
 });
 
@@ -26,5 +31,12 @@ describe('depthTicks', () => {
   it('depth ticks mark 70 and 300 km between the ends', () => {
     expect(depthTicks(1.4, 653.8).map((t) => t.label)).toEqual(['1', '70', '300', '654 km']);
     expect(depthTicks(0, 100).map((t) => t.label)).toEqual(['0', '70', '100 km']);
+  });
+});
+
+describe('depth bands', () => {
+  it('show the earthquake bands only for data deeper than 300 km', () => {
+    expect(showDepthBands(1, 654)).toBe(true);
+    expect(showDepthBands(1, 6.4)).toBe(false); // deep-sea corals: km, but no 70 / 300 km bands
   });
 });

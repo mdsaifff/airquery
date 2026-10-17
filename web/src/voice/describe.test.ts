@@ -42,4 +42,17 @@ describe('spoken replies', () => {
     expect(spokenNotice('flying to Japan')).toBe('flying to Japan');
     expect(spokenNotice('Nothing to undo.')).toBe('Nothing to undo.');
   });
+
+  it('other datasets: their own size unit and a plain phrase for any filter', () => {
+    const storms = { ...dash, maxSize: 165, charts: [] };
+    const spec = { ...blank, filters: [{ field: 'category', op: '>=' as const, value: 4 }] };
+    expect(
+      describeView(spec, storms, 'storm positions', { column: 'wind_kt', unit: 'knots' }),
+    ).toBe('314 storm positions with category 4 and up, up to 165 knots.');
+    const kinds = {
+      ...blank,
+      filters: [{ field: 'type', op: '=' as const, value: 'large airport' }],
+    };
+    expect(describeView(kinds, { ...dash, maxSize: null, charts: [] }, 'airports')).toBe('314 airports with type large airport.'); // prettier-ignore
+  });
 });

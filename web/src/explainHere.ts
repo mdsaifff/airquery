@@ -38,7 +38,8 @@ export async function explainHere(ctx: ExplainContext, name: string): Promise<vo
     const resp = await explainIds({ dataset: name, ids: [first, ...rest], dataset_schema: userSchema }); // prettier-ignore
     if (resp.status !== 'ok' || !resp.sql)
       return toast('error', resp.message ?? 'Could not summarize.');
-    const sentence = explainSentence(name, firstRow(await (await db).run(resp.sql, resp.params)));
+    const row = firstRow(await (await db).run(resp.sql, resp.params));
+    const sentence = explainSentence(name, row, d.schema);
     hudStore.glass = { spec: datasets.session(name).current, sql: resp.sql, params: [`… ${picked.length} ids`] }; // prettier-ignore
     say(sentence);
   } catch (err) {

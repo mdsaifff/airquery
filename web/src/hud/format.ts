@@ -45,6 +45,7 @@ export function formatMs(ms: number): string {
 
 export function formatLegendValue(v: number, isTime: boolean): string {
   if (isTime) return new Date(v).toISOString().slice(0, 10);
+  if (v !== 0 && Math.abs(v) < 0.1) return String(Number(v.toPrecision(2))); // tiny masses
   return Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(1);
 }
 
