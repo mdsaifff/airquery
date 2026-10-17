@@ -90,7 +90,7 @@ function rig() {
     },
     show: (view) => legends.push(applyView(globe, BASE, SCHEMA, idIndex, mask, view).legend?.column ?? null), // prettier-ignore
     flyTo: (lat, lon) => flights.push([lat, lon]),
-    explain: () => notes.push('explain'),
+    explain: (p) => notes.push(p ? `explain:${p.lat},${p.lon}` : 'explain'),
     resetView: () => notes.push('resetView'),
     notify: (kind, text) => notes.push(`${kind}:${text}`),
     pointer: () => pointer,
@@ -286,5 +286,28 @@ describe('refresh', () => {
     await r.session.submit('what happened here?', 0);
     const sent = JSON.parse((fetchMock.mock.calls[0] as unknown as [string, { body: string }])[1].body); // prettier-ignore
     expect(sent.pointer).toEqual({ lat: 35, lon: 139 });
+  });
+
+  it('only commands that point somewhere send the pointer', async () => {
+    const r = rig();
+    r.setPointer({ lat: 35, lon: 139 });
+    const fetchMock = agentReplies(
+      { ...okResponse(spec({ intent: 'timeline', timeline: { action: 'play', date: null, speed: null } }), '', []), sql: null }, // prettier-ignore
+      { ...okResponse(spec({ intent: 'explain' }), '', []), sql: null },
+    );
+    await r.session.submit('play the year', 0); // no "here": cacheable, no pointer
+    await r.session.submit('show me what is around here', 0);
+    const sent = fetchMock.mock.calls.map((c) => JSON.parse((c as unknown as [string, { body: string }])[1].body).pointer); // prettier-ignore
+    expect(sent).toEqual([null, { lat: 35, lon: 139 }]);
+  });
+
+  it('"what happened here?" explains the place that was sent', async () => {
+    const r = rig();
+    r.setPointer({ lat: 35, lon: 139 });
+    agentReplies({ ...okResponse(spec({ intent: 'explain' }), '', []), sql: null });
+    const asked = r.session.submit('what happened here?', 0);
+    r.setPointer({ lat: 0, lon: 0 }); // the hand moved on while the agent answered
+    await asked;
+    expect(r.notes).toEqual(['explain:35,139']);
   });
 });

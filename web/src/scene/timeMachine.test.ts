@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DAY_MS, TimeMachine } from './timeMachine.ts';
+import { DAY_MS, dayStartMs, TimeMachine } from './timeMachine.ts';
 import type { TimedCloud } from './timeMachine.ts';
 
 const T0 = Date.UTC(2024, 0, 1);
@@ -97,5 +97,15 @@ describe('TimeMachine', () => {
     tm.seekDate(T0 + 5 * DAY_MS);
     expect(tm.day).toBeCloseTo(5);
     expect(tm.playing).toBe(false);
+  });
+
+  it('dates with a time or a zone mean that calendar day; a bad date changes nothing', () => {
+    expect(dayStartMs('2024-06-05')).toBe(Date.UTC(2024, 5, 5));
+    expect(dayStartMs('2024-06-05T00:00:00Z')).toBe(Date.UTC(2024, 5, 5));
+    expect(dayStartMs('2024-06-05T13:20:00+00:00')).toBe(Date.UTC(2024, 5, 5));
+    const { tm } = started();
+    tm.seekDate(T0 + 2 * DAY_MS);
+    tm.seekDate(Number.NaN);
+    expect(tm.day).toBeCloseTo(2);
   });
 });

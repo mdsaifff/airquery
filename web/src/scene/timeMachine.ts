@@ -4,6 +4,11 @@ import { config } from '../config.ts';
 
 export const DAY_MS = 86_400_000;
 
+/** The UTC start of an ISO date's calendar day ("2024-06-05", "…T00:00:00Z", "…+00:00"). */
+export function dayStartMs(iso: string): number {
+  return Date.parse(`${iso.slice(0, 10)}T00:00:00Z`);
+}
+
 export interface TimedCloud {
   readonly visible: Uint8Array;
   setVisibility(mask: Uint8Array | null): void;
@@ -86,9 +91,9 @@ export class TimeMachine {
     this.dirty = true;
   }
 
-  /** Jump to a calendar time (epoch ms), paused. */
+  /** Jump to a calendar time (epoch ms), paused; a bad date (NaN) changes nothing. */
   seekDate(ms: number): void {
-    this.seek((ms - this.t0) / DAY_MS);
+    if (Number.isFinite(ms)) this.seek((ms - this.t0) / DAY_MS);
   }
 
   seekFraction(f: number): void {

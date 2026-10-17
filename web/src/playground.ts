@@ -6,7 +6,7 @@ import { computeDashboard } from './hud/dashboard.ts';
 import { timeRange } from './hud/seismogram.ts';
 import { hudStore, toast } from './hud/store.ts';
 import type { LoadedDataset } from './scene/loadDataset.ts';
-import { TimeMachine } from './scene/timeMachine.ts';
+import { dayStartMs, TimeMachine } from './scene/timeMachine.ts';
 import type { XrayState } from './scene/xray.ts';
 import type { CameraController } from './interaction/cameraController.ts';
 import { decodeShare, encodeShare } from './share.ts';
@@ -101,7 +101,7 @@ export class Playground {
       this.stopTime();
     } else if (t.action === 'seek' && t.date) {
       this.host.skipIntro();
-      time.seekDate(Date.parse(t.date.length === 10 ? `${t.date}T00:00:00Z` : `${t.date}Z`));
+      time.seekDate(dayStartMs(t.date));
     }
     const label = new Date(time.cutoffMs()).toLocaleDateString('en-US', DATE);
     return timelineSentence(t, label);

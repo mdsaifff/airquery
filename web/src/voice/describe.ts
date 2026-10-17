@@ -35,6 +35,12 @@ export function describeView(spec: QuerySpec | null, dash: Dashboard | null, nou
   return `${head}${near}${strongest}.`;
 }
 
+/** A toast spoken aloud: the sentence, without the raw details in trailing brackets. */
+export function spokenNotice(text: string): string {
+  const plain = text.replace(/\s*\([^)]*\)\s*$/, '');
+  return plain === text ? text : `${plain}.`;
+}
+
 const SPEED: Record<string, string> = { day: 'a day', week: 'a week', month: 'a month' };
 
 export function timelineSentence(t: Timeline, dateLabel: string): string {

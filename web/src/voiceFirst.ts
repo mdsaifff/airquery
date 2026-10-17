@@ -71,14 +71,14 @@ export class VoiceFirst {
     }
   }
 
-  /** Visible points in the box around the pin ("what happened here?"), or null. */
-  hereSelection(d: LoadedDataset): number[] | null {
+  /** Visible points in the box around `p` (the "here" a request carried). */
+  selectionAround(d: LoadedDataset, p: Pointer): number[] | null {
     const pos = d.schema.position;
-    if (!this.pin || pos.kind !== 'geo') return null;
+    if (pos.kind !== 'geo') return null;
     const lats = d.base.numbers.get(pos.lat);
     const lons = d.base.numbers.get(pos.lon);
     if (!lats || !lons) return null;
-    return inBox(lats, lons, d.cloud.visible, hereBox(this.pin, config.hereHalfDeg));
+    return inBox(lats, lons, d.cloud.visible, hereBox(p, config.hereHalfDeg));
   }
 
   say(text: string): void {

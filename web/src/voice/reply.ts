@@ -40,6 +40,11 @@ export class Replier {
     if (!this.mutedNow) this.deps.speak(text);
   }
 
+  /** The user started talking: stop speaking (the subtitle stays). */
+  hush(): void {
+    this.deps.stop();
+  }
+
   setMuted(m: boolean): void {
     this.mutedNow = m;
     hudStore.muted = m;

@@ -34,7 +34,7 @@ import { wantsXray, XrayState } from './scene/xray.ts';
 import { downloadJson, LandmarkRecorder } from './tracking/recorder.ts';
 import { captureFrames } from './tracking/captureFrames.ts';
 import { startTracking } from './tracking/trackingLoop.ts';
-import { describeView, viewSentence } from './voice/describe.ts';
+import { describeView, spokenNotice, viewSentence } from './voice/describe.ts';
 import { Replier } from './voice/reply.ts';
 import { speak } from './voice/speak.ts';
 import { VoiceController } from './voice/voiceController.ts';
@@ -189,7 +189,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
     resetView: () => camera.reset(performance.now()),
     notify: (kind, text) => {
       toast(kind, text);
-      if (kind === 'clarify') voiceFirst.say(text); // the globe asks back out loud
+      voiceFirst.say(spokenNotice(text)); // every notice is said out loud too (spec C)
     },
     pointer: () => voiceFirst.pointer(screenNow(), isGeo()),
     timeline: (t) => voiceFirst.say(playground.applyTimeline(t)),
@@ -198,10 +198,11 @@ export function startRuntime(els: RuntimeElements): Runtime {
       if (v.mute !== null) replier.setMuted(v.mute);
       voiceFirst.say(viewSentence(v));
     },
-    explain: () => {
+    explain: (pointer) => {
+      // "what happened here?": the box around the place the request carried; else near the pointer
       const here = () => {
         const d = datasets.get(name);
-        return d ? voiceFirst.hereSelection(d) : null;
+        return d && pointer ? voiceFirst.selectionAround(d, pointer) : null;
       };
       const say = (text: string) => voiceFirst.say(text);
       const ctx = { datasets, hover, camera: sm.camera, db, selection: () => lasso.selection ?? here(), occluded: crustSolid, say }; // prettier-ignore
@@ -284,8 +285,10 @@ export function startRuntime(els: RuntimeElements): Runtime {
       },
       listening(active) {
         hudStore.listening = active;
-        if (active) voiceFirst.captureHere(screenNow(), isGeo());
-        else voiceFirst.releaseAt(performance.now());
+        if (active) {
+          replier.hush(); // the globe stops talking when the user starts
+          voiceFirst.captureHere(screenNow(), isGeo());
+        } else voiceFirst.releaseAt(performance.now());
       },
       error: (message) => toast('error', message),
     },

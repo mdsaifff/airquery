@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { QuerySpec } from '../contracts/contracts.ts';
 import type { Dashboard } from '../hud/dashboard.ts';
-import { describeView, timelineSentence, viewSentence } from './describe.ts';
+import { describeView, spokenNotice, timelineSentence, viewSentence } from './describe.ts';
 
 const blank: QuerySpec = {
   version: 1, dataset: 'quakes', intent: 'query', mode: 'replace', filters: [],
@@ -35,5 +35,11 @@ describe('spoken replies', () => {
     expect(timelineSentence({ action: 'stop', date: null, speed: null }, '')).toBe('Back to the whole year.'); // prettier-ignore
     expect(viewSentence({ xray: true, stats: null, share: null, mute: null })).toBe('X-ray on.');
     expect(viewSentence({ xray: null, stats: false, share: null, mute: true })).toBe('Stats hidden. Voice off.'); // prettier-ignore
+  });
+
+  it('notices are spoken without raw exception details', () => {
+    expect(spokenNotice('Agent unreachable or invalid reply (TypeError: Failed to fetch)')).toBe('Agent unreachable or invalid reply.'); // prettier-ignore
+    expect(spokenNotice('flying to Japan')).toBe('flying to Japan');
+    expect(spokenNotice('Nothing to undo.')).toBe('Nothing to undo.');
   });
 });

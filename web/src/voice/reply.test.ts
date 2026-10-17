@@ -35,4 +35,13 @@ describe('Replier', () => {
       true,
     );
   });
+
+  it('starting to listen hushes the globe (the subtitle stays)', () => {
+    const log: string[] = [];
+    const r = new Replier({ speak: (t) => log.push(`say:${t}`), stop: () => log.push('stop'), storage: fakeStorage() }); // prettier-ignore
+    r.say('Playing the year.', 0);
+    r.hush();
+    expect(log.at(-1)).toBe('stop');
+    expect(hudStore.reply.text).toBe('Playing the year.');
+  });
 });

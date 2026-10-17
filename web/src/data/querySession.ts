@@ -39,7 +39,7 @@ export interface SessionDeps {
   show(view: SceneView, applied: Applied, endedAt: number | null): void;
   flyTo(lat: number, lon: number): void;
   /** "What's this?": summarize what is under the pointer (or the lasso selection). */
-  explain(): void;
+  explain(pointer: Pointer | null): void;
   resetView(): void;
   notify(kind: 'info' | 'clarify' | 'error', text: string): void;
   /** The globe point under the hand or mouse ("here"), or null. Read when a request is sent. */
@@ -53,6 +53,9 @@ export interface SessionDeps {
 interface Entry extends Applied {
   result: Columns | null;
 }
+
+/** Words that point at a place on the globe ("around here", "fly there", "this area"). */
+const POINTS_SOMEWHERE = /\b(here|there)\b|\bthis (area|place|region|spot)\b/i;
 
 const EMPTY: Entry = { spec: null, sql: null, params: [], result: null };
 
@@ -77,15 +80,17 @@ export class QuerySession {
   }
 
   async submit(utterance: string, endedAt: number): Promise<void> {
+    // Only commands that point somewhere carry "here": the others stay cacheable.
     const { deps } = this;
+    const pointer = POINTS_SOMEWHERE.test(utterance) ? deps.pointer() : null;
     const req = {
       dataset: deps.dataset,
       utterance,
       current_spec: this.current,
       dataset_schema: deps.datasetSchema ?? null,
-      pointer: deps.pointer(),
+      pointer,
     };
-    await this.handle(() => deps.ask(req), endedAt);
+    await this.handle(() => deps.ask(req), endedAt, pointer);
   }
 
   /** Mouse baseline: apply a spec built from dropdowns (still validated by the agent). */
@@ -93,7 +98,12 @@ export class QuerySession {
     await this.handle(() => this.deps.compile({ dataset: this.deps.dataset, spec }), endedAt);
   }
 
-  private async handle(request: () => Promise<QueryResponse>, endedAt: number): Promise<void> {
+  /** pointer: the "here" the request carried (explain summarises around it). */
+  private async handle(
+    request: () => Promise<QueryResponse>,
+    endedAt: number,
+    pointer: Pointer | null = null,
+  ): Promise<void> {
     const { deps } = this;
     const id = ++this.seq;
     let resp: QueryResponse;
@@ -117,7 +127,7 @@ export class QuerySession {
 
     if (spec.intent === 'undo') return this.undo(endedAt);
     if (spec.intent === 'reset') return this.reset(endedAt);
-    if (spec.intent === 'explain') return deps.explain();
+    if (spec.intent === 'explain') return deps.explain(pointer);
     if (spec.intent === 'timeline') return spec.timeline ? deps.timeline(spec.timeline) : undefined;
     if (spec.intent === 'view') return spec.view ? deps.view(spec.view) : undefined;
     if (spec.intent === 'navigate') {
@@ -141,7 +151,7 @@ export class QuerySession {
 
   /** Custom gesture: same as saying "what's this?", without the agent round trip. */
   explainNow(): void {
-    this.deps.explain();
+    this.deps.explain(null);
   }
 
   /** Re-push what is on screen (e.g. after switching back to this dataset). */
