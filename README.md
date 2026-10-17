@@ -136,24 +136,29 @@ origins), `RATE_LIMIT_PER_MIN` (AI questions per visitor per minute, default 6),
 and `LLM_CALLS_PER_MIN` (AI questions from all visitors together, default 5; at ~2.1k
 tokens each that is a little over a Groq free key's 8k tokens/min, so a busy minute may get
 an occasional "the AI is busy" reply). When a limit is hit, visitors see "the AI is busy; ask again in
-a minute".
+a minute"; when the provider's daily cap is spent (Groq free: 200k tokens/day, about 90
+questions), they are told to try again in a few hours.
 The image reads its `DatasetSchema` files from
 `/app/data` and listens on `$PORT` (default 8000).
 
-**Hosts.** Web: Netlify, Vercel or GitHub Pages (the DuckDB-Wasm binaries are
-~36–41 MB each, so Cloudflare Pages' 25 MiB file limit rules it out). Agent: Google
-Cloud Run (set min instances = 1 while recording to avoid cold starts), Fly.io,
-Render (free tier sleeps) or Railway.
+**Hosts.** The repo is set up for GitHub Pages (website, `.github/workflows/pages.yml`)
+and Render (agent, `render.yaml`), both free. Netlify or Vercel also work for the website;
+Cloud Run, Fly.io or Railway for the agent. Cloudflare Pages does not: the DuckDB-Wasm
+binaries are ~36–41 MB each, over its 25 MiB file limit.
 
-**Deploy checklist.**
+**Deploy checklist (GitHub Pages + Render).**
 
-1. Deploy the agent (Render or Cloud Run) with the variables above and
-   `WEB_ORIGIN=https://<your-site>`.
-2. `curl https://<agent-host>/health` returns `{"ok":true}`.
-3. `VITE_AGENT_URL=https://<agent-host> make build`.
-4. Upload `web/dist` to Netlify (drag and drop, or `netlify deploy --prod --dir web/dist`).
-5. Open the site: allow the camera, ask one question, press ▶ on the strip, then copy a share
-   link and open it in a private window.
+1. Push the repo to GitHub (public, for free Pages).
+2. Render: **New → Blueprint**, pick the repo. Fill in `LLM_API_KEY` (your Groq key) and
+   `WEB_ORIGIN=https://<your-user>.github.io` (origin only: no path, no trailing slash).
+3. `curl https://<agent>.onrender.com/health` returns `{"ok":true}`.
+4. GitHub repo **Settings → Pages → Source: GitHub Actions**; **Settings → Secrets and
+   variables → Actions → Variables**: `AGENT_URL=https://<agent>.onrender.com`.
+5. **Actions → pages → Run workflow** (later pushes to `main` deploy by themselves). The site
+   is at `https://<your-user>.github.io/<repo>/`.
+6. Open the site: allow the camera, ask one question (the free Render agent sleeps; the
+   first question after a quiet spell takes ~30 s), then copy a share link and open it in a
+   private window.
 
 ## Design decisions
 

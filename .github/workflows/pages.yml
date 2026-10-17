@@ -1,0 +1,48 @@
+# Publishes the website to GitHub Pages on every push to main.
+# Set the repo variable AGENT_URL (Settings -> Secrets and variables -> Actions ->
+# Variables) to the deployed agent, e.g. https://airquery-agent.onrender.com
+name: pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - if: vars.AGENT_URL == ''
+        run: echo "::warning::AGENT_URL is not set; the site will work without voice commands."
+      - run: npm ci && npm run build
+        working-directory: web
+        env:
+          VITE_AGENT_URL: ${{ vars.AGENT_URL }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
