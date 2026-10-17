@@ -84,14 +84,18 @@ export function App() {
       {!baseline && <CamLabel />}
       <div className="vignette" aria-hidden="true" />
       <aside className="rail">
-        <TopBar onReplay={() => runtime.current?.replayIntro()} />
+        <TopBar onReplay={() => runtime.current?.playYear()} />
         <GlassBox />
       </aside>
       <Stats />
       <Dashboard onPick={(c, b) => runtime.current?.playground.pickBar(c, b)} />
       <div className="bottom-left">
         <HowToRead onToggleXray={() => runtime.current?.toggleXray()} />
-        <Seismogram />
+        <Seismogram
+          onToggle={() => runtime.current?.playground.toggleTime()}
+          onSeek={(f) => runtime.current?.playground.seekFraction(f)}
+          onSpeed={(s) => runtime.current?.playground.setSpeed(s)}
+        />
         {!baseline && (
           <Chips
             onPick={(c) => runtime.current?.playground.pickChip(c)}

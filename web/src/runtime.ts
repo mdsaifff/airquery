@@ -68,8 +68,8 @@ export interface Runtime {
   captureGesture(label: string, onProgress: (done: number) => void): Promise<void>;
   /** X-ray: crust to glass, quakes sink to their real depth (X key, legend button). */
   toggleXray(): void;
-  /** Replay the year from the start (top bar button). */
-  replayIntro(): void;
+  /** Replay the year with the time machine (masthead link). */
+  playYear(): void;
 }
 
 export function startRuntime(els: RuntimeElements): Runtime {
@@ -169,7 +169,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
 
   const db = Db.open();
   const datasets = new Datasets(DATASETS, sm.scene, db, sessionDeps);
-  const playground = new Playground({ datasets });
+  const playground = new Playground({ datasets, skipIntro });
   cleanups.push(() => datasets.dispose());
 
   async function showDataset(name: string, announce: boolean): Promise<void> {
@@ -189,7 +189,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       if (name === 'quakes') {
         hudStore.placeOptions = d.schema.columns.find((c) => c.name === 'place')?.examples ?? [];
       }
-      void playground.onDataset(name);
+      void playground.onDataset(name, d);
       datasets.session(name).refresh();
       if (name === DATASETS[0] && !introPlayed) {
         introPlayed = true;
@@ -310,6 +310,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       d.earth?.setXray(xray.eased);
       d.cloud.setDepthMix(xray.eased);
       d.shockwaves?.update(now, config.shockwavePeriodMs, reduceMotion || intro ? 0 : 1 - xray.eased); // prettier-ignore
+      if (!intro) playground.onFrame(dt, d); // time machine (the fly-in intro owns the points meanwhile)
       d.cloud.update(dt, orbit.distance, sm.pixelScale);
       const handCursor = cursor.visible ? cursor.position : null;
       const canPick = mode === 'pointing' || mode === 'idle';
@@ -347,6 +348,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
   const onKey = (e: KeyboardEvent) => {
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.repeat) return; // prettier-ignore
     skipIntro();
+    if (playground.onKey(e.code)) return;
     if (e.code === 'Space') {
       e.preventDefault();
       if (hudStore.baseline) return; // no voice in the mouse baseline
@@ -407,8 +409,6 @@ export function startRuntime(els: RuntimeElements): Runtime {
     undo: () => datasets.session().undo(),
     resetView: () => camera.reset(performance.now()),
     toggleXray: () => xray.toggle(),
-    replayIntro() {
-      if (datasets.active === DATASETS[0]) startIntro();
-    },
+    playYear: () => playground.playYear(),
   };
 }

@@ -240,7 +240,7 @@ button {
 .glass {
   padding: 10px 14px 12px;
   /* long queries (chips + chart clicks) scroll instead of running into the legend */
-  max-height: max(110px, calc(100vh - 730px));
+  max-height: max(110px, calc(100vh - 770px));
   overflow-y: auto;
   scrollbar-width: thin;
   background: var(--surface);
@@ -1059,6 +1059,36 @@ button {
 }
 .chip.surprise {
   color: var(--muted);
+}
+
+.seismo-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font: 12px var(--sans);
+  color: var(--dim);
+}
+.seismo-controls button {
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font: 12px var(--sans);
+  cursor: pointer;
+}
+.seismo-controls button.on,
+.seismo-controls button:hover {
+  color: var(--fg);
+  border-color: var(--line-strong);
+}
+.seismo-controls .play {
+  min-width: 34px;
+  color: var(--fg);
+}
+.seismo-controls .hint {
+  margin-left: 6px;
 }
 
 @media (max-width: 760px) {

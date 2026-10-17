@@ -23,3 +23,15 @@ describe('PointCloud depth mix', () => {
     expect(c.surfacePositions).toBe(c.depthPositions);
   });
 });
+describe('PointCloud time glow', () => {
+  it('stores days since t0 per point and switches the glow with the playhead', () => {
+    const c = new PointCloud(new THREE.Scene(), depth);
+    const day = 86_400_000;
+    c.setTimes([0, day * 2], 0);
+    expect([...c.times]).toEqual([0, 2]);
+    c.setPlayhead(1.5, 3);
+    expect(c.timeUniforms).toEqual({ on: 1, playhead: 1.5, glowDays: 3 });
+    c.setPlayhead(null, 3);
+    expect(c.timeUniforms.on).toBe(0);
+  });
+});

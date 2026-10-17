@@ -61,6 +61,8 @@ export const hudStore = {
   } | null,
   /** Charts for what is on screen (recomputed per view change), or null before data. */
   dashboard: null as Dashboard | null,
+  /** Time machine controls: shown when the dataset has times; playing; days of data per second. */
+  playback: { available: false, playing: false, speed: 30 },
   /** Suggestion chips for the current dataset (empty: no chips file). */
   chips: [] as Chip[],
   /** One-line description of the current dataset (from its schema). */

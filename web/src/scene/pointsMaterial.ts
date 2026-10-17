@@ -8,10 +8,14 @@ const vertexShader = /* glsl */ `
   attribute vec3 aColor;
   attribute float aSize;
   attribute float aAlpha;
+  attribute float aTime;
   uniform float uPixelScale;
   uniform float uCamDist;
   uniform float uFarDim;
   uniform float uDepthMix;
+  uniform float uTimeOn;
+  uniform float uPlayhead;
+  uniform float uGlowDays;
   varying vec3 vColor;
   varying float vAlpha;
   float easeOutBack(float t) {
@@ -28,8 +32,12 @@ const vertexShader = /* glsl */ `
     mv.xyz -= normalize(mv.xyz) * 0.5 * aSize * pop;
     gl_Position = projectionMatrix * mv;
     float far = clamp(-mv.z - uCamDist + 0.5, 0.0, 1.0);
-    vColor = aColor;
-    vAlpha = aAlpha * (1.0 - uFarDim * far);
+    // Time machine: new arrivals glow, then settle to a dimmer dot as they age.
+    float age = uPlayhead - aTime;
+    float glow = uTimeOn * exp(-max(age, 0.0) / uGlowDays);
+    float settle = mix(1.0, 0.55, uTimeOn * smoothstep(uGlowDays, uGlowDays * 6.0, age));
+    vColor = aColor * (1.0 + 1.6 * glow);
+    vAlpha = aAlpha * settle * (1.0 - uFarDim * far);
   }
 `;
 
@@ -58,6 +66,9 @@ export function createPointsMaterial(farDim: number): THREE.ShaderMaterial {
       uCamDist: { value: 3 },
       uFarDim: { value: farDim },
       uDepthMix: { value: 0 },
+      uTimeOn: { value: 0 },
+      uPlayhead: { value: 0 },
+      uGlowDays: { value: 1 },
     },
     transparent: true,
     depthWrite: false,

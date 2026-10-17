@@ -40,6 +40,7 @@ export class PointCloud {
     this.geometry.setAttribute('aColor', new THREE.BufferAttribute(new Float32Array(this.count * 3), 3)); // prettier-ignore
     this.geometry.setAttribute('aSize', new THREE.BufferAttribute(new Float32Array(this.count), 1));
     this.geometry.setAttribute('aAlpha', new THREE.BufferAttribute(this.alpha, 1));
+    this.geometry.setAttribute('aTime', new THREE.BufferAttribute(new Float32Array(this.count), 1));
     this.material = createPointsMaterial(farDim);
     const points = new THREE.Points(this.geometry, this.material);
     points.renderOrder = 0;
@@ -87,6 +88,34 @@ export class PointCloud {
     if (mask) this.visible.set(mask);
     else this.visible.fill(1);
     this.animating = true;
+  }
+
+  /** Days since t0 per point (for the time machine's glow); missing times never glow. */
+  setTimes(times: ArrayLike<number>, t0: number): void {
+    const attr = this.geometry.getAttribute('aTime') as THREE.BufferAttribute;
+    const out = attr.array as Float32Array;
+    for (let i = 0; i < this.count; i++) {
+      const t = times[i];
+      out[i] = Number.isFinite(t) ? (t - t0) / 86_400_000 : -1e6;
+    }
+    attr.needsUpdate = true;
+  }
+
+  get times(): Float32Array {
+    return (this.geometry.getAttribute('aTime') as THREE.BufferAttribute).array as Float32Array;
+  }
+
+  /** Time machine playhead (days since t0), or null when it is off. */
+  setPlayhead(day: number | null, glowDays: number): void {
+    const u = this.material.uniforms;
+    u.uTimeOn.value = day === null ? 0 : 1;
+    u.uPlayhead.value = day ?? 0;
+    u.uGlowDays.value = glowDays;
+  }
+
+  get timeUniforms(): { on: number; playhead: number; glowDays: number } {
+    const u = this.material.uniforms;
+    return { on: u.uTimeOn.value as number, playhead: u.uPlayhead.value as number, glowDays: u.uGlowDays.value as number }; // prettier-ignore
   }
 
   /** rgb per point (0..1, sRGB), as last set by setColors / setCategoryColors. */

@@ -1,12 +1,24 @@
 // The year as a seismogram: one spike per time slice, coloured like its dot on the
 // globe; filtered-out events stay as a faint trace. Plays along with the replay.
 import { useEffect, useRef, useState } from 'react';
+import type { PointerEvent } from 'react';
+import { config } from '../config.ts';
 import { binStrip, timeRange, timeTicks } from './seismogram.ts';
 import { hudStore, useTick } from './store.ts';
 
 const HEIGHT = 46; // css px
+const SPEED_LABELS: Record<number, string> = { 1: 'day/s', 7: 'week/s', 30: 'month/s' };
 
-export function Seismogram() {
+/** The strip doubles as the time machine's timeline: play, speed, click or drag to jump. */
+export function Seismogram({
+  onToggle,
+  onSeek,
+  onSpeed,
+}: {
+  onToggle: () => void;
+  onSeek: (fraction: number) => void;
+  onSpeed: (daysPerSec: number) => void;
+}) {
   useTick(15);
   const canvas = useRef<HTMLCanvasElement>(null);
   const [width, setWidth] = useState(0);
@@ -57,11 +69,39 @@ export function Seismogram() {
   }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!tl) return null;
+  const pb = hudStore.playback;
+  const seek = (e: PointerEvent<HTMLCanvasElement>) => {
+    if (e.type === 'pointermove' && e.buttons !== 1) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    onSeek(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)));
+  };
   const cutoff = hudStore.introCutoff;
   const at = cutoff !== null && t1 > t0 ? (cutoff - t0) / (t1 - t0) : null;
   return (
     <figure className="seismo" aria-label="Events over time">
-      <canvas ref={canvas} style={{ height: HEIGHT }} />
+      {pb.available && (
+        <div className="seismo-controls">
+          <button
+            className="play"
+            onClick={onToggle}
+            aria-label={pb.playing ? 'Pause' : 'Play the year'}
+          >
+            {pb.playing ? '❚❚' : '▶'}
+          </button>
+          {config.timeSpeeds.map((s) => (
+            <button key={s} className={pb.speed === s ? 'on' : ''} onClick={() => onSpeed(s)}>
+              {SPEED_LABELS[s] ?? `${s}d/s`}
+            </button>
+          ))}
+          <span className="hint">L to play · click the strip to jump</span>
+        </div>
+      )}
+      <canvas
+        ref={canvas}
+        style={{ height: HEIGHT, cursor: 'pointer' }}
+        onPointerDown={seek}
+        onPointerMove={seek}
+      />
       {at !== null && (
         <div className="playhead" style={{ left: `${at * 100}%` }}>
           <span>{hudStore.introDate}</span>
