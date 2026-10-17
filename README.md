@@ -91,6 +91,11 @@ by magnitude", "the ten strongest", "near Japan", "undo", ...).
 | X-ray: see quakes at their real depth | – | **X**, or the button in the legend |
 | What's this? (spoken summary) | say it, or hold the custom gesture | type it |
 
+Click a suggestion chip or a bar in the dashboard to filter (no AI needed; **Z** undoes it).
+▶ on the strip or **L** replays the year; click the strip to jump to a date. **H** or
+✋ Use hands turns on hand control (the camera never starts on its own). *Share this view*
+copies a link that reopens the same query, camera, X-ray and date.
+
 Study tools: **G** gesture study + false-trigger counter, **B** mouse baseline
 (dropdown filters), **T** task timer, **M** download frontend timings,
 **C** record frames for a custom gesture (`notebooks/custom_gesture.ipynb`),
@@ -120,13 +125,27 @@ VITE_AGENT_URL=http://localhost:8000 make preview      # http://localhost:4173
 
 Agent environment variables (secrets on the host, never in the web build):
 `LLM_PROVIDER`, `LLM_MODEL`, `LLM_API_KEY`, `WEB_ORIGIN` (comma-separated allowed
-origins), `RATE_LIMIT_PER_MIN`. The image reads its `DatasetSchema` files from
+origins), `RATE_LIMIT_PER_MIN` (AI questions per visitor per minute, default 6),
+`COMPILE_RATE_LIMIT_PER_MIN` (chips, chart clicks and share links per visitor, default 60)
+and `LLM_CALLS_PER_MIN` (AI calls from all visitors together, default 20; keeps a Groq free
+key inside its 8k tokens/min). When a limit is hit, visitors see "try a suggestion chip".
+The image reads its `DatasetSchema` files from
 `/app/data` and listens on `$PORT` (default 8000).
 
 **Hosts.** Web: Netlify, Vercel or GitHub Pages (the DuckDB-Wasm binaries are
 ~36–41 MB each, so Cloudflare Pages' 25 MiB file limit rules it out). Agent: Google
 Cloud Run (set min instances = 1 while recording to avoid cold starts), Fly.io,
 Render (free tier sleeps) or Railway.
+
+**Deploy checklist.**
+
+1. Deploy the agent (Render or Cloud Run) with the variables above and
+   `WEB_ORIGIN=https://<your-site>`.
+2. `curl https://<agent-host>/health` returns `{"ok":true}`.
+3. `VITE_AGENT_URL=https://<agent-host> make build`.
+4. Upload `web/dist` to Netlify (drag and drop, or `netlify deploy --prod --dir web/dist`).
+5. Open the site: click a chip, ask one question, press ▶ on the strip, then copy a share
+   link and open it in a private window.
 
 ## Design decisions
 

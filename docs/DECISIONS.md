@@ -174,3 +174,15 @@ These double as material for LinkedIn posts.
 - **Consequences:** reverses the 2026-10-15 redesign spec's "system fonts only": ~95 KB of OFL woff2 in
   `web/public/fonts/` (licences alongside). The day/night line no longer matches the real
   time unless `sunFollowsCamera` is turned off.
+
+## D-017 Playground release: browser-side dashboard and time machine, chips via /compile
+- **Context:** the site should be playable by anyone with a link; the free LLM key cannot
+  serve many visitors, and the screen said little beyond the globe.
+- **Decision:** the dashboard and the time machine are computed in the browser from the
+  loaded columns (no SQL, no agent); chips, chart clicks and share links send a fixed or
+  refined QuerySpec to `/compile` (validated, compiled, no LLM). Hands are opt-in. The agent
+  limits AI questions per visitor and LLM calls globally, with friendly "try a chip" replies.
+- **Why:** everything except free-form questions keeps working when the AI is busy; no
+  camera prompt for visitors; one place still writes SQL.
+- **Consequences:** the time machine reuses the seismogram strip (D-016) as its timeline;
+  the dashboard's three depth bands match the legend rather than the spec's five.
