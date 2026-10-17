@@ -4,6 +4,7 @@ import type { Columns } from '../data/arrow.ts';
 import {
   bands, byMonth, computeDashboard, filterFor, histogram, niceWidth, region, topRegions,
 } from './dashboard.ts'; // prettier-ignore
+import type { Chart } from './dashboard.ts';
 
 const all = (n: number) => new Uint8Array(n).fill(1);
 
@@ -52,22 +53,22 @@ describe('dashboard maths', () => {
   });
 
   it('turns a clicked bar into a filter', () => {
-    const range = {
+    const range: Chart = {
       key: 'size',
       title: 'Magnitude',
       field: 'magnitude',
       kind: 'range',
       bars: [],
-    } as const;
+    };
     expect(filterFor(range, { label: '5', count: 1, lo: 5, hi: 5.5, closed: false })).toEqual({
       field: 'magnitude',
       op: 'between',
       value: [5, 5.499],
     });
-    const time = { ...range, key: 'time', field: 'time', kind: 'time' } as const;
+    const time: Chart = { ...range, key: 'time', field: 'time', kind: 'time' };
     const mar = { label: 'Mar', count: 1, lo: Date.UTC(2024, 2, 1), hi: Date.UTC(2024, 3, 1) - 1000, closed: true }; // prettier-ignore
     expect(filterFor(time, mar).value).toEqual(['2024-03-01T00:00:00', '2024-03-31T23:59:59']);
-    const text = { ...range, key: 'text', field: 'place', kind: 'text' } as const;
+    const text: Chart = { ...range, key: 'text', field: 'place', kind: 'text' };
     expect(filterFor(text, { label: 'Japan', count: 2, lo: 0, hi: 0, closed: true })).toEqual({
       field: 'place',
       op: 'contains',
