@@ -30,7 +30,7 @@ lint: $(WEB_DEPS)
 	cd eval && uv run --project ../agent ruff check . && uv run --project ../agent ruff format --check .
 
 data:
-	cd data_prep && uv run python quakes.py && uv run python coastlines.py
+	cd data_prep && uv run python quakes.py && uv run python coastlines.py && uv run python catalog.py
 
 # NASA Earth imagery (public domain) for the realistic globe, written to web/public/textures/.
 textures:

@@ -103,6 +103,8 @@ export interface ViewChange {
 export interface DatasetSchema {
   dataset: string;
   table: string;
+  title?: string | null;
+  noun?: string | null;
   description: string;
   id?: string;
   position: GeoPosition | XyzPosition;

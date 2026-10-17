@@ -89,6 +89,13 @@ describe('computeDashboard', () => {
     expect(d).toMatchObject({ count: 2, maxSize: 6.5, medianDepth: 205 });
   });
 
+  it('depths too shallow for the earthquake bands get a plain histogram', () => {
+    const cols = { ...quakeCols, numbers: new Map([...quakeCols.numbers, ['depth_km', new Float64Array([1, 2.5, 6])]]) }; // prettier-ignore
+    const depth = computeDashboard(quakeSchema, cols, all(3)).charts.find((c) => c.key === 'depth');
+    expect(depth?.bars.length).toBeGreaterThan(3);
+    expect(depth?.bars[0].label).not.toBe('0–70');
+  });
+
   it('a dataset without time or place gets only histograms', () => {
     const schema = {
       ...quakeSchema,

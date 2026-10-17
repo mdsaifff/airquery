@@ -165,6 +165,8 @@ export const config = {
     'deeper than 300 km',
     'hide the stats',
   ],
+  /** The same on scenes other than the earthquakes (the list above is about quakes). */
+  voiceHintsAnyScene: ["what's this?", 'hide the stats', 'switch to the hurricane tracks', 'undo'],
   voiceHintMs: 6000,
   /** Reset / fly-to animation length (ms). */
   animMs: 1200,

@@ -1,0 +1,123 @@
+{
+  "dataset": "corals",
+  "table": "corals",
+  "title": "deep-sea corals",
+  "noun": "coral and sponge records",
+  "description": "Deep-sea coral and sponge observations 1,000 m and deeper, from NOAA's Deep Sea Coral Research and Technology Program; thinned to one record per kind per ~1 km",
+  "id": "id",
+  "position": {
+    "kind": "geo",
+    "lat": "lat",
+    "lon": "lon",
+    "depth": "depth_km"
+  },
+  "columns": [
+    {
+      "name": "kind",
+      "type": "text",
+      "categorical": true,
+      "synonyms": [
+        "type",
+        "group",
+        "sponge",
+        "black coral",
+        "stony coral",
+        "soft coral"
+      ],
+      "examples": [
+        "gorgonian coral",
+        "sea pen",
+        "glass sponge",
+        "sponge (unspecified)",
+        "black coral",
+        "stony coral (cup coral)",
+        "demosponge",
+        "soft coral"
+      ]
+    },
+    {
+      "name": "species",
+      "type": "text",
+      "synonyms": [
+        "scientific name",
+        "genus",
+        "taxon"
+      ],
+      "examples": [
+        "Porifera",
+        "Pennatuloidea",
+        "Scleractinia",
+        "Anthoptilum grandiflorum",
+        "Bathypathes",
+        "Hexactinellida",
+        "Umbellula",
+        "Keratoisididae"
+      ]
+    },
+    {
+      "name": "depth_km",
+      "type": "number",
+      "unit": "km",
+      "synonyms": [
+        "depth",
+        "deep",
+        "metres down"
+      ],
+      "min": 1.0,
+      "max": 6.369
+    },
+    {
+      "name": "year",
+      "type": "number",
+      "unit": "year",
+      "synonyms": [
+        "observed",
+        "when",
+        "since"
+      ],
+      "min": 1842,
+      "max": 2025
+    },
+    {
+      "name": "ocean",
+      "type": "text",
+      "categorical": true,
+      "synonyms": [
+        "sea",
+        "in the"
+      ],
+      "examples": [
+        "North Pacific",
+        "North Atlantic",
+        "South Pacific",
+        "South Atlantic",
+        "Southern",
+        "Indian",
+        "Arctic"
+      ]
+    },
+    {
+      "name": "lat",
+      "type": "number",
+      "unit": "degrees",
+      "synonyms": [
+        "latitude"
+      ],
+      "min": -75.817,
+      "max": 67.8167
+    },
+    {
+      "name": "lon",
+      "type": "number",
+      "unit": "degrees",
+      "synonyms": [
+        "longitude"
+      ],
+      "min": -179.99175,
+      "max": 179.97975
+    }
+  ],
+  "default_color_by": "depth_km",
+  "default_size_by": null,
+  "row_count": 14545
+}

@@ -1,0 +1,162 @@
+{
+  "dataset": "airports",
+  "table": "airports",
+  "title": "airports of the world",
+  "noun": "airports",
+  "description": "Airports, airstrips, heliports and seaplane bases worldwide from OurAirports (public domain); height above the globe shows elevation",
+  "id": "id",
+  "position": {
+    "kind": "geo",
+    "lat": "lat",
+    "lon": "lon",
+    "height": "elevation_ft"
+  },
+  "columns": [
+    {
+      "name": "name",
+      "type": "text",
+      "synonyms": [
+        "called",
+        "named"
+      ],
+      "examples": [
+        "Centre Hospitalier Heliport",
+        "Fazenda Santa Maria Airport",
+        "Fazenda S\u00e3o Jos\u00e9 Airport",
+        "Fazenda S\u00e3o Francisco Airport",
+        "Fazenda S\u00e3o Jo\u00e3o Airport",
+        "Fazenda Santo Ant\u00f4nio Airport",
+        "Fazenda Bela Vista Airport",
+        "Fazenda Primavera Airport"
+      ]
+    },
+    {
+      "name": "type",
+      "type": "text",
+      "categorical": true,
+      "synonyms": [
+        "kind",
+        "size",
+        "big",
+        "small",
+        "heliport",
+        "seaplane"
+      ],
+      "examples": [
+        "small airport",
+        "heliport",
+        "medium airport",
+        "seaplane base",
+        "large airport",
+        "balloonport"
+      ]
+    },
+    {
+      "name": "elevation_ft",
+      "type": "number",
+      "unit": "feet",
+      "synonyms": [
+        "elevation",
+        "altitude",
+        "high",
+        "height"
+      ],
+      "min": -1266.0,
+      "max": 17372.0
+    },
+    {
+      "name": "country",
+      "type": "text",
+      "synonyms": [
+        "ISO country code",
+        "in",
+        "nation"
+      ],
+      "examples": [
+        "US",
+        "BR",
+        "JP",
+        "AU",
+        "CA",
+        "MX",
+        "FR",
+        "RU"
+      ]
+    },
+    {
+      "name": "city",
+      "type": "text",
+      "synonyms": [
+        "town",
+        "municipality",
+        "serving",
+        "near"
+      ],
+      "examples": [
+        "Osaka",
+        "Seoul",
+        "S\u00e3o Paulo",
+        "Los Angeles",
+        "Corumb\u00e1",
+        "Yokohama",
+        "Busan",
+        "Minato, Tokyo"
+      ]
+    },
+    {
+      "name": "scheduled_service",
+      "type": "text",
+      "categorical": true,
+      "synonyms": [
+        "airline flights",
+        "commercial",
+        "passenger"
+      ],
+      "examples": [
+        "no",
+        "yes"
+      ]
+    },
+    {
+      "name": "iata",
+      "type": "text",
+      "synonyms": [
+        "airport code",
+        "three-letter code"
+      ],
+      "examples": [
+        "AAA",
+        "AAB",
+        "AAC",
+        "AAD",
+        "AAE",
+        "AAF",
+        "AAH",
+        "AAI"
+      ]
+    },
+    {
+      "name": "lat",
+      "type": "number",
+      "unit": "degrees",
+      "synonyms": [
+        "latitude"
+      ],
+      "min": -90.0,
+      "max": 83.091029
+    },
+    {
+      "name": "lon",
+      "type": "number",
+      "unit": "degrees",
+      "synonyms": [
+        "longitude"
+      ],
+      "min": -179.876999,
+      "max": 179.9757
+    }
+  ],
+  "default_color_by": "type",
+  "default_size_by": null,
+  "row_count": 72571
+}

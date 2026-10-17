@@ -133,6 +133,8 @@ def build(records: list[dict], embed: Embed, reduce: Reduce, out_dir: Path) -> d
     schema = {
         "dataset": "papers",
         "table": "papers",
+        "title": "ML paper galaxy",
+        "noun": "papers",
         "description": f"Machine-learning papers on arXiv (cs.LG, cs.CL, cs.CV), {lo}-{hi}, "
         "placed by topic: similar abstracts sit close together",
         "id": "id",

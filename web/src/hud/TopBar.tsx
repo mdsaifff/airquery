@@ -3,8 +3,6 @@
 import { CSV_INPUT_ID } from './CsvPanel.tsx';
 import { hudStore, useTick } from './store.ts';
 
-const NOUNS: Record<string, string> = { quakes: 'earthquakes', papers: 'papers' };
-
 interface Props {
   onReplay: () => void;
   onShare: () => void;
@@ -13,7 +11,7 @@ interface Props {
 
 export function TopBar({ onReplay, onShare, onPickScene }: Props) {
   useTick(30);
-  const { total, dataset, introDate, subtitle, scenes } = hudStore;
+  const { total, dataset, noun, introDate, subtitle, scenes } = hudStore;
   const filtered = total > 0 && hudStore.shown < total && !introDate;
   return (
     <header className="masthead">
@@ -24,7 +22,7 @@ export function TopBar({ onReplay, onShare, onPickScene }: Props) {
       <div className="count" aria-live="polite">
         <b>{Math.round(hudStore.shownDisplay).toLocaleString()}</b>
         <span className="noun">
-          {NOUNS[dataset] ?? 'points'}
+          {noun}
           {filtered && <span className="of">of {total.toLocaleString()}</span>}
         </span>
       </div>
@@ -45,9 +43,9 @@ export function TopBar({ onReplay, onShare, onPickScene }: Props) {
         </label>
       </div>
       <div className="masthead-links">
-        {dataset === 'quakes' && (
+        {hudStore.playback.available && (
           <button className="text-btn" onClick={onReplay}>
-            Replay the year
+            {dataset === 'quakes' ? 'Replay the year' : 'Replay over time'}
           </button>
         )}
         <button className="text-btn" onClick={onShare}>

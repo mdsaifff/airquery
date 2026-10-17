@@ -287,6 +287,15 @@ on the deployed site. Ask the user to record the hero take.
     picked through the button, picker back to quakes, typed "switch to the cities" and back,
     unknown scene leaves the view alone. 4 new eval items (s01-s04) need a real-model run:
     `make eval ARGS="--ids s01,s02,s03,s04"`. Needs you: saying "switch to ..." on the mic.
+- [x] **T5.11 More scenes** — hurricane tracks (replayable), meteorite landings, deep-sea
+  corals (X-ray depth), airports (elevation as height) and a 3D star map, in the picker.
+  - Note: one script, `data_prep/catalog.py` (part of `make data`), one cleaning query per
+    scene; tests on inline fixtures. Schemas gained optional `title` / `noun`, so scenes name
+    themselves (picker, count, spoken replies) instead of hardcoded maps (D-021). Built
+    2026-10-17: 6.7k storm positions, 31.9k meteorites, 14.5k coral records (thinned from
+    445k below 1,000 m), 72.6k airports, 15.2k stars; 5.2 MB of Parquet in all. Headless:
+    every scene loads from the picker, hurricane replay runs, corals sink with X-ray. No
+    worked examples or eval items for the new scenes yet: accuracy there is unmeasured.
 - [x] **T5.11 Gesture rework** — talk by raising the other hand, "here" stays on the
   pointing fingertip; one open palm starts over; pinch and hold still to draw a selection
   circle, whose contents are said straight away; ✌, 👎 and 🤟 retired; undo is spoken.

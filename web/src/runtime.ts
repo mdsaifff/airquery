@@ -2,7 +2,7 @@
 // React only mounts the DOM elements and the HUD; it never sees per-frame data.
 import * as THREE from 'three';
 import { config } from './config.ts';
-import type { QuerySpec } from './contracts/contracts.ts';
+import type { DatasetSchema, QuerySpec } from './contracts/contracts.ts';
 import { askAgent, compileSpec } from './data/agentClient.ts';
 import { Db } from './data/db.ts';
 import type { SessionDeps } from './data/querySession.ts';
@@ -41,14 +41,15 @@ import { VoiceController } from './voice/voiceController.ts';
 import { VoiceFirst } from './voiceFirst.ts';
 import { WebSpeechToText } from './voice/webSpeech.ts';
 
-/** Scenes in swipe order. */
-const DATASETS = ['quakes', 'papers'];
-const SCENE_NAMES: Record<string, string> = {
-  quakes: 'earthquake globe',
-  papers: 'ML paper galaxy',
-};
-/** What the spoken replies call the points of each scene. */
-const NOUNS: Record<string, string> = { quakes: 'quakes', papers: 'papers' };
+/** Built-in scenes in swipe / picker order; ones whose files are missing drop out. */
+const DATASETS = ['quakes', 'hurricanes', 'meteorites', 'corals', 'airports', 'stars', 'papers'];
+/** Picker titles and point nouns per scene, filled in from each schema as it is fetched. */
+const SCENE_NAMES: Record<string, string> = {};
+const NOUNS: Record<string, string> = {};
+function learnNames(schema: DatasetSchema): void {
+  SCENE_NAMES[schema.dataset] = schema.title ?? schema.dataset;
+  NOUNS[schema.dataset] = schema.noun ?? 'points';
+}
 
 function safeStorage(): Storage | null {
   try {
@@ -241,7 +242,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
     try {
       const d = await datasets.show(name);
       if (disposed) return;
+      learnNames(d.schema);
       hudStore.dataset = name;
+      hudStore.noun = NOUNS[name];
       hudStore.subtitle = d.schema.description;
       const pos = d.schema.position;
       hudStore.geo = pos.kind === 'geo';
@@ -275,20 +278,16 @@ export function startRuntime(els: RuntimeElements): Runtime {
     }
   }
   void showDataset(DATASETS[0], false);
-  // Scenes whose files are missing (the galaxy before `make galaxy`) leave the swipe order.
-  for (const name of DATASETS.slice(1)) {
-    void fetch(new URL(`data/${name}.schema.json`, document.baseURI)).then(
-      (r) => {
-        if (!r.ok || !(r.headers.get('content-type') ?? '').includes('json')) {
-          datasets.remove(name);
-          publishScenes();
-        }
-      },
-      () => {
-        datasets.remove(name);
-        publishScenes();
-      },
-    );
+  // Each schema names its scene; scenes whose files are missing (the galaxy before
+  // `make galaxy`) leave the swipe order.
+  for (const name of DATASETS) {
+    fetch(new URL(`data/${name}.schema.json`, document.baseURI))
+      .then((r) => {
+        if (!r.ok || !(r.headers.get('content-type') ?? '').includes('json')) throw new Error();
+        return r.json() as Promise<DatasetSchema>;
+      })
+      .then(learnNames, () => datasets.remove(name))
+      .finally(publishScenes);
   }
   const switchScene = (dir: 'left' | 'right') => {
     const next = datasets.neighbour(dir);
@@ -499,8 +498,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
       await captureFrames(video, label, config.captureFrames, config.captureIntervalMs, onProgress);
     },
     async finishCsv(imp, mapping) {
-      datasets.addCustom(imp.name, buildCsvDataset(sm.scene, imp, mapping));
-      SCENE_NAMES[imp.name] = imp.fileName.slice(0, 80); // Scene.title max length
+      const d = buildCsvDataset(sm.scene, imp, mapping);
+      datasets.addCustom(imp.name, d);
+      learnNames(d.schema);
       publishScenes();
       await showDataset(imp.name, false);
       const c = centroid(imp.base, mapping);

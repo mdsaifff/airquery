@@ -1,0 +1,142 @@
+{
+  "dataset": "meteorites",
+  "table": "meteorites",
+  "title": "meteorite landings",
+  "noun": "meteorites",
+  "description": "Known meteorite landings worldwide from The Meteoritical Society, via NASA (fell = seen falling, found = picked up later)",
+  "id": "id",
+  "position": {
+    "kind": "geo",
+    "lat": "lat",
+    "lon": "lon"
+  },
+  "columns": [
+    {
+      "name": "name",
+      "type": "text",
+      "synonyms": [
+        "called",
+        "named"
+      ],
+      "examples": [
+        "Aachen",
+        "Aarhus",
+        "Abajo",
+        "Abar al' Uj 001",
+        "Abbott",
+        "Abee",
+        "Abernathy",
+        "Abo"
+      ]
+    },
+    {
+      "name": "kind",
+      "type": "text",
+      "categorical": true,
+      "synonyms": [
+        "type",
+        "group",
+        "iron",
+        "stony",
+        "chondrite",
+        "from mars",
+        "from the moon"
+      ],
+      "examples": [
+        "ordinary chondrite",
+        "achondrite or other",
+        "iron",
+        "carbonaceous chondrite",
+        "stony-iron",
+        "enstatite chondrite",
+        "lunar",
+        "martian"
+      ]
+    },
+    {
+      "name": "class",
+      "type": "text",
+      "synonyms": [
+        "classification",
+        "recclass"
+      ],
+      "examples": [
+        "L6",
+        "H5",
+        "H4",
+        "H6",
+        "L5",
+        "LL5",
+        "LL6",
+        "L4"
+      ]
+    },
+    {
+      "name": "fall",
+      "type": "text",
+      "categorical": true,
+      "synonyms": [
+        "seen falling",
+        "fell",
+        "found",
+        "observed"
+      ],
+      "examples": [
+        "found",
+        "fell"
+      ]
+    },
+    {
+      "name": "mass_kg",
+      "type": "number",
+      "unit": "kg",
+      "synonyms": [
+        "mass",
+        "weight",
+        "heavy",
+        "big",
+        "large",
+        "size"
+      ],
+      "min": 1e-05,
+      "max": 60000.0
+    },
+    {
+      "name": "year",
+      "type": "number",
+      "unit": "year",
+      "synonyms": [
+        "when",
+        "since",
+        "before",
+        "fell in",
+        "found in"
+      ],
+      "min": 860,
+      "max": 2013
+    },
+    {
+      "name": "lat",
+      "type": "number",
+      "unit": "degrees",
+      "synonyms": [
+        "latitude"
+      ],
+      "min": -87.36667,
+      "max": 81.16667
+    },
+    {
+      "name": "lon",
+      "type": "number",
+      "unit": "degrees",
+      "synonyms": [
+        "longitude"
+      ],
+      "min": -165.43333,
+      "max": 178.2
+    }
+  ],
+  "default_color_by": "kind",
+  "default_size_by": null,
+  "row_count": 31908
+}

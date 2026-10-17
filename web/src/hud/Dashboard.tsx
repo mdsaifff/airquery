@@ -111,7 +111,10 @@ export function Dashboard() {
               />
             ),
           )}
-          <p className="dash-hint">Say “only magnitude 6 and up”: what you ask lights up here.</p>
+          <p className="dash-hint">
+            {hudStore.dataset === 'quakes' ? 'Say “only magnitude 6 and up”' : 'Ask for a filter'}:
+            what you ask lights up here.
+          </p>
         </>
       )}
     </aside>

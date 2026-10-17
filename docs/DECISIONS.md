@@ -246,3 +246,19 @@ These double as material for LinkedIn posts.
 - **Consequences:** a pinch held still before rotating becomes a circle (tune `circleHoldMs`).
   The gesture study swaps "undo" for "circle".
 
+## D-021 New built-in scenes come from one prep script and name themselves
+- **Context:** five more public datasets (NOAA IBTrACS, NASA meteorites, NOAA deep-sea
+  corals, OurAirports, HYG stars) after the scene picker (D-020).
+- **Decision:** `data_prep/catalog.py` holds every extra scene as data: a source URL, one
+  DuckDB cleaning query and column hints; download, Parquet and schema writing are shared.
+  `DatasetSchema` gains optional `title` and `noun`, so the browser's hardcoded name maps
+  went away and a new scene needs only its name in `DATASETS`.
+- **Why:** each source has one or two quirks (a units row, 0..360 longitudes, placeholder
+  distances, unknown places at 0,0) that fit in SQL; a per-scene module would repeat the
+  rest five times.
+- **Consequences:** corals are thinned to one record per kind per ~1 km cell (14.5k of 445k);
+  coral depths are a few km, so X-ray moves them only slightly, and the dashboard falls back
+  from the earthquake depth bands to a plain histogram when no point is deeper than 300 km.
+  Stars are CC BY-SA 4.0 (credited in the README). The LLM gets these schemas without
+  worked examples, and the eval covers only quakes.
+

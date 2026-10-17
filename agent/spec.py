@@ -181,6 +181,10 @@ class XyzPosition(SchemaModel):
 class DatasetSchema(SchemaModel):
     dataset: str
     table: str
+    # Shown in the scene picker ("earthquake globe") and what one point is called, plural
+    # ("earthquakes"); both fall back to the dataset name / "points".
+    title: str | None = Field(default=None, max_length=80)
+    noun: str | None = Field(default=None, max_length=40)
     description: str
     id: str = "id"
     position: GeoPosition | XyzPosition = Field(discriminator="kind")

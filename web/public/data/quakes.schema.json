@@ -1,6 +1,8 @@
 {
   "dataset": "quakes",
   "table": "quakes",
+  "title": "earthquake globe",
+  "noun": "earthquakes",
   "description": "Earthquakes worldwide, M4.5+, 2024, from the USGS catalog",
   "id": "id",
   "position": {

@@ -162,8 +162,11 @@ export function computeDashboard(
   const sizes = sizeCol ? base.numbers.get(sizeCol) : undefined;
   if (sizeCol && sizes) hist('size', sizeCol, sizes);
   const depths = depthCol ? base.numbers.get(depthCol) : undefined;
-  if (depthCol && depths) {
-    charts.push({ key: 'depth', title: 'Depth (km)', field: depthCol, kind: 'range', bars: bands(depths, mask, DEPTH_EDGES, range(depths)[1]) }); // prettier-ignore
+  const maxDepth = depths ? range(depths)[1] : 0;
+  if (depthCol && depths && maxDepth > DEPTH_EDGES[2]) {
+    charts.push({ key: 'depth', title: 'Depth (km)', field: depthCol, kind: 'range', bars: bands(depths, mask, DEPTH_EDGES, maxDepth) }); // prettier-ignore
+  } else if (depthCol && depths) {
+    hist('depth', depthCol, depths); // too shallow for the earthquake bands (deep-sea corals)
   } else if (colorCol && colorCol !== sizeCol && !base.timeColumns?.has(colorCol)) {
     const values = base.numbers.get(colorCol);
     if (values) hist('color', colorCol, values);

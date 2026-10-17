@@ -71,6 +71,8 @@ export function inferSchema(
   return {
     dataset: name,
     table: name,
+    title: fileName.slice(0, 80),
+    noun: 'rows',
     description: `The user's CSV "${fileName.slice(0, 60)}", ${cols.numRows} rows`,
     id: '__id',
     position: { kind: 'geo', lat: m.lat, lon: m.lon, depth: null, height: m.height },

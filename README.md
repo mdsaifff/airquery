@@ -13,6 +13,10 @@ The first scene is a year of earthquakes (USGS, 2024, M4.5+) plotted at their re
 depth inside the globe. Say *"only show quakes deeper than 300 kilometres"*, then
 *"colour them by magnitude"*, and watch the subducting slabs light up.
 
+More scenes sit in the picker (or say *"switch to the hurricane tracks"*): three seasons of
+hurricane tracks you can replay, meteorite landings, deep-sea corals, the world's airports
+and a 3D star map around the Sun. Drop in your own CSV with latitude and longitude too.
+
 ## How it works
 
 ```mermaid
@@ -184,3 +188,10 @@ for recognition (D-004); the typed box is always available instead.
 Earth imagery: NASA Visible Earth (public domain): Blue Marble Next Generation
 (R. Stöckli, NASA Earth Observatory), Black Marble 2016 city lights, and the
 Blue Marble cloud composite. Earthquakes: USGS. Built by `make textures`.
+
+Scenes built by `make data` (`data_prep/catalog.py`): meteorite landings, The Meteoritical
+Society via NASA Open Data; airports, [OurAirports](https://ourairports.com/data/) (public
+domain); hurricane tracks, NOAA NCEI IBTrACS v04r01 (doi:10.25921/82ty-9e16); deep-sea corals
+and sponges, NOAA Deep Sea Coral Research and Technology Program National Database; stars,
+the [HYG database](https://astronexus.com/hyg) v3 by David Nash, CC BY-SA 4.0, so
+`web/public/data/stars.*` is shared under CC BY-SA 4.0 too.

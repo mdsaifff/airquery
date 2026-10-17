@@ -127,6 +127,8 @@ def build(csv_paths: Sequence[Path], out_dir: Path, description: str) -> dict[st
     schema = {
         "dataset": "quakes",
         "table": "quakes",
+        "title": "earthquake globe",
+        "noun": "earthquakes",
         "description": description,
         "id": "id",
         "position": {"kind": "geo", "lat": "lat", "lon": "lon", "depth": "depth_km"},

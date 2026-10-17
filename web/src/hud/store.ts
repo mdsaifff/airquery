@@ -11,6 +11,8 @@ export const hudStore = {
   mode: 'idle' as Mode,
   /** Which scene is on screen (dataset name). */
   dataset: 'quakes',
+  /** What the scene's points are called, plural ("earthquakes"). */
+  noun: 'points',
   /** Every scene the user can switch to, in swipe order (the picker and "switch to ..."). */
   scenes: [] as Scene[],
   /** Listening: the other hand raised open, or the spacebar. */

@@ -1,0 +1,118 @@
+{
+  "dataset": "stars",
+  "table": "stars",
+  "title": "star map",
+  "noun": "stars",
+  "description": "Stars brighter than magnitude 7.0 around the Sun (at the centre), from the HYG database v3 (CC BY-SA 4.0); true 3D positions",
+  "id": "id",
+  "position": {
+    "kind": "xyz",
+    "x": "x",
+    "y": "y",
+    "z": "z"
+  },
+  "columns": [
+    {
+      "name": "name",
+      "type": "text",
+      "synonyms": [
+        "called",
+        "named",
+        "star"
+      ],
+      "examples": [
+        "Alp Com",
+        "Eta CrB",
+        "Gam CrA",
+        "Iot Cnc",
+        "Iot Pic",
+        "Kap Her",
+        "Mu Dra",
+        "Omi Oph"
+      ]
+    },
+    {
+      "name": "spectral_class",
+      "type": "text",
+      "categorical": true,
+      "synonyms": [
+        "colour",
+        "color",
+        "type",
+        "hot",
+        "blue",
+        "red",
+        "sun-like is G"
+      ],
+      "examples": [
+        "K",
+        "A",
+        "B",
+        "F",
+        "G",
+        "M",
+        "other",
+        "O"
+      ]
+    },
+    {
+      "name": "dist_ly",
+      "type": "number",
+      "unit": "light years",
+      "synonyms": [
+        "distance",
+        "far",
+        "near",
+        "close"
+      ],
+      "min": 0.0,
+      "max": 3229.26729444
+    },
+    {
+      "name": "mag",
+      "type": "number",
+      "unit": "apparent magnitude, lower is brighter",
+      "synonyms": [
+        "brightness",
+        "bright",
+        "visible",
+        "faint"
+      ],
+      "min": -26.7,
+      "max": 7.0
+    },
+    {
+      "name": "absmag",
+      "type": "number",
+      "unit": "absolute magnitude, lower is more luminous",
+      "synonyms": [
+        "luminosity",
+        "luminous",
+        "true brightness"
+      ],
+      "min": -7.223,
+      "max": 8.709
+    },
+    {
+      "name": "constellation",
+      "type": "text",
+      "synonyms": [
+        "in",
+        "constellation abbreviation like Ori or UMa"
+      ],
+      "examples": [
+        "Cen",
+        "Cyg",
+        "Hya",
+        "Her",
+        "Pup",
+        "Dra",
+        "Tau",
+        "Car"
+      ]
+    }
+  ],
+  "default_color_by": "spectral_class",
+  "default_size_by": null,
+  "row_count": 15167
+}
