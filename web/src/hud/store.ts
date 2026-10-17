@@ -63,6 +63,10 @@ export const hudStore = {
   dashboard: null as Dashboard | null,
   /** Time machine controls: shown when the dataset has times; playing; days of data per second. */
   playback: { available: false, playing: false, speed: 30 },
+  /** First-visit loading: 0 data engine, 1 earthquake data, 2 globe textures, 3 ready; or an error. */
+  loading: { step: 0, error: '' },
+  /** Hand tracking was switched on (the camera only starts on request). */
+  handsOn: false,
   /** Suggestion chips for the current dataset (empty: no chips file). */
   chips: [] as Chip[],
   /** One-line description of the current dataset (from its schema). */

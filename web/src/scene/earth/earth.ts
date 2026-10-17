@@ -53,6 +53,11 @@ function loadTextures(quality: 'high' | 'low'): Promise<Textures | null> {
   return textures;
 }
 
+/** Resolves once the globe textures loaded (or failed: the plain globe is used). */
+export function texturesReady(): Promise<unknown> {
+  return loadTextures(config.quality);
+}
+
 export function createEarth(quality: 'high' | 'low' = config.quality): Earth {
   const sun = { value: new THREE.Vector3(0, 0, 1) };
   const earthMat = new THREE.ShaderMaterial({

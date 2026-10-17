@@ -8,6 +8,7 @@ import { Db } from './data/db.ts';
 import type { SessionDeps } from './data/querySession.ts';
 import { Datasets } from './datasets.ts';
 import { Playground } from './playground.ts';
+import { texturesReady } from './scene/earth/earth.ts';
 import { explainHere } from './explainHere.ts';
 import { LassoSelect } from './lassoSelect.ts';
 import { CursorView, MODE_COLORS } from './hud/cursor.ts';
@@ -72,6 +73,8 @@ export interface Runtime {
   playYear(): void;
   /** Copy a link that reopens this view. */
   share(): void;
+  /** Start the webcam and hand tracking (opt-in). */
+  enableHands(): void;
 }
 
 export function startRuntime(els: RuntimeElements): Runtime {
@@ -170,6 +173,14 @@ export function startRuntime(els: RuntimeElements): Runtime {
   });
 
   const db = Db.open();
+  const loadingStep = (step: number) => {
+    hudStore.loading = { ...hudStore.loading, step: Math.max(hudStore.loading.step, step) };
+  };
+  const loadingFailed = (error: string) => (hudStore.loading = { ...hudStore.loading, error });
+  void db.then(
+    () => loadingStep(1),
+    (err: unknown) => loadingFailed(`The data engine failed to start (${String(err)}).`),
+  );
   const datasets = new Datasets(DATASETS, sm.scene, db, sessionDeps);
   const playground = new Playground({ datasets, skipIntro, camera, xray });
   cleanups.push(() => datasets.dispose());
@@ -195,6 +206,8 @@ export function startRuntime(els: RuntimeElements): Runtime {
       datasets.session(name).refresh();
       if (name === DATASETS[0] && !introPlayed) {
         introPlayed = true;
+        loadingStep(2);
+        void texturesReady().then(() => loadingStep(3));
         if (!playground.restore(window.location.hash)) startIntro();
       }
       hudStore.status = '';
@@ -205,12 +218,24 @@ export function startRuntime(els: RuntimeElements): Runtime {
     } catch (err) {
       if (disposed) return; // a torn-down runtime (React StrictMode remount) must not report
       console.error(`dataset ${name} failed to load`, err);
-      if (name === DATASETS[0]) hudStore.status = `Data failed to load: ${String(err)}`;
-      else toast('error', `${SCENE_NAMES[name] ?? name} is not built yet (make galaxy).`);
+      if (name === DATASETS[0]) loadingFailed(`Earthquake data failed to load (${String(err)}).`);
+      else toast('error', `Couldn't load the ${SCENE_NAMES[name] ?? name}.`);
     }
   }
   void showDataset(DATASETS[0], false);
-  const switchScene = (dir: 'left' | 'right') => void showDataset(datasets.neighbour(dir), true);
+  // Scenes whose files are missing (the galaxy before `make galaxy`) leave the swipe order.
+  for (const name of DATASETS.slice(1)) {
+    void fetch(new URL(`data/${name}.schema.json`, document.baseURI)).then(
+      (r) => {
+        if (!r.ok || !(r.headers.get('content-type') ?? '').includes('json')) datasets.remove(name);
+      },
+      () => datasets.remove(name),
+    );
+  }
+  const switchScene = (dir: 'left' | 'right') => {
+    const next = datasets.neighbour(dir);
+    if (next !== datasets.active) void showDataset(next, true);
+  };
 
   // --- voice: push-to-talk -> transcript -> utterance ---
   const voice = new VoiceController(
@@ -328,8 +353,12 @@ export function startRuntime(els: RuntimeElements): Runtime {
   // --- hand tracking (its own loop) ---
   const recorder = new LandmarkRecorder();
   let video: HTMLVideoElement | null = null;
-  cleanups.push(
-    startTracking(els.camCanvas, {
+  // The camera (and the hand model download) start only when asked: "Use hands" or H.
+  let stopTracking: (() => void) | null = null;
+  const enableHands = () => {
+    if (stopTracking) return;
+    hudStore.handsOn = true;
+    stopTracking = startTracking(els.camCanvas, {
       onVideo(v) {
         video = v;
       },
@@ -343,8 +372,9 @@ export function startRuntime(els: RuntimeElements): Runtime {
       onError(message) {
         hudStore.cameraError = message;
       },
-    }),
-  );
+    });
+  };
+  cleanups.push(() => stopTracking?.());
 
   // --- keyboard: space talk, R reset view, Z undo, arrows switch scene, M timings ---
   const onKey = (e: KeyboardEvent) => {
@@ -413,5 +443,6 @@ export function startRuntime(els: RuntimeElements): Runtime {
     toggleXray: () => xray.toggle(),
     playYear: () => playground.playYear(),
     share: () => playground.share(),
+    enableHands,
   };
 }

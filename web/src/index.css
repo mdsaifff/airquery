@@ -1096,6 +1096,50 @@ button {
   gap: 18px;
 }
 
+.loading {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 18px;
+  background: var(--space);
+  color: var(--muted);
+  font: 15px/1.6 var(--sans);
+  z-index: 30;
+}
+.loading h1 {
+  margin: 0;
+  font: 64px/1 var(--display);
+  color: var(--fg);
+}
+.loading ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.loading li.done {
+  color: var(--dim);
+}
+.loading li.now {
+  color: var(--fg);
+}
+.loading .err {
+  color: var(--bad);
+}
+.loading button,
+.hands-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: none;
+  color: var(--fg);
+  font: 13px var(--sans);
+  cursor: pointer;
+}
+.hands-btn {
+  align-self: flex-start;
+}
+
 @media (max-width: 760px) {
   :root {
     --cam-w: 140px;

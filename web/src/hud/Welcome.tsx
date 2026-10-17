@@ -1,7 +1,7 @@
 // First-visit welcome: what you're looking at and the three moves. Shown once
 // (remembered in localStorage); closes on click, Esc/Enter, or when a hand shows up.
 import { useCallback, useEffect, useState } from 'react';
-import { hudStore } from './store.ts';
+import { hudStore, useTick } from './store.ts';
 
 const KEY = 'airquery.welcomed';
 
@@ -14,6 +14,7 @@ function seen(): boolean {
 }
 
 export function Welcome() {
+  useTick(4); // waits for the loading screen to finish
   const [open, setOpen] = useState(() => !seen());
   const close = useCallback(() => {
     setOpen(false);
@@ -42,7 +43,7 @@ export function Welcome() {
     return () => clearInterval(id);
   }, [open, close]);
 
-  if (!open) return null;
+  if (!open || hudStore.loading.step < 3) return null;
   const n = hudStore.total;
   return (
     <div className="welcome" role="dialog" aria-modal="true" aria-label="Welcome" onClick={close}>
@@ -50,7 +51,8 @@ export function Welcome() {
         <h1>Every dot is an earthquake.</h1>
         <p className="lede">
           {n > 0 ? `${n.toLocaleString()} of them` : 'All of them'}, magnitude 4.5 and up, recorded
-          around the world in 2024. Steer the globe with your hands and ask questions out loud.
+          around the world in 2024. Drag the globe, click a suggestion, ask a question, or press ✋
+          Use hands to steer with your hands.
         </p>
         <ul className="steps">
           <li>

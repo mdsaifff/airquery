@@ -7,6 +7,7 @@ import { highlightSpec, highlightSql } from './highlight.ts';
 import type { Token } from './highlight.ts';
 import { depthBands, sizeSamples } from './legend.ts';
 import { formatLegendValue, formatMs, prettySpec, prettySql } from './format.ts';
+import { debugMode } from './debug.ts';
 import { metrics } from './metrics.ts';
 import { hudStore, useTick } from './store.ts';
 
@@ -55,19 +56,24 @@ export function GlassBox() {
 
 export function Stats() {
   useTick();
+  if (!debugMode && !hudStore.status && !hudStore.cameraError) return null;
   return (
     <div className="stats">
-      <span>
-        <b>{hudStore.renderFps.toFixed(0)}</b> fps
-      </span>
-      <span>
-        hands <b>{hudStore.trackingFps.toFixed(0)}</b> fps
-      </span>
-      <span>
-        voice to render <b>{formatMs(hudStore.latencyMs)}</b>
-        {metrics.voiceToRender.count > 1 &&
-          `, median ${formatMs(metrics.voiceToRender.percentile(0.5))}`}
-      </span>
+      {debugMode && (
+        <>
+          <span>
+            <b>{hudStore.renderFps.toFixed(0)}</b> fps
+          </span>
+          <span>
+            hands <b>{hudStore.trackingFps.toFixed(0)}</b> fps
+          </span>
+          <span>
+            voice to render <b>{formatMs(hudStore.latencyMs)}</b>
+            {metrics.voiceToRender.count > 1 &&
+              `, median ${formatMs(metrics.voiceToRender.percentile(0.5))}`}
+          </span>
+        </>
+      )}
       {hudStore.status && <span className="status">{hudStore.status}</span>}
       {hudStore.cameraError && <span className="warn">{hudStore.cameraError}</span>}
     </div>

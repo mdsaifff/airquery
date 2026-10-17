@@ -9,7 +9,7 @@ import type { LoadedDataset } from './scene/loadDataset.ts';
 
 export class Datasets {
   active: string;
-  private readonly names: string[];
+  private names: string[];
   private readonly scene: THREE.Scene;
   private readonly db: Promise<Db>;
   private readonly depsFor: (name: string) => SessionDeps;
@@ -64,6 +64,12 @@ export class Datasets {
     this.loaded.set(name, d);
     this.loading.set(name, Promise.resolve(d));
     this.sessions.delete(name);
+  }
+
+  /** Leave a scene out of the swipe order (its files are missing). */
+  remove(name: string): void {
+    if (name === this.active) return;
+    this.names = this.names.filter((n) => n !== name);
   }
 
   /** The dataset a swipe would show next (left = next, right = previous). */
