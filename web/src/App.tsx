@@ -84,7 +84,10 @@ export function App() {
       {!baseline && <CamLabel />}
       <div className="vignette" aria-hidden="true" />
       <aside className="rail">
-        <TopBar onReplay={() => runtime.current?.playYear()} />
+        <TopBar
+          onReplay={() => runtime.current?.playYear()}
+          onShare={() => runtime.current?.share()}
+        />
         <GlassBox />
       </aside>
       <Stats />

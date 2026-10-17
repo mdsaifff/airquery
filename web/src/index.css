@@ -1091,6 +1091,11 @@ button {
   margin-left: 6px;
 }
 
+.masthead-links {
+  display: flex;
+  gap: 18px;
+}
+
 @media (max-width: 760px) {
   :root {
     --cam-w: 140px;

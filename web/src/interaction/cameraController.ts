@@ -132,6 +132,20 @@ export class CameraController {
     this.lastInputAt = now;
   }
 
+  /** Jump to a shared view (clamped). A shared view holds still: no idle spin. */
+  setOrbit(o: Orbit, now: number): void {
+    this.anim = null;
+    this.dragging = false;
+    this.vel = { yaw: 0, pitch: 0 };
+    this.spinAllowed = false;
+    this.lastInputAt = now;
+    this.orbit = {
+      yaw: o.yaw,
+      pitch: clamp(o.pitch, -this.opts.pitchLimit, this.opts.pitchLimit),
+      distance: clamp(o.distance, this.opts.distanceMin, this.opts.distanceMax),
+    };
+  }
+
   /** Glide home; the intro passes a longer duration (ms). */
   reset(now: number, durationMs = this.opts.animMs): void {
     this.spinAllowed = true;

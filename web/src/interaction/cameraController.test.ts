@@ -167,4 +167,12 @@ describe('CameraController', () => {
     }
     expect(c.orbit.yaw).toBe(home.yaw);
   });
+
+  it('setOrbit jumps to a shared view, clamped, and does not idle-spin there', () => {
+    const c = make();
+    c.update(1);
+    c.setOrbit({ yaw: 1, pitch: 9, distance: 99 }, 1);
+    c.update(60_000);
+    expect(c.orbit).toEqual({ yaw: 1, pitch: opts.pitchLimit, distance: opts.distanceMax });
+  });
 });

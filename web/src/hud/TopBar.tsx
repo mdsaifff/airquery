@@ -1,10 +1,10 @@
 // Top-left masthead: wordmark, a large ticking count of what is shown, the
-// dataset description (or the replay date), and the Replay button.
+// dataset description (or the replay date), and the Replay / Share links.
 import { hudStore, useTick } from './store.ts';
 
 const NOUNS: Record<string, string> = { quakes: 'earthquakes', papers: 'papers' };
 
-export function TopBar({ onReplay }: { onReplay: () => void }) {
+export function TopBar({ onReplay, onShare }: { onReplay: () => void; onShare: () => void }) {
   useTick(30);
   const { total, dataset, introDate, subtitle } = hudStore;
   const filtered = total > 0 && hudStore.shown < total && !introDate;
@@ -22,11 +22,16 @@ export function TopBar({ onReplay }: { onReplay: () => void }) {
         </span>
       </div>
       <p className="sub">{introDate ? `Replaying the year: ${introDate}` : subtitle}</p>
-      {dataset === 'quakes' && (
-        <button className="text-btn" onClick={onReplay}>
-          Replay the year
+      <div className="masthead-links">
+        {dataset === 'quakes' && (
+          <button className="text-btn" onClick={onReplay}>
+            Replay the year
+          </button>
+        )}
+        <button className="text-btn" onClick={onShare}>
+          Share this view
         </button>
-      )}
+      </div>
     </header>
   );
 }

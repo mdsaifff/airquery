@@ -11,11 +11,16 @@ import { timeRange } from './hud/seismogram.ts';
 import { hudStore, toast } from './hud/store.ts';
 import type { LoadedDataset } from './scene/loadDataset.ts';
 import { TimeMachine } from './scene/timeMachine.ts';
+import type { XrayState } from './scene/xray.ts';
+import type { CameraController } from './interaction/cameraController.ts';
+import { decodeShare, encodeShare } from './share.ts';
 
 export interface PlaygroundHost {
   datasets: Datasets;
   /** End the first-load fly-in replay (the time machine takes over the points). */
   skipIntro(): void;
+  camera: CameraController;
+  xray: XrayState;
 }
 
 const DATE: Intl.DateTimeFormatOptions = { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' }; // prettier-ignore
@@ -84,6 +89,40 @@ export class Playground {
 
   setSpeed(daysPerSec: number): void {
     this.time.setSpeed(daysPerSec);
+  }
+
+  share(): void {
+    const { datasets, camera, xray } = this.host;
+    const hash = encodeShare({
+      v: 1,
+      dataset: datasets.active,
+      spec: datasets.session().current,
+      orbit: { ...camera.orbit },
+      xray: xray.target === 1,
+      day: this.time.active ? Math.round(this.time.day * 10) / 10 : null,
+    });
+    const url = `${location.origin}${location.pathname}${location.search}${hash}`;
+    history.replaceState(null, '', url);
+    navigator.clipboard?.writeText(url).then(
+      () => toast('info', 'Link copied. Anyone who opens it sees this view.'),
+      () => toast('info', 'Link is in the address bar: copy it from there.'),
+    );
+  }
+
+  /** Restore a shared view from the URL hash; true if one was applied. */
+  restore(hash: string): boolean {
+    if (!hash) return false;
+    const s = decodeShare(hash);
+    const { datasets, camera, xray } = this.host;
+    if (!s || s.dataset !== datasets.active) {
+      toast('clarify', "Couldn't restore that link; showing the full view.");
+      return false;
+    }
+    camera.setOrbit(s.orbit, performance.now());
+    if ((xray.target === 1) !== s.xray) xray.toggle();
+    if (s.spec) void datasets.session().applySpec(s.spec);
+    if (s.day !== null) this.time.seek(s.day);
+    return true;
   }
 
   /** L plays / pauses the time machine. */

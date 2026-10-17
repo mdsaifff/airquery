@@ -70,6 +70,8 @@ export interface Runtime {
   toggleXray(): void;
   /** Replay the year with the time machine (masthead link). */
   playYear(): void;
+  /** Copy a link that reopens this view. */
+  share(): void;
 }
 
 export function startRuntime(els: RuntimeElements): Runtime {
@@ -169,7 +171,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
 
   const db = Db.open();
   const datasets = new Datasets(DATASETS, sm.scene, db, sessionDeps);
-  const playground = new Playground({ datasets, skipIntro });
+  const playground = new Playground({ datasets, skipIntro, camera, xray });
   cleanups.push(() => datasets.dispose());
 
   async function showDataset(name: string, announce: boolean): Promise<void> {
@@ -193,7 +195,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       datasets.session(name).refresh();
       if (name === DATASETS[0] && !introPlayed) {
         introPlayed = true;
-        startIntro();
+        if (!playground.restore(window.location.hash)) startIntro();
       }
       hudStore.status = '';
       if (announce) {
@@ -410,5 +412,6 @@ export function startRuntime(els: RuntimeElements): Runtime {
     resetView: () => camera.reset(performance.now()),
     toggleXray: () => xray.toggle(),
     playYear: () => playground.playYear(),
+    share: () => playground.share(),
   };
 }
