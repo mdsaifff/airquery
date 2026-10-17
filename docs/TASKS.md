@@ -304,3 +304,9 @@ on the deployed site. Ask the user to record the hero take.
     445k below 1,000 m), 72.6k airports, 15.2k stars; 5.2 MB of Parquet in all. Headless:
     every scene loads from the picker, hurricane replay runs, corals sink with X-ray. No
     worked examples or eval items for the new scenes yet: accuracy there is unmeasured.
+  - Note: audit 2026-10-17 with a real-model probe (42 commands + refine chains). Fixed:
+    case-sensitive names ("hurricane Milton" found 0), bare sorts ("the deepest ones"
+    changed nothing; a sort now needs a limit, checked after the merge), "only X" dropping
+    earlier filters, timelines on undated data, a switch without `dataset`, quake wording
+    and depth bands on other scenes, 3-colour categories, linear scales for heavy-tailed
+    data (D-023), and "in a minute" for Groq's daily cap. Chain probe cut short by that cap.

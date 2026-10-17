@@ -262,3 +262,16 @@ These double as material for LinkedIn posts.
   Stars are CC BY-SA 4.0 (credited in the README). The LLM gets these schemas without
   worked examples, and the eval covers only quakes.
 
+## D-023 Heavy-tailed numbers go on a log scale; a sort needs a limit
+- **Context:** the audit of the new scenes. Meteorite masses run from 0.00001 to 60 000 kg:
+  on a linear ramp all but a handful of dots were the same colour and size. And "show me
+  the deepest ones" came back as a sort with no limit, which reorders points without
+  changing anything on screen.
+- **Decision:** colour, size, the legend's size key and the dashboard's bars switch to a
+  log scale (bars every 1000x) when positive data spans 1000x or more (`isLogScale`); one
+  rule shared by globe and HUD so colours match. The validator rejects a sort without a
+  limit (repairs add one; the prompt says a superlative without a number means 50), and the
+  graph validates the merged spec, so "now by depth" keeps an earlier "the ten strongest".
+- **Consequences:** the threshold is a heuristic, not a per-column setting; a column that
+  needs log at 500x would need one. Old shared links holding a bare sort are now rejected.
+
