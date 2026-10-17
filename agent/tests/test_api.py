@@ -146,7 +146,7 @@ def test_a_provider_rate_limit_is_a_friendly_clarify(quakes_schema, log_path) ->
 
 
 def test_the_default_llm_budget_fits_a_free_key() -> None:
-    assert settings.llm_calls_per_min <= 4  # ~1.6k tokens per call vs 8k tokens/min
+    assert settings.llm_calls_per_min <= 3  # ~2.1k tokens per call vs 8k tokens/min
 
 
 def test_bad_requests_are_rejected_and_logged(quakes_schema, log_path) -> None:
