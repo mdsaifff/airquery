@@ -170,12 +170,10 @@ describe('GestureClassifier (synthetic hands)', () => {
     expect(run(40, (i) => [right({ pose: 'point' }), ...raised(i)])).toEqual(['talk:on']);
   });
 
-  it('swipe: a fast sideways sweep of an open hand, once per cooldown', () => {
-    // raw x falls = hand moves right on screen; ~40% of the frame in 250 ms
-    expect(run(12, (i) => [right({ gesture: 'Open_Palm', cx: 0.7 - i * 0.05 })])).toEqual([
-      'swipe:right',
-    ]);
-    expect(run(12, (i) => [right({ gesture: 'Open_Palm', cx: 0.3 + i * 0.05 })])).toEqual(['swipe:left']); // prettier-ignore
+  it('swipe: a quick sideways flick of a pointing finger, like swiping a phone', () => {
+    // raw x falls = finger moves right on screen; ~40% of the frame in 250 ms
+    expect(run(12, (i) => [right({ pose: 'point', cx: 0.7 - i * 0.05 })])).toEqual(['swipe:right']); // prettier-ignore
+    expect(run(12, (i) => [right({ pose: 'point', cx: 0.3 + i * 0.05 })])).toEqual(['swipe:left']); // prettier-ignore
   });
 
   it('tracking swapping left and right hands mid-talk is not a swipe (seen live: the scene switched)', () => {
@@ -186,14 +184,16 @@ describe('GestureClassifier (synthetic hands)', () => {
     expect(run(40, swapped).filter((x) => x.startsWith('swipe'))).toEqual([]);
   });
 
-  it('only one open hand swipes: not a pointing hand, not with both hands up', () => {
-    expect(run(12, (i) => [right({ pose: 'point', cx: 0.7 - i * 0.05 })]).filter((x) => x.startsWith('swipe'))).toEqual([]); // prettier-ignore
-    const twoUp = (i: number) => [right({ gesture: 'Open_Palm', cx: 0.7 - i * 0.05 }), left({ pose: 'point', cy: 0.4 })]; // prettier-ignore
-    expect(run(12, twoUp).filter((x) => x.startsWith('swipe'))).toEqual([]);
+  it('only a lone pointing finger swipes: not an open hand, not with both hands up', () => {
+    const swipes = (seq: string[]) => seq.filter((x) => x.startsWith('swipe'));
+    expect(swipes(run(12, (i) => [right({ gesture: 'Open_Palm', cx: 0.7 - i * 0.05 })]))).toEqual([]); // prettier-ignore
+    const twoUp = (i: number) => [right({ pose: 'point', cx: 0.7 - i * 0.05 }), left({ gesture: 'Open_Palm' })]; // prettier-ignore
+    expect(swipes(run(12, twoUp))).toEqual([]);
   });
 
-  it('slow movement and pinch-drags are not swipes', () => {
-    expect(run(60, (i) => [right({ gesture: 'Open_Palm', cx: 0.3 + i * 0.006 })])).toEqual([]);
+  it('moving the cursor across the globe, even briskly, and pinch-drags are not swipes', () => {
+    expect(run(60, (i) => [right({ pose: 'point', cx: 0.3 + i * 0.006 })])).toEqual([]);
+    expect(run(40, (i) => [right({ pose: 'point', cx: 0.8 - i * 0.0167 })])).toEqual([]); // across in ~1 s
     expect(run(20, (i) => [right({ pinch: 1, cx: 0.7 - i * 0.05 })]).filter((s) => s.startsWith('swipe'))).toEqual([]); // prettier-ignore
   });
 

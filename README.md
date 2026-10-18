@@ -87,7 +87,7 @@ by magnitude", "the ten strongest", "near Japan", "undo", ...).
 | Talk | point with one hand and raise the other, open; speak when the bar turns green (a soft tick) | hold **space**, or type in the box |
 | Start over (camera home, filters cleared) | hold one open palm ✋ (1.2 s), or say "start over" / "undo" | **Z**; **R** resets only the camera |
 | Freeze the scene while repositioning | closed fist ✊ | – |
-| Switch scene | only one hand in view, open: sweep it sideways quickly, like turning a page (or say "switch to the …") | **←** / **→** |
+| Switch scene | only one hand in view, pointing: flick the finger sideways quickly, like swiping a phone (or say "switch to the …") | **←** / **→** |
 | Select an area (the globe says what is inside) | pinch and hold still (~1 s, until the ring fills), then move out to size the circle and let go | **Shift**+drag, **Esc** clears |
 | X-ray: see points at their real depth (quakes, corals) | – | **X**, or the button in the legend |
 | What's this? (spoken summary) | say it | type it |

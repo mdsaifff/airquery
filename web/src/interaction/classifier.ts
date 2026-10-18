@@ -48,7 +48,7 @@ class Debounced {
 interface HandState {
   label: Debounced;
   points: Vec2[];
-  /** Recent wrist positions for swipe detection. */
+  /** Recent index fingertip positions for swipe detection. */
   trail: { t: number; x: number; y: number }[];
   pinching: boolean;
   pinchFrames: number;
@@ -178,25 +178,25 @@ export class GestureClassifier {
   }
 
   /** A fast sideways sweep of an open (not pinching, not fist) hand. */
-  /** Switch scene: one open hand alone in view, swept sideways fast and smoothly. */
+  /** Switch scene: a lone pointing finger flicked sideways, fast and smooth (like swiping a phone). */
   private detectSwipe(s: HandState, t: number, ev: GestureEvent[], alone: boolean): void {
     const { p } = this;
-    const wrist = s.points[WRIST];
+    const tip = s.points[INDEX_TIP];
     const prev = s.trail.at(-1);
     if (
       prev &&
-      Math.hypot(wrist.x - prev.x, wrist.y - prev.y) >
+      Math.hypot(tip.x - prev.x, tip.y - prev.y) >
         p.swipeMaxStepHandScales * handScale(s.points)
     ) {
       s.trail.length = 0; // a jump: tracking swapped the hands or re-found one, not a motion
     }
-    s.trail.push({ t, x: wrist.x, y: wrist.y });
+    s.trail.push({ t, x: tip.x, y: tip.y });
     while (s.trail.length && t - s.trail[0].t > p.swipeWindowMs) s.trail.shift();
-    const deliberate = alone && this.liveHands().length === 1 && !s.pinching && s.label.stable === 'Open_Palm'; // prettier-ignore
+    const deliberate = alone && this.liveHands().length === 1 && !s.pinching && isPointing(s.points, p); // prettier-ignore
     if (!deliberate || t - this.lastSwipeAt < p.swipeCooldownMs) return;
     const first = s.trail[0];
-    const dx = wrist.x - first.x;
-    const dy = wrist.y - first.y;
+    const dx = tip.x - first.x;
+    const dy = tip.y - first.y;
     if (
       Math.abs(dx) > p.swipeMinHandScales * handScale(s.points) &&
       Math.abs(dx) > 2 * Math.abs(dy)
