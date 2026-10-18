@@ -185,8 +185,7 @@ export class GestureClassifier {
     const prev = s.trail.at(-1);
     if (
       prev &&
-      Math.hypot(tip.x - prev.x, tip.y - prev.y) >
-        p.swipeMaxStepHandScales * handScale(s.points)
+      Math.hypot(tip.x - prev.x, tip.y - prev.y) > p.swipeMaxStepHandScales * handScale(s.points)
     ) {
       s.trail.length = 0; // a jump: tracking swapped the hands or re-found one, not a motion
     }
