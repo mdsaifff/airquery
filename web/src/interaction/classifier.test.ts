@@ -175,7 +175,21 @@ describe('GestureClassifier (synthetic hands)', () => {
     expect(run(12, (i) => [right({ gesture: 'Open_Palm', cx: 0.7 - i * 0.05 })])).toEqual([
       'swipe:right',
     ]);
-    expect(run(12, (i) => [right({ cx: 0.3 + i * 0.05 })])).toEqual(['swipe:left']);
+    expect(run(12, (i) => [right({ gesture: 'Open_Palm', cx: 0.3 + i * 0.05 })])).toEqual(['swipe:left']); // prettier-ignore
+  });
+
+  it('tracking swapping left and right hands mid-talk is not a swipe (seen live: the scene switched)', () => {
+    const swapped = (i: number) =>
+      i === 15 || i === 16
+        ? [synthHand({ handedness: 'Right', pose: 'point', cx: 0.25 }), synthHand({ handedness: 'Left', gesture: 'Open_Palm', cx: 0.75 })] // prettier-ignore
+        : [right({ pose: 'point', cx: 0.25 }), left({ gesture: 'Open_Palm', cx: 0.75 })];
+    expect(run(40, swapped).filter((x) => x.startsWith('swipe'))).toEqual([]);
+  });
+
+  it('only one open hand swipes: not a pointing hand, not with both hands up', () => {
+    expect(run(12, (i) => [right({ pose: 'point', cx: 0.7 - i * 0.05 })]).filter((x) => x.startsWith('swipe'))).toEqual([]); // prettier-ignore
+    const twoUp = (i: number) => [right({ gesture: 'Open_Palm', cx: 0.7 - i * 0.05 }), left({ pose: 'point', cy: 0.4 })]; // prettier-ignore
+    expect(run(12, twoUp).filter((x) => x.startsWith('swipe'))).toEqual([]);
   });
 
   it('slow movement and pinch-drags are not swipes', () => {

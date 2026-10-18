@@ -138,7 +138,7 @@ export class GestureClassifier {
         ev.push({ kind: 'pinchMove', hand: h.hand, x: at.x, y: at.y });
         this.circleHold(h.hand, s, at, t, ev);
       }
-      this.detectSwipe(s, raw, t, ev);
+      this.detectSwipe(s, t, ev, frame.hands.length === 1);
     }
 
     // Hands missing from this frame decay through the same debounce, so a
@@ -178,12 +178,22 @@ export class GestureClassifier {
   }
 
   /** A fast sideways sweep of an open (not pinching, not fist) hand. */
-  private detectSwipe(s: HandState, raw: string, t: number, ev: GestureEvent[]): void {
+  /** Switch scene: one open hand alone in view, swept sideways fast and smoothly. */
+  private detectSwipe(s: HandState, t: number, ev: GestureEvent[], alone: boolean): void {
     const { p } = this;
     const wrist = s.points[WRIST];
+    const prev = s.trail.at(-1);
+    if (
+      prev &&
+      Math.hypot(wrist.x - prev.x, wrist.y - prev.y) >
+        p.swipeMaxStepHandScales * handScale(s.points)
+    ) {
+      s.trail.length = 0; // a jump: tracking swapped the hands or re-found one, not a motion
+    }
     s.trail.push({ t, x: wrist.x, y: wrist.y });
     while (s.trail.length && t - s.trail[0].t > p.swipeWindowMs) s.trail.shift();
-    if (s.pinching || raw === 'Closed_Fist' || t - this.lastSwipeAt < p.swipeCooldownMs) return;
+    const deliberate = alone && this.liveHands().length === 1 && !s.pinching && s.label.stable === 'Open_Palm'; // prettier-ignore
+    if (!deliberate || t - this.lastSwipeAt < p.swipeCooldownMs) return;
     const first = s.trail[0];
     const dx = wrist.x - first.x;
     const dy = wrist.y - first.y;
