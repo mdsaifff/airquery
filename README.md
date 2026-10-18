@@ -17,9 +17,20 @@ The first scene is a year of earthquakes (USGS, 2024, M4.5+) plotted at their re
 depth inside the globe. Say *"only show quakes deeper than 300 kilometres"*, then
 *"colour them by magnitude"*, and watch the subducting slabs light up.
 
-More scenes sit in the picker (or say *"switch to the hurricane tracks"*): three seasons of
-hurricane tracks you can replay, meteorite landings, deep-sea corals, the world's airports
-and a 3D star map around the Sun. Drop in your own CSV with latitude and longitude too.
+Five more scenes sit in the picker, or just say *"switch to the hurricane tracks"*:
+
+| Scene | What you see | Try saying |
+| --- | --- | --- |
+| Earthquakes | 6.4k quakes of 2024 (M4.5+) at their real depth inside the globe | *"deeper than 300 km"*, *"the ten strongest"*, *"play the year"* |
+| Hurricane tracks | 6.7k storm positions over three seasons, replayable | *"only category 4 and up"*, *"show hurricane Milton"*, *"play the year"* |
+| Meteorite landings | 31.9k meteorites, sized by mass | *"the ten heaviest"*, *"only the ones seen falling"* |
+| Deep-sea corals | 14.5k coral and sponge records, sunk to their depth (X-ray) | *"only sponges"*, *"deeper than 3 km"*, *"show me the deepest ones"* |
+| Airports of the world | 72.6k airports, raised by elevation | *"only large airports"*, *"airports higher than 3000 metres"* |
+| Star map | 15.2k stars in 3D around the Sun | *"stars within 50 light years"*, *"the ten brightest stars"*, *"only stars in Orion"* |
+
+Follow-ups build on what is shown (*"only sponges"*, then *"only in the North Pacific"*), and
+circling an area makes the globe say what is inside. Drop in your own CSV with latitude and
+longitude too.
 
 ## How it works
 
@@ -70,7 +81,7 @@ by magnitude", "the ten strongest", "near Japan", "undo", ...).
 
 | Input | Hands | Keyboard / mouse |
 | --- | --- | --- |
-| Move cursor, hover a quake | point (index finger up) | mouse |
+| Move cursor, hover a point | point (index finger up) | mouse |
 | Rotate | pinch and drag | drag |
 | Zoom | pinch with both hands, pull apart / together | wheel |
 | Talk | point with one hand and raise the other, open | hold **space**, or type in the box |
@@ -79,7 +90,7 @@ by magnitude", "the ten strongest", "near Japan", "undo", ...).
 | Freeze the scene while repositioning | closed fist ✊ | – |
 | Switch scene | swipe an open hand sideways | **←** / **→** |
 | Select an area (the globe says what is inside) | pinch and hold still (~0.6 s), then move out to size the circle and let go | **Shift**+drag, **Esc** clears |
-| X-ray: see quakes at their real depth | – | **X**, or the button in the legend |
+| X-ray: see points at their real depth (quakes, corals) | – | **X**, or the button in the legend |
 | What's this? (spoken summary) | say it | type it |
 
 Raise your other hand (or hold Space) and speak. Besides filters you can say *play the year*, *pause*, *go to
@@ -172,7 +183,7 @@ for recognition (D-004); the typed box is always available instead.
 
 Earth imagery: NASA Visible Earth (public domain): Blue Marble Next Generation
 (R. Stöckli, NASA Earth Observatory), Black Marble 2016 city lights, and the
-Blue Marble cloud composite. Earthquakes: USGS. Built by `make textures`.
+Blue Marble cloud composite. Built by `make textures`. Earthquakes: USGS.
 
 Scenes built by `make data` (`data_prep/catalog.py`): meteorite landings, The Meteoritical
 Society via NASA Open Data; airports, [OurAirports](https://ourairports.com/data/) (public
