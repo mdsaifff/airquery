@@ -11,6 +11,7 @@ export class FakeSpeechToText implements SpeechToText {
   start(handlers: SttHandlers): void {
     this.handlers = handlers;
     this.listening = true;
+    handlers.ready();
     const words = this.script.split(' ');
     for (let i = 1; i < words.length; i++) handlers.interim(words.slice(0, i).join(' '));
   }
@@ -21,5 +22,10 @@ export class FakeSpeechToText implements SpeechToText {
     const h = this.handlers;
     this.handlers = null;
     h.final(this.script, performance.now());
+  }
+
+  abort(): void {
+    this.listening = false;
+    this.handlers = null;
   }
 }

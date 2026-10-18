@@ -15,11 +15,13 @@ interface Recognition {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
+  onaudiostart: (() => void) | null;
   onresult: ((e: RecognitionEvent) => void) | null;
   onerror: ((e: { error: string }) => void) | null;
   onend: (() => void) | null;
   start(): void;
   stop(): void;
+  abort(): void;
 }
 type RecognitionCtor = new () => Recognition;
 
@@ -32,6 +34,8 @@ export class WebSpeechToText implements SpeechToText {
   readonly available = recognitionCtor() !== null;
   private rec: Recognition | null = null;
   private releasedAt = 0;
+  /** Silences the current recognition's handlers (abort). */
+  private drop: (() => void) | null = null;
 
   start(handlers: SttHandlers): void {
     const Ctor = recognitionCtor();
@@ -43,7 +47,13 @@ export class WebSpeechToText implements SpeechToText {
     rec.interimResults = true;
     rec.lang = 'en-US';
     let finalText = '';
+    let dropped = false;
+    this.drop = () => (dropped = true);
+    rec.onaudiostart = () => {
+      if (!dropped) handlers.ready();
+    };
     rec.onresult = (e) => {
+      if (dropped) return;
       let interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const r = e.results[i];
@@ -53,12 +63,12 @@ export class WebSpeechToText implements SpeechToText {
       handlers.interim((finalText + interim).trim());
     };
     rec.onerror = (e) => {
-      if (e.error !== 'no-speech' && e.error !== 'aborted')
+      if (!dropped && e.error !== 'no-speech' && e.error !== 'aborted')
         handlers.error(`Speech error: ${e.error}`);
     };
     rec.onend = () => {
       if (this.rec === rec) this.rec = null;
-      handlers.final(finalText.trim(), this.releasedAt || performance.now());
+      if (!dropped) handlers.final(finalText.trim(), this.releasedAt || performance.now());
     };
     this.releasedAt = 0;
     rec.start();
@@ -67,5 +77,11 @@ export class WebSpeechToText implements SpeechToText {
   stop(): void {
     this.releasedAt = performance.now();
     this.rec?.stop();
+  }
+
+  abort(): void {
+    this.drop?.();
+    this.rec?.abort();
+    this.rec = null;
   }
 }

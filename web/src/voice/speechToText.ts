@@ -1,6 +1,8 @@
 // Speech-to-text behind an interface (D-004): Web Speech today, swappable later.
 
 export interface SttHandlers {
+  /** The engine is actually recording now: words from here on are heard. */
+  ready(): void;
   /** Partial transcript while the user is still talking. */
   interim(text: string): void;
   /** Final transcript after stop(); releasedAt = performance.now() when push-to-talk ended. */
@@ -14,4 +16,6 @@ export interface SpeechToText {
   start(handlers: SttHandlers): void;
   /** Ends listening; the final transcript arrives through handlers.final. */
   stop(): void;
+  /** Ends listening and drops everything heard: no handler is called again. */
+  abort(): void;
 }

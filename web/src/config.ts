@@ -67,6 +67,9 @@ export const config = {
     circleMaxSpeed: 1,
     /** ...counted only after the hand settles into the pinch (ms). */
     circleSettleMs: 300,
+    /** A second hand coming up beside a pointing one starts the microphone early, so Chrome is
+     *  recording by the time the open palm is recognised; dropped if talk doesn't follow within (ms). */
+    talkPrimeMs: 1500,
     /** No hands for this long emits handsLost (ms). */
     handsLostMs: 500,
     /** Swipe: wrist travels this far sideways (hand-scale units)... */
@@ -161,6 +164,8 @@ export const config = {
   pinShowMs: 5000,
   /** Spoken-reply subtitles: base time on screen plus time per character (ms). */
   subtitleMs: { base: 2500, perChar: 45 },
+  /** The "speak now" tick when the mic really starts recording: pitch (Hz), volume (0..1), length (ms). */
+  readyTick: { hz: 880, gain: 0.06, ms: 120 },
   /** "Try saying …" examples under the talk bar, and how long each shows (ms). */
   voiceHints: [
     'play the year',

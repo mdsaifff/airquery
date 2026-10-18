@@ -12,6 +12,8 @@ export interface EffectTargets {
   cursor(visible: boolean, x?: number, y?: number): void;
   /** at: where the pointing finger rests ("here"), when the hands started listening. */
   listening(active: boolean, at?: { x: number; y: number }): void;
+  /** Talk is likely: start the mic early (dropped unless listening follows). */
+  primeListening(active: boolean): void;
   /** Open palm held: camera home, filters cleared, replay stopped, selection dropped. */
   startOver(): void;
   switchScene(direction: 'left' | 'right'): void;
@@ -64,6 +66,9 @@ export function applyEffects(effects: readonly Effect[], t: EffectTargets, now: 
         break;
       case 'stopListening':
         t.listening(false);
+        break;
+      case 'primeListening':
+        t.primeListening(e.active);
         break;
       case 'explain':
         t.explain();

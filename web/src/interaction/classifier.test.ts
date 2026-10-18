@@ -122,6 +122,39 @@ describe('GestureClassifier (synthetic hands)', () => {
     expect(Math.hypot(onAt[0] - cur[0], onAt[1] - cur[1])).toBeLessThan(3);
   });
 
+  it('the mic warms up as the second hand comes up, before its open palm is recognised', () => {
+    const raising = (i: number) =>
+      i < 5 ? [right({ pose: 'point' })] : [right({ pose: 'point' }), left({ gesture: i < 10 ? 'None' : 'Open_Palm' })]; // prettier-ignore
+    const kinds = replay(synthFrames(30, raising)).map((e) => e.filter((x) => x.kind === 'talkPrime' || x.kind === 'talk')); // prettier-ignore
+    const primeAt = kinds.findIndex((e) => e.some((x) => x.kind === 'talkPrime' && x.active));
+    const talkAt = kinds.findIndex((e) => e.some((x) => x.kind === 'talk' && x.active));
+    expect(primeAt).toBeGreaterThanOrEqual(5);
+    expect(talkAt).toBeGreaterThan(primeAt + 3); // the palm label settles a few frames later
+  });
+
+  it('a warmed-up mic that never becomes talk switches off again (~1.5 s)', () => {
+    const primes = replay(synthFrames(70, () => [right({ pose: 'point' }), left()]))
+      .map((e, i) =>
+        e
+          .filter((x) => x.kind === 'talkPrime')
+          .map((x) => `${i}:${x.kind === 'talkPrime' && x.active ? 'on' : 'off'}`),
+      ) // prettier-ignore
+      .flat();
+    expect(primes.length).toBe(2);
+    const [on, off] = primes.map((p) => Number(p.split(':')[0]));
+    expect(primes[0].endsWith('on') && primes[1].endsWith('off')).toBe(true);
+    expect((off - on) / 30).toBeCloseTo(1.5, 0);
+  });
+
+  it('two pinching hands (zoom) never warm up the mic', () => {
+    const zoom = () => [right({ pinch: 1 }), left({ pinch: 1 })];
+    expect(
+      replay(synthFrames(30, zoom))
+        .flat()
+        .some((e) => e.kind === 'talkPrime'),
+    ).toBe(false);
+  });
+
   it('with two hands up, an open palm never starts over', () => {
     expect(run(60, () => [right({ pose: 'point' }), left({ gesture: 'Open_Palm' })])).toEqual([
       'talk:on',

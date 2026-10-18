@@ -84,7 +84,7 @@ by magnitude", "the ten strongest", "near Japan", "undo", ...).
 | Move cursor, hover a point | point (index finger up) | mouse |
 | Rotate | pinch and drag | drag |
 | Zoom | pinch with both hands, pull apart / together | wheel |
-| Talk | point with one hand and raise the other, open | hold **space**, or type in the box |
+| Talk | point with one hand and raise the other, open; speak when the bar turns green (a soft tick) | hold **space**, or type in the box |
 | Undo | say "undo" / "go back" | **Z** |
 | Start over (camera home, filters cleared) | hold one open palm ✋ (1.2 s) | **R** resets the camera |
 | Freeze the scene while repositioning | closed fist ✊ | – |
@@ -177,7 +177,9 @@ schema · `docs/` spec, architecture, tasks, decisions.
 
 Hand tracking runs fully in the browser; webcam frames never leave it. Only the
 transcript text goes to the agent. Chrome's Web Speech API sends audio to Google
-for recognition (D-004); the typed box is always available instead.
+for recognition (D-004); the typed box is always available instead. So that your first
+word isn't lost, the microphone starts as soon as a second hand comes up beside a pointing
+one; if the talk gesture doesn't follow within 1.5 s, that recording is dropped unused.
 
 ## Credits
 

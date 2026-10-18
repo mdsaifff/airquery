@@ -34,6 +34,8 @@ export type Effect =
   /** x, y: where the pointing finger rests ("here"), when the hands started it. */
   | { kind: 'startListening'; x?: number; y?: number }
   | { kind: 'stopListening' }
+  /** Warm the mic up (talk is likely) or drop the warm-up. */
+  | { kind: 'primeListening'; active: boolean }
   /** Open palm held: camera home, filters cleared, replay stopped, selection dropped. */
   | { kind: 'startOver' }
   | { kind: 'switchScene'; direction: 'left' | 'right' }
@@ -82,6 +84,11 @@ export function reduce(s: InteractionState, e: GestureEvent): Result {
       return [{ ...s, mode: s.resume }, [{ kind: 'stopListening' }]];
     }
     return [s, []];
+  }
+
+  if (e.kind === 'talkPrime') {
+    if (e.active && s.mode !== 'pointing' && s.mode !== 'idle') return [s, []];
+    return [s, [{ kind: 'primeListening', active: e.active }]];
   }
 
   // A pinch held still turns the rotation into a circle selection centred there.

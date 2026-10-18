@@ -5,9 +5,10 @@ import { hudStore, useTick } from './store.ts';
 export function TranscriptBar({ onSubmit }: { onSubmit: (text: string) => void }) {
   useTick();
   const [text, setText] = useState('');
-  const { listening, transcript, transcriptFinal } = hudStore;
+  const { listening, listeningReady, transcript, transcriptFinal } = hudStore;
+  const ready = listening && listeningReady;
   return (
-    <div className={`transcript ${listening ? 'is-listening' : ''}`}>
+    <div className={`transcript ${listening ? 'is-listening' : ''} ${ready ? 'is-ready' : ''}`}>
       <span className="wave" role="img" aria-label={listening ? 'listening' : 'microphone idle'}>
         <i />
         <i />
@@ -17,7 +18,9 @@ export function TranscriptBar({ onSubmit }: { onSubmit: (text: string) => void }
       </span>
       <span className={`said ${transcriptFinal ? 'final' : ''}`}>
         {listening && !transcript
-          ? 'listening…'
+          ? ready
+            ? 'listening… speak now'
+            : 'getting ready…'
           : transcript || 'raise your other hand, or hold space, to talk'}
       </span>
       <form

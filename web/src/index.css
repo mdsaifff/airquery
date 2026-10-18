@@ -623,6 +623,16 @@ button {
 
 .is-listening .wave i {
   background: var(--ember);
+}
+
+/* Recording for real: green like the cursor's listening ring, wave moving. */
+.transcript.is-ready {
+  border-color: rgb(74 222 128 / 70%);
+  box-shadow: 0 0 32px rgb(74 222 128 / 22%);
+}
+
+.is-ready .wave i {
+  background: #4ade80;
   animation: wave 0.9s ease-in-out infinite;
 }
 

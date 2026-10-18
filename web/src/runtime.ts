@@ -37,6 +37,7 @@ import { startTracking } from './tracking/trackingLoop.ts';
 import { describeView, spokenNotice, viewSentence } from './voice/describe.ts';
 import { Replier } from './voice/reply.ts';
 import { speak } from './voice/speak.ts';
+import { tick } from './voice/tick.ts';
 import { VoiceController } from './voice/voiceController.ts';
 import { VoiceFirst } from './voiceFirst.ts';
 import { WebSpeechToText } from './voice/webSpeech.ts';
@@ -309,10 +310,15 @@ export function startRuntime(els: RuntimeElements): Runtime {
       },
       listening(active) {
         hudStore.listening = active;
+        hudStore.listeningReady = false;
         if (active) {
           replier.hush(); // the globe stops talking when the user starts
           voiceFirst.captureHere(talkAt ?? screenNow(), isGeo());
         } else voiceFirst.releaseAt(performance.now());
+      },
+      ready() {
+        hudStore.listeningReady = true;
+        if (!replier.muted) tick();
       },
       error: (message) => toast('error', message),
     },
@@ -334,6 +340,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
       talkAt = at ?? null; // where the pointing finger rests: "here" for this request
       voice.setListening(active);
     },
+    primeListening: (active) => voice.prime(active),
     startOver: () => {
       lasso.clear();
       playground.stopTime();

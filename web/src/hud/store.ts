@@ -17,6 +17,8 @@ export const hudStore = {
   scenes: [] as Scene[],
   /** Listening: the other hand raised open, or the spacebar. */
   listening: false,
+  /** The microphone is really recording (the engine has started): "speak now". */
+  listeningReady: false,
   trackingFps: 0,
   renderFps: 0,
   /** Smoothed CPU time per render frame (ms). */

@@ -14,6 +14,8 @@ export type GestureEvent =
   | { kind: 'clutch'; active: boolean }
   /** Listening on/off; x, y (screen px) is where the pointing finger rests ("here"). */
   | { kind: 'talk'; active: boolean; x?: number; y?: number }
+  /** A second hand is coming up beside a pointing one: talk is likely, warm up the mic. */
+  | { kind: 'talkPrime'; active: boolean }
   | { kind: 'swipe'; direction: 'left' | 'right' } // switch scene
   /** A pinch held still: the centre of a circle selection (screen px). */
   | { kind: 'circleHold'; hand: Hand; x: number; y: number }
