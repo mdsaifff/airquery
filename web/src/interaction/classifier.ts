@@ -55,6 +55,9 @@ interface HandState {
   /** When and where the current pinch started, and whether it can still become a circle. */
   pinchAt: number;
   pinchOrigin: Vec2;
+  /** The pinch point and time last frame, for its speed. */
+  pinchLast: Vec2;
+  pinchLastT: number;
   circleOpen: boolean;
   missing: number;
   lastSeen: number;
@@ -106,7 +109,7 @@ export class GestureClassifier {
     for (const h of frame.hands) {
       let s = this.hands.get(h.hand);
       if (!s) {
-        s = { label: new Debounced(), points: h.points, trail: [], pinching: false, pinchFrames: 0, pinchAt: t, pinchOrigin: h.points[INDEX_TIP], circleOpen: false, missing: 0, lastSeen: t }; // prettier-ignore
+        s = { label: new Debounced(), points: h.points, trail: [], pinching: false, pinchFrames: 0, pinchAt: t, pinchOrigin: h.points[INDEX_TIP], pinchLast: h.points[INDEX_TIP], pinchLastT: t, circleOpen: false, missing: 0, lastSeen: t }; // prettier-ignore
         this.hands.set(h.hand, s);
       }
       s.points = h.points;
@@ -126,6 +129,7 @@ export class GestureClassifier {
         if (s.pinchFrames >= p.pinchStableFrames) {
           s.pinching = true;
           [s.pinchAt, s.pinchOrigin, s.circleOpen] = [t, at, true];
+          [s.pinchLast, s.pinchLastT] = [at, t];
           ev.push({ kind: 'pinchStart', hand: h.hand, x: at.x, y: at.y });
         }
       } else if (d > p.pinchExit) {
@@ -213,7 +217,11 @@ export class GestureClassifier {
   /** A pinch held still (before it starts rotating) becomes the centre of a circle selection. */
   private circleHold(hand: Hand, s: HandState, at: Vec2, t: number, ev: GestureEvent[]): void {
     if (!s.circleOpen) return;
-    if (dist(at, s.pinchOrigin) / handScale(s.points) > this.p.circleMaxDrift) {
+    const scale = handScale(s.points);
+    const speed = (dist(at, s.pinchLast) / scale) * (1000 / Math.max(1, t - s.pinchLastT));
+    [s.pinchLast, s.pinchLastT] = [at, t];
+    const dragging = t - s.pinchAt > this.p.circleSettleMs && speed > this.p.circleMaxSpeed;
+    if (dist(at, s.pinchOrigin) / scale > this.p.circleMaxDrift || dragging) {
       s.circleOpen = false; // it moved: a rotation, not a circle
       ev.push({ kind: 'holdProgress', gesture: 'circle', progress: 0 });
       return;

@@ -24,7 +24,7 @@ describe('GestureClassifier (synthetic hands)', () => {
   });
 
   it('pinch: one start, one end (held still long enough, it also becomes a circle)', () => {
-    expect(run(60, (i) => [right({ pinch: i >= 15 && i < 40 ? 1 : 0 })])).toEqual([
+    expect(run(70, (i) => [right({ pinch: i >= 15 && i < 55 ? 1 : 0 })])).toEqual([
       'pinchStart:right',
       'circle:right',
       'pinchEnd:right',
@@ -135,6 +135,17 @@ describe('GestureClassifier (synthetic hands)', () => {
   it('pinch held still: one circle at the pinch point; a moving pinch rotates, no circle', () => {
     expect(run(60, () => [right({ pinch: 1 })])).toEqual(['pinchStart:right', 'circle:right']);
     expect(run(40, (i) => [right({ pinch: 1, cx: 0.6 - i * 0.004 })])).toEqual(['pinchStart:right']); // prettier-ignore
+  });
+
+  it('pinch, a natural pause before dragging, then a drag: a rotation, not a circle', () => {
+    // Seen live: the half-second settle before a drag passed the hold and the drag sized a circle
+    const pauseThenDrag = (i: number) => [right({ pinch: 1, cx: i < 24 ? 0.6 : 0.6 - (i - 24) * 0.004 })]; // prettier-ignore
+    expect(run(60, pauseThenDrag)).toEqual(['pinchStart:right']);
+  });
+
+  it('a hand settling as the pinch closes, then held still: still a circle', () => {
+    const settle = (i: number) => [right({ pinch: 1, cx: 0.6 - Math.min(i, 6) * 0.004 })];
+    expect(run(60, settle)).toEqual(['pinchStart:right', 'circle:right']);
   });
 
   it('custom Model Maker label held: explain', () => {

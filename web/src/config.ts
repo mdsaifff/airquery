@@ -57,9 +57,14 @@ export const config = {
     handReleaseFling: false,
     /** Pointing pose: index reach above pinchMinIndexReach and the middle fingertip within this (hand-scale units). */
     pointMiddleMaxReach: 1.2,
-    /** A pinch held still this long starts a circle selection (ms), within this drift (hand-scale units). */
-    circleHoldMs: 600,
+    /** A pinch held still this long starts a circle selection (ms), within this drift (hand-scale units).
+     *  Longer than the natural pause between pinching and dragging (600 ms turned drags into circles). */
+    circleHoldMs: 1000,
     circleMaxDrift: 0.3,
+    /** A pinch moving faster than this is a drag starting, even inside the drift (hand-scale units per second)... */
+    circleMaxSpeed: 1,
+    /** ...counted only after the hand settles into the pinch (ms). */
+    circleSettleMs: 300,
     /** No hands for this long emits handsLost (ms). */
     handsLostMs: 500,
     /** Swipe: wrist travels this far sideways (hand-scale units)... */
