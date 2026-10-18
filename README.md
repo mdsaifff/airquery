@@ -5,6 +5,10 @@ docs/media/demo.gif, then uncomment the next line.
 ![AirQuery demo: rotating an earthquake globe by hand and filtering it by voice](docs/media/demo.gif)
 -->
 
+**[Try it live: mdsaifff.github.io/airquery](https://mdsaifff.github.io/airquery/)** (Chrome,
+webcam and microphone; typing works too). Built by Mohammed Saif
+([@mdsaifff](https://github.com/mdsaifff)).
+
 **Explore a 3D dataset with your hands and ask questions out loud.** Hand tracking
 moves the camera; your voice becomes a validated query that runs locally in DuckDB;
 the scene re-renders in about a second. Runs in a browser on a normal laptop, no GPU.
@@ -48,23 +52,6 @@ flowchart LR
 - **One contract, two languages.** `QuerySpec` is defined in Pydantic and the
   TypeScript types are generated from its JSON Schema; tests fail if they drift.
 
-## Measured results
-
-Measured on the demo laptop (Chrome, plugged in). Method: `docs/EVAL.md`.
-
-| What | Target | Result |
-| --- | --- | --- |
-| Rendering | 60 fps | pending: HUD readout during a 2-min session |
-| Hand tracking | ≥ 25 fps | pending: HUD readout |
-| Voice → render latency (median) | < 1.5 s | pending: `make latency` (press **M** in the app for frontend timings) |
-| Query accuracy, result-set match (115 utterances) | ≥ 90 % | pending: `make eval` |
-| Gesture accuracy per gesture (5 people × 7 gestures × 20 tries) | ≥ 95 % | pending: study panel (**G**) + `make gestures` |
-| False triggers while talking | < 1 per 5 min | pending: study panel counter |
-| Invalid SQL reaching DuckDB | 0 | 0 by construction (every spec is validated, then compiled from a whitelist); checked by `make eval` |
-
-Ablations (repair loop on/off, model tiers, accuracy vs cost vs latency) land in
-`eval/reports/` via `make eval` + `make ablation`.
-
 ## Run it
 
 Needs Node.js LTS, Python 3.12, [uv](https://docs.astral.sh/uv/) and GNU make.
@@ -72,7 +59,7 @@ Needs Node.js LTS, Python 3.12, [uv](https://docs.astral.sh/uv/) and GNU make.
 ```bash
 cp agent/.env.example agent/.env   # paste a free Groq key (console.groq.com/keys) into LLM_API_KEY
 make dev    # web on http://localhost:5173, agent on http://localhost:8000
-make test   # Vitest + pytest (agent, data_prep, eval)
+make test   # Vitest + pytest
 make lint
 make data   # re-download and rebuild the Parquet + schema (the 2024 set is committed)
 ```
@@ -90,10 +77,10 @@ by magnitude", "the ten strongest", "near Japan", "undo", ...).
 | Undo | say "undo" / "go back" | **Z** |
 | Start over (camera home, filters cleared) | hold one open palm ✋ (1.2 s) | **R** resets the camera |
 | Freeze the scene while repositioning | closed fist ✊ | – |
-| Switch scene (globe ↔ paper galaxy ↔ your CSV) | swipe an open hand sideways | **←** / **→** |
+| Switch scene | swipe an open hand sideways | **←** / **→** |
 | Select an area (the globe says what is inside) | pinch and hold still (~0.6 s), then move out to size the circle and let go | **Shift**+drag, **Esc** clears |
 | X-ray: see quakes at their real depth | – | **X**, or the button in the legend |
-| What's this? (spoken summary) | say it, or hold the custom gesture | type it |
+| What's this? (spoken summary) | say it | type it |
 
 Raise your other hand (or hold Space) and speak. Besides filters you can say *play the year*, *pause*, *go to
 March*, *faster*, *stop the replay*, *X-ray on*, *show / hide the stats*, *share this view*,
@@ -102,15 +89,11 @@ March*, *faster*, *stop the replay*, *X-ray on*, *show / hide the stats*, *share
 dashboard lights up what your filter covers. Quiet fallbacks: click the strip to jump to a
 date, **L** plays or pauses, **Esc** leaves the replay; *Share this view* copies a link.
 
-Study tools: **G** gesture study + false-trigger counter, **B** mouse baseline
-(dropdown filters), **T** task timer, **M** download frontend timings,
-**C** record frames for a custom gesture (`notebooks/custom_gesture.ipynb`),
-**V** choose the voice that reads summaries aloud.
+**V** chooses the voice that reads summaries aloud.
 
 The first visit shows a short welcome; **↻ Replay** in the title bar replays 2024.
 Set `quality: 'low'` in `web/src/config.ts` if the frame rate drops on your machine.
 Drop any CSV with latitude/longitude columns onto the page to explore it.
-`make galaxy` builds the arXiv paper galaxy (needs a few GB of RAM).
 Dev only: **D** tuning panel, **Shift+R** record a landmark fixture.
 
 ## Deploy
@@ -119,7 +102,7 @@ Two pieces, deployed separately:
 
 | Piece | What | Build |
 | --- | --- | --- |
-| Web | Static files (`web/dist`) | `VITE_AGENT_URL=https://<agent-host> make build` |
+| Web | Static files (`web/dist`) | `VITE_AGENT_URL=https://airquery-agent.onrender.com make build` |
 | Agent | Docker image (FastAPI) | `make docker-agent` (= `docker build -f agent/Dockerfile -t airquery-agent .`) |
 
 Check a production build locally against a local agent:
@@ -146,41 +129,38 @@ and Render (agent, `render.yaml`), both free. Netlify or Vercel also work for th
 Cloud Run, Fly.io or Railway for the agent. Cloudflare Pages does not: the DuckDB-Wasm
 binaries are ~36–41 MB each, over its 25 MiB file limit.
 
-**Deploy checklist (GitHub Pages + Render).**
+**How this repo is deployed.**
 
-1. Push the repo to GitHub (public, for free Pages).
-2. Render: **New → Blueprint**, pick the repo. Fill in `LLM_API_KEY` (your Groq key) and
-   `WEB_ORIGIN=https://<your-user>.github.io` (origin only: no path, no trailing slash).
-3. `curl https://<agent>.onrender.com/health` returns `{"ok":true}`.
-4. GitHub repo **Settings → Pages → Source: GitHub Actions**; **Settings → Secrets and
-   variables → Actions → Variables**: `AGENT_URL=https://<agent>.onrender.com`.
-5. **Actions → pages → Run workflow** (later pushes to `main` deploy by themselves). The site
-   is at `https://<your-user>.github.io/<repo>/`.
-6. Open the site: allow the camera, ask one question (the free Render agent sleeps; the
-   first question after a quiet spell takes ~30 s), then copy a share link and open it in a
-   private window.
+- Website: https://mdsaifff.github.io/airquery/, rebuilt by the `pages` workflow on every
+  push to `main`. The repo variable `AGENT_URL` (Settings → Secrets and variables →
+  Actions → Variables) is `https://airquery-agent.onrender.com`.
+- Agent: https://airquery-agent.onrender.com (Render blueprint from `render.yaml`), with
+  `LLM_API_KEY` (Groq key) and `WEB_ORIGIN=https://mdsaifff.github.io` set on Render.
+  `curl https://airquery-agent.onrender.com/health` returns `{"ok":true}`. The free plan
+  sleeps when idle, so the first question after a quiet spell takes ~30 s.
+
+To run your own copy, fork the repo, create a Render blueprint from it with your own key,
+set `WEB_ORIGIN` to `https://<your-github-user>.github.io` and `AGENT_URL` to your agent,
+then turn on Pages (Source: GitHub Actions) and run the `pages` workflow.
 
 ## Design decisions
 
 Full log with context and consequences: `docs/DECISIONS.md`. Highlights:
 
 - **three.js, not deck.gl** (D-001): the globe needs points *below* the surface and
-  free camera pitch; one engine also covers the planned embedding galaxy.
+  free camera pitch.
 - **The LLM fills a spec, never SQL** (D-002): no injection, no hallucinated
-  columns, explainable failures, and evaluation by exact spec match.
+  columns, explainable failures.
 - **DuckDB-Wasm in a worker** (D-003): real SQL in milliseconds, no data leaves
   the laptop, no database server to host.
 - **MediaPipe in its own frame-callback loop** (D-008): the JS API has no
   `LIVE_STREAM` mode, so tracking runs beside the render loop, never inside it.
-- **The mouse baseline compiles through the agent too** (D-010): both arms of the
-  hands-vs-mouse study run identical, validated queries.
 
 ## Repo map
 
 `web/` Vite + React + TypeScript frontend (three.js used imperatively) ·
-`agent/` FastAPI + LangGraph query service · `data_prep/` USGS → Parquet +
-schema · `eval/` utterance set, scoring, latency and gesture reports ·
-`docs/` spec, architecture, tasks, decisions, evaluation protocol.
+`agent/` FastAPI + LangGraph query service · `data_prep/` public datasets → Parquet +
+schema · `docs/` spec, architecture, tasks, decisions.
 
 ## Privacy
 
@@ -200,3 +180,8 @@ domain); hurricane tracks, NOAA NCEI IBTrACS v04r01 (doi:10.25921/82ty-9e16); de
 and sponges, NOAA Deep Sea Coral Research and Technology Program National Database; stars,
 the [HYG database](https://astronexus.com/hyg) v3 by David Nash, CC BY-SA 4.0, so
 `web/public/data/stars.*` is shared under CC BY-SA 4.0 too.
+
+## License
+
+Code: [MIT](LICENSE) © 2026 Mohammed Saif. The datasets keep their own terms (see
+Credits): the star map data is CC BY-SA 4.0.

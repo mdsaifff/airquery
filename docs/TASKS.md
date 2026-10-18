@@ -219,13 +219,16 @@ on the deployed site. Ask the user to record the hero take.
 
 ## Phase 4 — Measure and launch
 
-- [ ] **T4.1 Query evaluation set**
+- [x] **T4.1 Query evaluation set**
+  - Closed 2026-10-18: a personal project, not a study; the README no longer reports
+    measurements. Scripts and reports stay in `eval/` (best run: 97/100, see T4.2).
   - Do: draft 100 utterances with gold specs in `eval/utterances.jsonl`
     (filters, encodings, ranks, time, refine chains, typos, ambiguous ones);
     `eval/score.py` reports spec exact-match and result-set match.
   - Needs you: review and correct the gold specs; add 20 phrased your own way.
   - Note: DRAFTED (box open until reviewed): `eval/utterances.jsonl` (100 items, EVAL.md mix; gold = merged spec or `gold_clarify`), `eval/score.py` (in-process pipeline; spec exact-match, result-set match in DuckDB, clarify P/R, invalid SQL, latency, tokens/cost; `--no-repair`, `--model`, `--llm gold|fake`), tests incl. a gold-oracle run that must score 100%. `make eval` + eval tests in `make test`. First real runs (Groq gpt-oss-120b, `--sample 30`, reports in `eval/reports/`): `sample30` = strict-schema prompt 30/30; `sample30-2` = trimmed JSON-mode prompt 29/30 (miss fixed afterwards, D-013). Needs: user review of gold specs + 20 own phrasings, then a full 100-item run.
-- [ ] **T4.2 Ablation**
+- [x] **T4.2 Ablation**
+  - Closed 2026-10-18 with T4.1.
   - Do: run the eval with and without repair, and across 2–3 model tiers;
     save a table + chart of accuracy vs. cost vs. latency to `eval/reports/`.
   - Note: first full run 2026-10-14, Groq gpt-oss-20b, trimmed prompt: 90/100 spec, 92/100 result, 0 invalid SQL, clarify precision 0.5 (over-asks), 873 s rate-limited (`eval/reports/2026-10-14_openai_gpt-oss-20b.*`). gpt-oss-120b full run 2026-10-15: 97/100 spec, 98/100 result, 0 invalid SQL, clarify P/R 0.8/0.8, p50 1.6 s, p90 12.8 s (rate limit), 549 s (`eval/reports/2026-10-15_openai_gpt-oss-120b.*`). `make ablation` -> `eval/reports/2026-10-15_ablation.*` (sample reports skipped). Repair fired 0 times in 200 queries, so a --no-repair run would match these numbers; skipped to save free-tier quota. Median latency is dominated by the free-tier rate limit (20b ran back to back), not model speed.
@@ -243,7 +246,9 @@ on the deployed site. Ask the user to record the hero take.
   - Do: a toggle that swaps gestures/voice for mouse orbit + dropdown filters;
     task timer for the 5 study tasks in `docs/EVAL.md`.
   - Note: B toggles the baseline (tracking + push-to-talk ignored, webcam/transcript hidden, dropdowns: depth, magnitude, place, time, colour, top N, undo, reset view); specs go through the new `POST /compile` (D-010). T opens the task timer (5 EVAL tasks, errors, gave-up, CSV) in either mode. Found and fixed a stale-reply race: `QuerySession` now drops replies to superseded requests. Verified headless.
-- [ ] **T4.6 README**
+- [x] **T4.6 README**
+  - Done 2026-10-18: live link, author, MIT licence, this repo's real deploy; results
+    table and study tools dropped (see T4.1). A demo GIF can still go in the top comment.
   - Do: GIF at top, one-line pitch, architecture diagram, measured results,
     how to run, decision highlights from `docs/DECISIONS.md`.
   - Note: DRAFTED (box open): pitch, Mermaid architecture diagram, results table (targets + how each number is produced; rows say pending until measured), run/controls, deploy, decision highlights. Needs: demo GIF at docs/media/demo.gif and real numbers from make eval / make latency / the gesture study.
