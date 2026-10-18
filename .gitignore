@@ -28,3 +28,7 @@ CLAUDE.local.md
 
 # OS
 .DS_Store
+
+# Local-only docs (never upload)
+docs/VIDEO-BRIEF.md
+docs/superpowers/
