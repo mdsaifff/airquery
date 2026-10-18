@@ -23,9 +23,4 @@ export class FakeSpeechToText implements SpeechToText {
     this.handlers = null;
     h.final(this.script, performance.now());
   }
-
-  abort(): void {
-    this.listening = false;
-    this.handlers = null;
-  }
 }

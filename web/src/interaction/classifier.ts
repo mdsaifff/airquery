@@ -75,9 +75,6 @@ export class GestureClassifier {
   private readonly hands = new Map<Hand, HandState>();
   private clutch = false;
   private talk = false;
-  private primed = false;
-  /** When the talk pose started forming (null: not forming). */
-  private primeSince: number | null = null;
   private hold: Hold | null = null;
   private zoomDist: number | null = null;
   private lastHandsAt = -Infinity;
@@ -167,7 +164,7 @@ export class GestureClassifier {
     const labels = [...this.hands.values()].map((s) => s.label.stable);
     const clutch = labels.includes('Closed_Fist');
     if (clutch !== this.clutch) ev.push({ kind: 'clutch', active: (this.clutch = clutch) });
-    this.updateTalk(ev, t);
+    this.updateTalk(ev);
     this.updateHold(t, ev);
 
     if (frame.hands.length > 0) {
@@ -206,24 +203,15 @@ export class GestureClassifier {
   }
 
   /** Talk: one hand pointing while the other is raised open ("here" = the pointing fingertip). */
-  private updateTalk(ev: GestureEvent[], t: number): void {
+  private updateTalk(ev: GestureEvent[]): void {
     const live = this.liveHands();
     const open = live.filter((s) => s.label.stable === 'Open_Palm');
     const pointer = live.find((s) => !s.pinching && s.label.stable !== 'Open_Palm' && isPointing(s.points, this.p)); // prettier-ignore
     const raised = live.length === 2 && open.length === 1 && pointer !== undefined;
-    if (raised !== this.talk) {
-      this.talk = raised;
-      const at = pointer?.points[INDEX_TIP];
-      ev.push(raised && at ? { kind: 'talk', active: true, x: at.x, y: at.y } : { kind: 'talk', active: raised }); // prettier-ignore
-    }
-    // Before the palm label settles: one hand points, the other is up and not pinching.
-    const other = live.find((s) => s !== pointer);
-    const forming = live.length === 2 && pointer !== undefined && other !== undefined && !other.pinching; // prettier-ignore
-    this.primeSince = forming ? (this.primeSince ?? t) : null;
-    const primed = raised || (forming && t - (this.primeSince ?? t) <= this.p.talkPrimeMs);
-    if (primed === this.primed) return;
-    this.primed = primed;
-    ev.push({ kind: 'talkPrime', active: primed });
+    if (raised === this.talk) return;
+    this.talk = raised;
+    const at = pointer?.points[INDEX_TIP];
+    ev.push(raised && at ? { kind: 'talk', active: true, x: at.x, y: at.y } : { kind: 'talk', active: raised }); // prettier-ignore
   }
 
   /** A pinch held still (before it starts rotating) becomes the centre of a circle selection. */

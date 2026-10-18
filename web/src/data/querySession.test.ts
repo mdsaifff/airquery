@@ -144,19 +144,28 @@ describe('voice to scene (mocked agent)', () => {
     expect(sentSecond?.color_by).toBe('magnitude');
   });
 
+  it('a spoken "undo" starts over: every filter cleared and the view reset', async () => {
+    agentReplies(okResponse(DEEP, DEEP_SQL, [300]), okResponse(spec({ intent: 'undo' }), '', []));
+    const r = rig();
+    await r.session.submit('deeper than 300', 0);
+    await r.session.submit('undo', 0);
+    expect(r.session.current).toBeNull();
+    expect([...r.globe.visible]).toEqual([1, 1, 1, 1]);
+    expect(r.notes).toContain('resetView');
+  });
+
   it('sends the current spec with follow-ups, and undo/reset walk the history', async () => {
     const coloured = spec({ ...DEEP, color_by: 'magnitude' });
     const fetchMock = agentReplies(
       okResponse(DEEP, DEEP_SQL, [300]),
       okResponse(coloured, DEEP_SQL, [300]),
-      okResponse(spec({ intent: 'undo' }), '', []),
     );
     const r = rig();
     await r.session.submit('deeper than 300', 0);
     await r.session.submit('colour by magnitude', 0);
     const second = JSON.parse((fetchMock.mock.calls[1] as unknown as [string, { body: string }])[1].body); // prettier-ignore
     expect(second.current_spec).toEqual(DEEP);
-    await r.session.submit('undo', 0); // spoken undo: no new SQL
+    r.session.undo(); // the mouse baseline's undo still steps back
     expect(r.session.current).toEqual(DEEP);
     expect(r.runs).toHaveLength(2);
     r.session.reset();

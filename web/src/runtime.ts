@@ -340,7 +340,6 @@ export function startRuntime(els: RuntimeElements): Runtime {
       talkAt = at ?? null; // where the pointing finger rests: "here" for this request
       voice.setListening(active);
     },
-    primeListening: (active) => voice.prime(active),
     startOver: () => {
       lasso.clear();
       playground.stopTime();
@@ -468,7 +467,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
     } else if (e.code === 'KeyR') {
       camera.reset(performance.now());
     } else if (e.code === 'KeyZ') {
-      datasets.session().undo();
+      datasets.session().reset(); // undo starts over, like the spoken "undo"
     } else if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
       switchScene(e.code === 'ArrowLeft' ? 'left' : 'right');
     } else if (e.code === 'Escape') {

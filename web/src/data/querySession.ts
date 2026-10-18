@@ -131,8 +131,8 @@ export class QuerySession {
     const spec = resp.spec;
     if (!spec) return deps.notify('error', 'Agent returned no spec.');
 
-    if (spec.intent === 'undo') return this.undo(endedAt);
-    if (spec.intent === 'reset') return this.reset(endedAt);
+    // "Undo" / "go back" starts over too: one way back, never a half-remembered step.
+    if (spec.intent === 'undo' || spec.intent === 'reset') return this.reset(endedAt);
     if (spec.intent === 'explain') return deps.explain(pointer);
     if (spec.intent === 'timeline') return spec.timeline ? deps.timeline(spec.timeline) : undefined;
     if (spec.intent === 'view') return spec.view ? deps.view(spec.view) : undefined;

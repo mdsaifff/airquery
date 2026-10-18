@@ -16,6 +16,4 @@ export interface SpeechToText {
   start(handlers: SttHandlers): void;
   /** Ends listening; the final transcript arrives through handlers.final. */
   stop(): void;
-  /** Ends listening and drops everything heard: no handler is called again. */
-  abort(): void;
 }

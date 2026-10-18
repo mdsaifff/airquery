@@ -67,9 +67,6 @@ export const config = {
     circleMaxSpeed: 1,
     /** ...counted only after the hand settles into the pinch (ms). */
     circleSettleMs: 300,
-    /** A second hand coming up beside a pointing one starts the microphone early, so Chrome is
-     *  recording by the time the open palm is recognised; dropped if talk doesn't follow within (ms). */
-    talkPrimeMs: 1500,
     /** No hands for this long emits handsLost (ms). */
     handsLostMs: 500,
     /** Swipe: wrist travels this far sideways (hand-scale units)... */
@@ -178,7 +175,12 @@ export const config = {
     'hide the stats',
   ],
   /** The same on scenes other than the earthquakes (the list above is about quakes). */
-  voiceHintsAnyScene: ["what's this?", 'hide the stats', 'switch to the hurricane tracks', 'undo'],
+  voiceHintsAnyScene: [
+    "what's this?",
+    'hide the stats',
+    'switch to the hurricane tracks',
+    'start over',
+  ],
   voiceHintMs: 6000,
   /** Reset / fly-to animation length (ms). */
   animMs: 1200,

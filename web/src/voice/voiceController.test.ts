@@ -41,39 +41,6 @@ describe('VoiceController', () => {
     ]);
   });
 
-  it('a warmed-up mic that becomes talk keeps the words heard while the hand came up', () => {
-    const { stt, voice, log, submitted } = rig();
-    stt.script = 'only sponges';
-    voice.prime(true);
-    expect(stt.listening).toBe(true);
-    expect(log).toEqual([]); // nothing shown until talk is confirmed
-    voice.setListening(true);
-    expect(log).toEqual(['listening', 'interim:only', 'ready']);
-    voice.setListening(false);
-    expect(submitted).toEqual(['only sponges']);
-  });
-
-  it('a warmed-up mic that never becomes talk is dropped: nothing shown, nothing sent', () => {
-    const { stt, voice, log, submitted } = rig();
-    stt.script = 'just chatting';
-    voice.prime(true);
-    voice.prime(false);
-    expect(stt.listening).toBe(false);
-    expect(log).toEqual([]);
-    expect(submitted).toEqual([]);
-  });
-
-  it('switching the warm-up off while listening does not cut the question', () => {
-    const { stt, voice, submitted } = rig();
-    stt.script = 'deeper than 3 km';
-    voice.prime(true);
-    voice.setListening(true);
-    voice.prime(false);
-    expect(stt.listening).toBe(true);
-    voice.setListening(false);
-    expect(submitted).toEqual(['deeper than 3 km']);
-  });
-
   it('does not submit an empty transcript', () => {
     const { stt, voice, submitted } = rig();
     stt.script = '   ';

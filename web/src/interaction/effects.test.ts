@@ -30,7 +30,6 @@ function rig(releaseFling = true) {
     releaseFling,
     cursor: (v: boolean) => log.push(v ? 'cursor' : 'nocursor'),
     listening: (a: boolean, at?: { x: number; y: number }) => log.push(a ? `listen${at ? `@${at.x},${at.y}` : ''}` : 'unlisten'), // prettier-ignore
-    primeListening: (a: boolean) => log.push(a ? 'prime' : 'unprime'),
     startOver: () => log.push('startOver'),
     switchScene: (d: 'left' | 'right') => log.push(`scene:${d}`),
     circle: (step: string, a?: number, b?: number) => log.push(`circle:${step}${a === undefined ? '' : `:${a}${b === undefined ? '' : `,${b}`}`}`), // prettier-ignore
