@@ -29,7 +29,8 @@ export class TooltipView {
       this.shownFor = id;
     }
     this.el.style.display = 'block';
-    const left = x + 18 + W > window.innerWidth ? x - 18 - W : x + 18;
+    const side = x + 18 + W > window.innerWidth ? x - 18 - W : x + 18;
+    const left = Math.max(8, Math.min(side, window.innerWidth - W - 8)); // on screen on phones too
     const top = Math.min(y + 18, window.innerHeight - this.el.offsetHeight - 8);
     this.el.style.transform = `translate(${left}px, ${top}px)`;
   }
