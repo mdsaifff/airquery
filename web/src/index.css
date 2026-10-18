@@ -743,14 +743,17 @@ button {
   pointer-events: none;
   padding: 14px 16px;
   background: var(--surface-solid);
-  border: 1px solid var(--hair);
+  border: 1px solid var(--hair-strong);
   border-radius: var(--radius);
+  box-shadow: 0 8px 28px rgb(0 0 0 / 45%);
+  backdrop-filter: blur(18px);
   font-size: 13px;
 }
 
 .card-title {
-  font-weight: 500;
-  line-height: 1.3;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
 }
 
 .card-badge {
@@ -808,19 +811,21 @@ button {
 .tooltip dl {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 3px 12px;
+  gap: 5px 14px;
   margin: 10px 0 0;
   padding-top: 10px;
-  border-top: 1px solid var(--hair);
-  font-size: 12.5px;
+  border-top: 1px solid var(--hair-strong);
+  font-size: 13px;
+  line-height: 1.35;
 }
 
 .tooltip dt {
-  color: var(--dust);
+  color: var(--mist);
 }
 
 .tooltip dd {
   margin: 0;
+  color: var(--chalk);
   overflow-wrap: anywhere;
 }
 
