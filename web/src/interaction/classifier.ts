@@ -48,8 +48,6 @@ class Debounced {
 interface HandState {
   label: Debounced;
   points: Vec2[];
-  /** Recent index fingertip positions for swipe detection. */
-  trail: { t: number; x: number; y: number }[];
   pinching: boolean;
   pinchFrames: number;
   /** When and where the current pinch started, and whether it can still become a circle. */
@@ -78,7 +76,6 @@ export class GestureClassifier {
   private hold: Hold | null = null;
   private zoomDist: number | null = null;
   private lastHandsAt = -Infinity;
-  private lastSwipeAt = -Infinity;
   private lostEmitted = true;
   private lastPinchEndAt = -Infinity;
 
@@ -109,7 +106,7 @@ export class GestureClassifier {
     for (const h of frame.hands) {
       let s = this.hands.get(h.hand);
       if (!s) {
-        s = { label: new Debounced(), points: h.points, trail: [], pinching: false, pinchFrames: 0, pinchAt: t, pinchOrigin: h.points[INDEX_TIP], pinchLast: h.points[INDEX_TIP], pinchLastT: t, circleOpen: false, missing: 0, lastSeen: t }; // prettier-ignore
+        s = { label: new Debounced(), points: h.points, pinching: false, pinchFrames: 0, pinchAt: t, pinchOrigin: h.points[INDEX_TIP], pinchLast: h.points[INDEX_TIP], pinchLastT: t, circleOpen: false, missing: 0, lastSeen: t }; // prettier-ignore
         this.hands.set(h.hand, s);
       }
       s.points = h.points;
@@ -138,7 +135,6 @@ export class GestureClassifier {
         ev.push({ kind: 'pinchMove', hand: h.hand, x: at.x, y: at.y });
         this.circleHold(h.hand, s, at, t, ev);
       }
-      this.detectSwipe(s, t, ev, frame.hands.length === 1);
     }
 
     // Hands missing from this frame decay through the same debounce, so a
@@ -178,34 +174,6 @@ export class GestureClassifier {
   }
 
   /** A fast sideways sweep of an open (not pinching, not fist) hand. */
-  /** Switch scene: a lone pointing finger flicked sideways, fast and smooth (like swiping a phone). */
-  private detectSwipe(s: HandState, t: number, ev: GestureEvent[], alone: boolean): void {
-    const { p } = this;
-    const tip = s.points[INDEX_TIP];
-    const prev = s.trail.at(-1);
-    if (
-      prev &&
-      Math.hypot(tip.x - prev.x, tip.y - prev.y) > p.swipeMaxStepHandScales * handScale(s.points)
-    ) {
-      s.trail.length = 0; // a jump: tracking swapped the hands or re-found one, not a motion
-    }
-    s.trail.push({ t, x: tip.x, y: tip.y });
-    while (s.trail.length && t - s.trail[0].t > p.swipeWindowMs) s.trail.shift();
-    const deliberate = alone && this.liveHands().length === 1 && !s.pinching && isPointing(s.points, p); // prettier-ignore
-    if (!deliberate || t - this.lastSwipeAt < p.swipeCooldownMs) return;
-    const first = s.trail[0];
-    const dx = tip.x - first.x;
-    const dy = tip.y - first.y;
-    if (
-      Math.abs(dx) > p.swipeMinHandScales * handScale(s.points) &&
-      Math.abs(dx) > 2 * Math.abs(dy)
-    ) {
-      ev.push({ kind: 'swipe', direction: dx > 0 ? 'right' : 'left' });
-      this.lastSwipeAt = t;
-      s.trail.length = 0;
-    }
-  }
-
   /** Hands still tracked (a one-frame dropout still counts). */
   private liveHands(): HandState[] {
     return [...this.hands.values()].filter((s) => s.missing < this.p.pinchStableFrames);

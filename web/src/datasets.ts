@@ -1,4 +1,4 @@
-// Scenes the user can swipe between: one point cloud + query history per dataset,
+// Scenes the user can switch between: one point cloud + query history per dataset,
 // loaded lazily the first time it is shown.
 import type * as THREE from 'three';
 import type { Db } from './data/db.ts';
@@ -30,7 +30,7 @@ export class Datasets {
     this.depsFor = depsFor;
   }
 
-  /** Scene names in swipe order. */
+  /** Scene names in scene order. */
   get order(): readonly string[] {
     return this.names;
   }
@@ -62,7 +62,7 @@ export class Datasets {
     return p;
   }
 
-  /** Add a dataset built in the browser (a dropped CSV) to the swipe order. */
+  /** Add a dataset built in the browser (a dropped CSV) to the scene order. */
   addCustom(name: string, d: LoadedDataset): void {
     this.loaded.get(name)?.cloud.dispose(); // same file dropped again
     if (!this.names.includes(name)) this.names.push(name);
@@ -71,13 +71,13 @@ export class Datasets {
     this.sessions.delete(name);
   }
 
-  /** Leave a scene out of the swipe order (its files are missing). */
+  /** Leave a scene out of the scene order (its files are missing). */
   remove(name: string): void {
     if (name === this.active) return;
     this.names = this.names.filter((n) => n !== name);
   }
 
-  /** The dataset a swipe would show next (left = next, right = previous). */
+  /** The dataset the arrow keys show next (left = next, right = previous). */
   neighbour(direction: 'left' | 'right'): string {
     const i = this.names.indexOf(this.active);
     const step = direction === 'left' ? 1 : -1;

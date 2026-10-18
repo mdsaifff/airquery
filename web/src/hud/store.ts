@@ -13,8 +13,10 @@ export const hudStore = {
   dataset: 'quakes',
   /** What the scene's points are called, plural ("earthquakes"). */
   noun: 'points',
-  /** Every scene the user can switch to, in swipe order (the picker and "switch to ..."). */
+  /** Every scene the user can switch to, in scene order (the picker and "switch to ..."). */
   scenes: [] as Scene[],
+  /** The scene name under the hand cursor: pinch to switch to it. */
+  hoverScene: null as string | null,
   /** Listening: the other hand raised open, or the spacebar. */
   listening: false,
   /** The microphone is really recording (the engine has started): "speak now". */

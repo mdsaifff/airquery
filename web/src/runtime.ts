@@ -15,6 +15,7 @@ import { CursorView, MODE_COLORS } from './hud/cursor.ts';
 import { Hover } from './hud/hover.ts';
 import { exportMetrics, metrics } from './hud/metrics.ts';
 import { approach } from './hud/format.ts';
+import { sceneAt } from './hud/sceneAt.ts';
 import { hudStore, toast } from './hud/store.ts';
 import { CameraController, orbitPosition } from './interaction/cameraController.ts';
 import { HandPipeline } from './interaction/handPipeline.ts';
@@ -42,7 +43,7 @@ import { VoiceController } from './voice/voiceController.ts';
 import { VoiceFirst } from './voiceFirst.ts';
 import { WebSpeechToText } from './voice/webSpeech.ts';
 
-/** Built-in scenes in swipe / picker order; ones whose files are missing drop out. */
+/** Built-in scenes in picker order; ones whose files are missing drop out. */
 const DATASETS = ['quakes', 'hurricanes', 'meteorites', 'corals', 'airports', 'stars', 'papers'];
 /** Picker titles and point nouns per scene, filled in from each schema as it is fetched. */
 const SCENE_NAMES: Record<string, string> = {};
@@ -285,7 +286,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
   }
   void showDataset(DATASETS[0], false);
   // Each schema names its scene; scenes whose files are missing (the galaxy before
-  // `make galaxy`) leave the swipe order.
+  // `make galaxy`) leave the scene order.
   for (const name of DATASETS) {
     fetch(new URL(`data/${name}.schema.json`, document.baseURI))
       .then((r) => {
@@ -345,9 +346,21 @@ export function startRuntime(els: RuntimeElements): Runtime {
       playground.stopTime();
       datasets.session().reset(); // camera home + every filter cleared, and said back
     },
-    switchScene,
     circle: (step, a, b) => lasso.circle(step, a, b),
+    uiPress: (x, y) => {
+      const name = sceneAt(els.sceneEl, x, y); // pinching on a scene name switches to it
+      if (!name) return false;
+      if (name !== datasets.active) {
+        voiceFirst.say(`Here's the ${SCENE_NAMES[name] ?? name}.`);
+        void showDataset(name, true);
+      }
+      return true;
+    },
     explain: () => datasets.session().explainNow(),
+  });
+  hands.listeners.push((e) => {
+    if (e.kind === 'cursor') hudStore.hoverScene = sceneAt(els.sceneEl, e.x, e.y);
+    else if (e.kind === 'handsLost') hudStore.hoverScene = null;
   });
   const studyHost = els.study;
   hands.listeners.push((e) => studyHost.onEvent(e, performance.now()));

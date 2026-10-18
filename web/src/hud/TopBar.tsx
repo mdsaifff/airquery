@@ -1,5 +1,6 @@
 // Top-left masthead: wordmark, a large ticking count of what is shown, the
-// dataset description (or the replay date), the scene picker and the Replay / Share links.
+// dataset description (or the replay date), the scene list (point + pinch, or click) and the
+// Replay / Share links.
 import { CSV_INPUT_ID } from './CsvPanel.tsx';
 import { hudStore, useTick } from './store.ts';
 
@@ -27,21 +28,19 @@ export function TopBar({ onReplay, onShare, onPickScene }: Props) {
         </span>
       </div>
       <p className="sub">{introDate ? `Replaying the year: ${introDate}` : subtitle}</p>
-      <div className="scene-row">
-        <label className="scene-pick">
-          <span>Scene</span>
-          <select value={dataset} onChange={(e) => onPickScene(e.target.value)}>
-            {scenes.map((s) => (
-              <option key={s.name} value={s.name}>
-                {s.title}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="text-btn" htmlFor={CSV_INPUT_ID}>
-          Open a CSV
-        </label>
-      </div>
+      <nav className="scene-list" aria-label="Scenes: point at one and pinch, or click">
+        {scenes.map((s) => (
+          <button
+            key={s.name}
+            data-scene={s.name}
+            className={[s.name === dataset ? 'on' : '', s.name === hudStore.hoverScene ? 'hover' : ''].join(' ')} // prettier-ignore
+            aria-current={s.name === dataset ? 'true' : undefined}
+            onClick={() => onPickScene(s.name)}
+          >
+            {s.title}
+          </button>
+        ))}
+      </nav>
       <div className="masthead-links">
         {hudStore.playback.available && (
           <button className="text-btn" onClick={onReplay}>
@@ -51,6 +50,9 @@ export function TopBar({ onReplay, onShare, onPickScene }: Props) {
         <button className="text-btn" onClick={onShare}>
           Share this view
         </button>
+        <label className="text-btn" htmlFor={CSV_INPUT_ID}>
+          Open a CSV
+        </label>
       </div>
     </header>
   );

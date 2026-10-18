@@ -69,13 +69,6 @@ export const config = {
     circleSettleMs: 300,
     /** No hands for this long emits handsLost (ms). */
     handsLostMs: 500,
-    /** Swipe: a lone pointing fingertip flicks this far sideways (hand-scale units)... */
-    swipeMinHandScales: 3.5,
-    /** ...within this window (ms), then no new swipe for the cooldown (ms). */
-    swipeWindowMs: 350,
-    swipeCooldownMs: 900,
-    /** A wrist step bigger than this in one frame is a tracking jump (hands swapped, re-found), not a swipe (hand-scale units). */
-    swipeMaxStepHandScales: 2,
     /** Label of the custom Model Maker gesture that asks "what's this?" (needs the custom model). */
     customExplainLabel: 'Rock',
     /** Hold time for the custom explain gesture (ms). */

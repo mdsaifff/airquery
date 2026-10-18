@@ -14,7 +14,6 @@ export interface EffectTargets {
   listening(active: boolean, at?: { x: number; y: number }): void;
   /** Open palm held: camera home, filters cleared, replay stopped, selection dropped. */
   startOver(): void;
-  switchScene(direction: 'left' | 'right'): void;
   /** Custom gesture: "what's this?" without speaking. */
   explain(): void;
   /** Circle selection: start at (a, b) px, radius a px, end (select) or cancel. */
@@ -68,8 +67,6 @@ export function applyEffects(effects: readonly Effect[], t: EffectTargets, now: 
       case 'explain':
         t.explain();
         break;
-      case 'switchScene':
-        t.switchScene(e.direction);
         break;
       case 'circleStart':
         t.circle('start', e.x, e.y);

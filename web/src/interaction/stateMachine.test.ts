@@ -49,8 +49,6 @@ const TABLE: Row[] = [
   { row: 'listening + talk inactive', from: st('listening', { resume: 'pointing' }), event: { kind: 'talk', active: false }, to: 'pointing', effects: ['stopListening'] },
   { row: 'pointing + fire reset (start over)', from: st('pointing'), event: { kind: 'fire', gesture: 'reset' }, to: 'pointing', effects: ['startOver'] },
   { row: 'pointing + fire explain (custom gesture)', from: st('pointing'), event: { kind: 'fire', gesture: 'explain' }, to: 'pointing', effects: ['explain'] },
-  { row: 'pointing + swipe', from: st('pointing'), event: { kind: 'swipe', direction: 'left' }, to: 'pointing', effects: ['switchScene'] },
-  { row: 'idle + swipe', from: st('idle'), event: { kind: 'swipe', direction: 'right' }, to: 'idle', effects: ['switchScene'] },
   { row: 'rotating + circleHold (still pinch)', from: rotating, event: { kind: 'circleHold', hand: 'right', x: 100, y: 100 }, to: 'circling', effects: ['stopDrag', 'circleStart'] },
   { row: 'circling + pinchMove', from: circling, event: { kind: 'pinchMove', hand: 'right', x: 130, y: 140 }, to: 'circling', effects: ['circleRadius'] },
   { row: 'circling + pinchEnd', from: circling, event: { kind: 'pinchEnd', hand: 'right', x: 0, y: 0 }, to: 'pointing', effects: ['circleEnd'] },

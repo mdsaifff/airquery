@@ -36,7 +36,6 @@ export type Effect =
   | { kind: 'stopListening' }
   /** Open palm held: camera home, filters cleared, replay stopped, selection dropped. */
   | { kind: 'startOver' }
-  | { kind: 'switchScene'; direction: 'left' | 'right' }
   | { kind: 'explain' }
   | { kind: 'circleStart'; x: number; y: number }
   | { kind: 'circleRadius'; r: number }
@@ -137,10 +136,6 @@ export function reduce(s: InteractionState, e: GestureEvent): Result {
 
   if (e.kind === 'twoHandZoom') {
     return s.mode === 'zooming' ? [s, [{ kind: 'dolly', scale: e.scaleDelta }]] : [s, []];
-  }
-
-  if (e.kind === 'swipe' && (s.mode === 'pointing' || s.mode === 'idle')) {
-    return [s, [{ kind: 'switchScene', direction: e.direction }]];
   }
 
   if (e.kind === 'fire' && s.mode === 'pointing') {

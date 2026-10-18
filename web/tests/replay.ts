@@ -28,7 +28,6 @@ export function summarize(perFrame: GestureEvent[][]): string[] {
       s = `${e.kind}:${e.active ? 'on' : 'off'}`; // prettier-ignore
     else if (e.kind === 'circleHold') s = `circle:${e.hand}`;
     else if (e.kind === 'handsLost') s = 'handsLost';
-    else if (e.kind === 'swipe') s = `swipe:${e.direction}`;
     else if (e.kind === 'twoHandZoom') s = out.at(-1) === 'zoom' ? null : 'zoom';
     if (s) out.push(s);
   }
