@@ -24,7 +24,7 @@ describe('GestureClassifier (synthetic hands)', () => {
   });
 
   it('pinch: one start, one end (held still long enough, it also becomes a circle)', () => {
-    expect(run(70, (i) => [right({ pinch: i >= 15 && i < 55 ? 1 : 0 })])).toEqual([
+    expect(run(70, (i) => [right({ pinch: i >= 15 && i < 60 ? 1 : 0 })])).toEqual([
       'pinchStart:right',
       'circle:right',
       'pinchEnd:right',
@@ -146,6 +146,14 @@ describe('GestureClassifier (synthetic hands)', () => {
   it('a hand settling as the pinch closes, then held still: still a circle', () => {
     const settle = (i: number) => [right({ pinch: 1, cx: 0.6 - Math.min(i, 6) * 0.004 })];
     expect(run(60, settle)).toEqual(['pinchStart:right', 'circle:right']);
+  });
+
+  it('the circle ring stays hidden through a short pause, so a drag never shows it loading', () => {
+    const frames = synthFrames(18, () => [right({ pinch: 1 })]); // ~0.55 s held still
+    const shown = replay(frames)
+      .flat()
+      .filter((e) => e.kind === 'holdProgress' && e.progress > 0);
+    expect(shown).toEqual([]);
   });
 
   it('custom Model Maker label held: explain', () => {

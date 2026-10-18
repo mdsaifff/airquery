@@ -89,7 +89,7 @@ by magnitude", "the ten strongest", "near Japan", "undo", ...).
 | Start over (camera home, filters cleared) | hold one open palm ✋ (1.2 s) | **R** resets the camera |
 | Freeze the scene while repositioning | closed fist ✊ | – |
 | Switch scene | swipe an open hand sideways | **←** / **→** |
-| Select an area (the globe says what is inside) | pinch and hold still (~1 s), then move out to size the circle and let go | **Shift**+drag, **Esc** clears |
+| Select an area (the globe says what is inside) | pinch and hold still (~1 s, until the ring fills), then move out to size the circle and let go | **Shift**+drag, **Esc** clears |
 | X-ray: see points at their real depth (quakes, corals) | – | **X**, or the button in the legend |
 | What's this? (spoken summary) | say it | type it |
 

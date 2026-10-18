@@ -59,7 +59,9 @@ export const config = {
     pointMiddleMaxReach: 1.2,
     /** A pinch held still this long starts a circle selection (ms), within this drift (hand-scale units).
      *  Longer than the natural pause between pinching and dragging (600 ms turned drags into circles). */
-    circleHoldMs: 1000,
+    circleHoldMs: 1200,
+    /** The circle's progress ring shows only after this much of the hold, so a pause before a drag shows nothing (ms). */
+    circleRingAfterMs: 600,
     circleMaxDrift: 0.3,
     /** A pinch moving faster than this is a drag starting, even inside the drift (hand-scale units per second)... */
     circleMaxSpeed: 1,

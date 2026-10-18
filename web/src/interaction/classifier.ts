@@ -226,9 +226,11 @@ export class GestureClassifier {
       ev.push({ kind: 'holdProgress', gesture: 'circle', progress: 0 });
       return;
     }
-    const progress = Math.min(1, (t - s.pinchAt) / this.p.circleHoldMs);
-    ev.push({ kind: 'holdProgress', gesture: 'circle', progress });
-    if (progress < 1) return;
+    const held = t - s.pinchAt;
+    const ring =
+      (held - this.p.circleRingAfterMs) / (this.p.circleHoldMs - this.p.circleRingAfterMs);
+    ev.push({ kind: 'holdProgress', gesture: 'circle', progress: Math.min(1, Math.max(0, ring)) });
+    if (held < this.p.circleHoldMs) return;
     s.circleOpen = false;
     ev.push({ kind: 'circleHold', hand, x: s.pinchOrigin.x, y: s.pinchOrigin.y });
   }
