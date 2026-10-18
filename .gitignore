@@ -32,3 +32,8 @@ CLAUDE.local.md
 # Local-only docs (never upload)
 docs/VIDEO-BRIEF.md
 docs/superpowers/
+
+# Claude Code tooling — kept local, not published
+.claude/
+CLAUDE.md
+SETUP.md
