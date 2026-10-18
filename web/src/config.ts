@@ -156,6 +156,8 @@ export const config = {
   pinShowMs: 5000,
   /** Spoken-reply subtitles: base time on screen plus time per character (ms). */
   subtitleMs: { base: 2500, perChar: 45 },
+  /** Point at a scene name and hold this long to switch to it (ms); the cursor ring fills meanwhile. */
+  sceneDwellMs: 800,
   /** The "speak now" tick when the mic really starts recording: pitch (Hz), volume (0..1), length (ms). */
   readyTick: { hz: 880, gain: 0.06, ms: 120 },
   /** "Try saying …" examples under the talk bar, and how long each shows (ms). */

@@ -1809,15 +1809,15 @@ button {
 .scene-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 6px;
   margin: 2px 0 8px;
 }
 
 /* Big enough to point at and pinch; the one under the hand cursor glows green. */
 .scene-list button {
-  padding: 3px 8px;
+  padding: 7px 14px;
   font: inherit;
-  font-size: 12.5px;
+  font-size: 15px;
   color: var(--dim);
   cursor: pointer;
   background: none;

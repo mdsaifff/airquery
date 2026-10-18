@@ -4,6 +4,16 @@
 import { CSV_INPUT_ID } from './CsvPanel.tsx';
 import { hudStore, useTick } from './store.ts';
 
+/** One-word names, big enough to point at; other scenes (a dropped CSV) use their title. */
+const SHORT: Record<string, string> = {
+  quakes: 'Earthquakes',
+  hurricanes: 'Hurricanes',
+  meteorites: 'Meteorites',
+  corals: 'Corals',
+  airports: 'Airports',
+  stars: 'Stars',
+};
+
 interface Props {
   onReplay: () => void;
   onShare: () => void;
@@ -28,16 +38,17 @@ export function TopBar({ onReplay, onShare, onPickScene }: Props) {
         </span>
       </div>
       <p className="sub">{introDate ? `Replaying the year: ${introDate}` : subtitle}</p>
-      <nav className="scene-list" aria-label="Scenes: point at one and pinch, or click">
+      <nav className="scene-list" aria-label="Scenes: point at one and hold, or click">
         {scenes.map((s) => (
           <button
             key={s.name}
             data-scene={s.name}
             className={[s.name === dataset ? 'on' : '', s.name === hudStore.hoverScene ? 'hover' : ''].join(' ')} // prettier-ignore
             aria-current={s.name === dataset ? 'true' : undefined}
+            title={s.title}
             onClick={() => onPickScene(s.name)}
           >
-            {s.title}
+            {SHORT[s.name] ?? s.title}
           </button>
         ))}
       </nav>

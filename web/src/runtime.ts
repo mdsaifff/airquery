@@ -16,6 +16,7 @@ import { Hover } from './hud/hover.ts';
 import { exportMetrics, metrics } from './hud/metrics.ts';
 import { approach } from './hud/format.ts';
 import { sceneAt } from './hud/sceneAt.ts';
+import { Dwell } from './interaction/dwell.ts';
 import { hudStore, toast } from './hud/store.ts';
 import { CameraController, orbitPosition } from './interaction/cameraController.ts';
 import { HandPipeline } from './interaction/handPipeline.ts';
@@ -296,6 +297,13 @@ export function startRuntime(els: RuntimeElements): Runtime {
       .then(learnNames, () => datasets.remove(name))
       .finally(publishScenes);
   }
+  const goToScene = (name: string) => {
+    if (name === datasets.active) return;
+    voiceFirst.say(`Here's the ${SCENE_NAMES[name] ?? name}.`);
+    void showDataset(name, true);
+  };
+  const sceneDwell = new Dwell(config.sceneDwellMs);
+  let dwellProgress = 0;
   const switchScene = (dir: 'left' | 'right') => {
     const next = datasets.neighbour(dir);
     if (next !== datasets.active) void showDataset(next, true);
@@ -347,20 +355,22 @@ export function startRuntime(els: RuntimeElements): Runtime {
       datasets.session().reset(); // camera home + every filter cleared, and said back
     },
     circle: (step, a, b) => lasso.circle(step, a, b),
-    uiPress: (x, y) => {
-      const name = sceneAt(els.sceneEl, x, y); // pinching on a scene name switches to it
-      if (!name) return false;
-      if (name !== datasets.active) {
-        voiceFirst.say(`Here's the ${SCENE_NAMES[name] ?? name}.`);
-        void showDataset(name, true);
-      }
-      return true;
+    // A pinch while a scene name glows picks that name (the pinch point itself sits lower).
+    uiPress: () => {
+      const name = hudStore.hoverScene;
+      if (name) goToScene(name);
+      return name !== null;
     },
     explain: () => datasets.session().explainNow(),
   });
+  // Point at a scene name and hold: the cursor ring fills, then the scene switches.
   hands.listeners.push((e) => {
-    if (e.kind === 'cursor') hudStore.hoverScene = sceneAt(els.sceneEl, e.x, e.y);
-    else if (e.kind === 'handsLost') hudStore.hoverScene = null;
+    if (e.kind !== 'cursor' && e.kind !== 'handsLost') return;
+    const name = e.kind === 'cursor' ? sceneAt(els.sceneEl, e.x, e.y) : null;
+    hudStore.hoverScene = name;
+    const d = sceneDwell.update(name !== datasets.active ? name : null, performance.now());
+    dwellProgress = d.progress;
+    if (d.fire) goToScene(d.fire);
   });
   const studyHost = els.study;
   hands.listeners.push((e) => studyHost.onEvent(e, performance.now()));
@@ -389,7 +399,7 @@ export function startRuntime(els: RuntimeElements): Runtime {
     }
     studyHost.tick(now);
     const mode = hands.state.mode;
-    cursor.style(mode, hands.hold?.progress ?? 0);
+    cursor.style(mode, Math.max(hands.hold?.progress ?? 0, dwellProgress));
     hudStore.mode = mode;
     if (cursor.visible || hover.mouseOver) camera.keepStill(now); // no idle spin under a pointer
     const orbit = camera.update(now);
