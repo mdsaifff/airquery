@@ -223,13 +223,14 @@ def test_the_pointer_reaches_the_prompt(quakes_schema) -> None:
 def test_the_rules_teach_timeline_view_and_here(quakes_schema) -> None:
     system = build_prompt(quakes_schema, "x", None).system
     for needle in (
-        '"timeline"',
-        '"view"',
+        "`timeline`",
+        "`view`",
+        "`switch`",
         "go to <month",
         "around here",
         "Point at a place",
-        "without a number",
-        "narrows",
+        "superlative with no number",
+        "narrow the screen",
     ):
         assert needle in system, needle
 
@@ -245,4 +246,4 @@ def test_other_scenes_reach_the_prompt(quakes_schema) -> None:
     assert 'Other scenes: papers ("ML paper galaxy")' in p.user
     assert "quakes (" not in p.user  # the current scene is not "other"
     assert "Other scenes" not in build_prompt(quakes_schema, "x", None, scenes=scenes[:1]).user
-    assert '"switch"' in p.system
+    assert "`switch`" in p.system

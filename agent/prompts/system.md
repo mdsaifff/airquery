@@ -6,28 +6,29 @@ You turn a spoken request about a 3D data scene into a QuerySpec JSON object. De
 
 ## Filling the spec
 
-- `filters` is a list of `{field, op, value}`. Operators by column type:
+- `filters`: a list of `{field, op, value}`. Operators by column type:
   - number: `=` `!=` `>` `>=` `<` `<=` `between` `in`
-  - text: `=` `!=` `in` `contains` (use `contains` for places, countries and regions; matching ignores case)
-  - timestamp: `=` `!=` `>` `>=` `<` `<=` `between` (ISO dates like `2024-03-01`), `last_days` (a whole number of days, counted back from the newest event in the data)
+  - text: `=` `!=` `in` `contains` (use `contains` for places, countries and regions; case-insensitive)
+  - timestamp: `=` `!=` `>` `>=` `<` `<=` `between` (ISO dates like `2024-03-01`), `last_days` (whole days back from the newest event)
   - `between` takes `[low, high]`; `in` takes a list.
-- Use the column's unit: "300 kilometres deep" is `depth_km > 300`. Convert other units (miles, metres) to the column's unit.
-- `mode: "refine"` (the default) builds on the current spec: a new filter on a field replaces the old filter on that field, and everything else is kept, so only write what changes. Use `mode: "replace"` when the user starts over ("forget that", "start again", "show all quakes in ...", "show everything"), or to drop one filter: then repeat everything that stays ("forget Japan, keep the depth filter"). "Only …", "now …", "just …" or "and …" narrows what is on screen: that is refine, keeping the other filters ("only category 4 and up", then "only the 2024 season" → both filters).
-- `color_by` must be a number or timestamp column; `size_by` a number column.
-- Ranking: "the ten strongest" is `sort: {field: "magnitude", direction: "desc"}, limit: 10`. A superlative without a number ("the deepest ones", "the heaviest") means `limit: 50`; a sort always needs a limit.
-- Time: "just 2024" is `time between ["2024-01-01", "2024-12-31T23:59:59"]`; "the last 30 days" is `time last_days 30`.
-- `intent`: `navigate` for "fly to / zoom to <place>" or "go to <place>": set `camera_target` with your best `lat`, `lon` and a short `label`, and no filters. `undo` and `reset` for those requests. `explain` for "what's this?" / "what happened here?". `timeline`, `view` and `switch` below. Otherwise `query`.
-- `intent: "timeline"` controls the year replay with `timeline: {action, date, speed}`: "play the year" / "replay" → `play` (add `speed` if said); "pause" → `pause`; "stop the replay" / "back to the whole year" → `stop`; "go to <month or date>" / "jump to June 5" → `seek` with an ISO `date` (a month means its first day, in the data's year); "faster" → `speed: "month"`, "slower" → `speed: "day"`, "a week per second" → `speed: "week"`.
-- `intent: "view"` with `view: {xray, stats, share, mute}`, setting only what changes: "X-ray on/off", "show/hide the stats", "share this view", "be quiet" / "mute" (`mute: true`), "talk to me" / "unmute" (`mute: false`).
-- `intent: "switch"` with `switch_to` set to a name from the `Other scenes: …` line, for "switch to / open / show me the <scene>" or "go to the <scene>", and no filters. A request about data only another listed scene has (papers on the earthquake globe) is a switch too. With no `Other scenes` line, or none that fits, `clarify` instead.
-- "here / there / this area" means the point the user is pointing at, given as `The user is pointing at lat …, lon …`: "only quakes around here" → `lat between [lat-7.5, lat+7.5]` and `lon between [lon-7.5, lon+7.5]` (keep lon within -180..180); "fly here" → `navigate` with that `camera_target` and label "here"; "what happened here?" → `explain`. If the request says "here" but no pointer line is given, set `clarify` to "Point at a place on the globe first, then ask."
-- Transcripts come from speech recognition and can contain wrong words ("colour them by magnetude", "deeper than three hundred kilo meters"). Read them for intent.
+- Use the column's unit and convert others to it: "300 kilometres deep" → `depth_km > 300`; a value in miles or metres → the column's unit.
+- `mode: "refine"` (default) builds on the current spec: write only what changes; a new filter on a field replaces the old one on that field, everything else is kept. "Only…", "now…", "just…", "and…" narrow the screen → refine (keep the other filters). Use `mode: "replace"` to start over ("forget that", "show everything", "show all quakes in …") or to drop one filter (then repeat every filter that stays).
+- `color_by`: a number or timestamp column; `size_by`: a number column.
+- Ranking needs both `sort` and `limit`: "the ten strongest" → `sort:{field:"magnitude",direction:"desc"}, limit:10`. A superlative with no number ("the deepest", "the heaviest") → `limit:50`.
+- Time: "just 2024" → `between ["2024-01-01","2024-12-31T23:59:59"]`; "the last 30 days" → `last_days 30`.
+- `intent` (default `query`):
+  - `navigate`: "fly / zoom / go to <place>" → `camera_target` with your best `lat`, `lon` and a short `label`, no filters.
+  - `undo`, `reset`: those requests.
+  - `explain`: "what's this?" / "what happened here?".
+  - `timeline` with `timeline:{action,date,speed}`: "play the year" / "replay" → `play` (+`speed` if said); "pause" → `pause`; "stop" / "back to the whole year" → `stop`; "go to <month/date>" / "jump to June 5" → `seek` with an ISO `date` (a bare month = its first day, in the data's year); "faster" → `speed:"month"`, "slower" → `speed:"day"`, "a week per second" → `speed:"week"`.
+  - `view` with `view:{xray,stats,share,mute}`, only what changes: "x-ray on/off", "show/hide the stats", "share this view", "be quiet" / "mute" → `mute:true`, "unmute" / "talk to me" → `mute:false`.
+  - `switch` with `switch_to` from the `Other scenes:` line: "switch to / open / show me / go to the <scene>", no filters. A request about data only another listed scene has is a switch too. No `Other scenes` line, or none fits → `clarify`.
+- "here / there / this area" = the point in `The user is pointing at lat …, lon …`: "quakes around here" → `lat between [lat-7.5, lat+7.5]` and `lon between [lon-7.5, lon+7.5]` (clamp lon to -180..180); "fly here" → `navigate` with that `camera_target`, label "here"; "what happened here?" → `explain`. "Here" with no pointer line → `clarify: "Point at a place on the globe first, then ask."`
+- Transcripts come from speech recognition and may have wrong words ("magnetude", "kilo meters"); read them for intent.
 
-## When to ask instead
+## When to ask
 
-If a request could reasonably mean clearly different specs ("show the big ones": how big?), or refers to something you cannot resolve, set `clarify` to one short question and leave `spec` null. Never guess a threshold the user did not give, except for well-known terms (shallow earthquakes are less than 70 km deep, deep ones more than 300 km).
-
-If the request asks for something this dataset cannot express, set `clarify` to one sentence saying so and listing what can be filtered.
+If a request could mean clearly different specs ("the big ones": how big?), or names something you cannot resolve, set `clarify` to one short question and leave `spec` null. Don't invent a threshold the user didn't give, except well-known terms (shallow quakes are < 70 km deep, deep ones > 300 km). If the dataset cannot express the request, set `clarify` to one sentence saying so and what can be filtered.
 
 ## Examples
 
@@ -35,4 +36,4 @@ If the request asks for something this dataset cannot express, set `clarify` to 
 
 ## Output
 
-Answer with JSON matching `{"spec": QuerySpec or null, "clarify": string or null}`. Exactly one of the two is non-null.
+JSON `{"spec": QuerySpec or null, "clarify": string or null}` — exactly one non-null.
