@@ -124,11 +124,11 @@ VITE_AGENT_URL=http://localhost:8000 make preview      # http://localhost:4173
 
 Agent environment variables (secrets on the host, never in the web build):
 `LLM_PROVIDER`, `LLM_MODEL`, `LLM_API_KEY`, `WEB_ORIGIN` (comma-separated allowed
-origins), `RATE_LIMIT_PER_MIN` (AI questions per visitor per minute, default 6),
+origins), `RATE_LIMIT_PER_MIN` (AI questions per visitor per minute, default 15),
 `COMPILE_RATE_LIMIT_PER_MIN` (chart clicks and share links per visitor, default 60)
-and `LLM_CALLS_PER_MIN` (AI questions from all visitors together, default 5; at ~2.1k
-tokens each that is a little over a Groq free key's 8k tokens/min, so a busy minute may get
-an occasional "the AI is busy" reply). When a limit is hit, visitors see "the AI is busy; ask again in
+and `LLM_CALLS_PER_MIN` (AI questions from all visitors together, default 15 — set so one
+visitor can explore freely; Groq's free token limit, ~8k/min, is the real ceiling under
+sustained load). When a limit is hit, visitors see "the AI is busy; ask again in
 a minute"; when the provider's daily cap is spent (Groq free: 200k tokens/day, about 90
 questions), they are told to try again in a few hours.
 The image reads its `DatasetSchema` files from
